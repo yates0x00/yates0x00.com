@@ -1,0 +1,1013 @@
+<div id="blog_content" class="blog_content">
+    按照gigix回帖，我把原帖子第五个java代码给重构了。
+<br />
+<br />我对重构理解的也许不太深入，因为周围的朋友都基本不用，而平时的工作中
+<br />也很难修改别人的代码。所以我的做法肯定有很多错误，请大家多多指教！
+<br />
+<br />把gigix的精彩点评放前面。 因为目前只知道他有过大型项目的重构经验。
+<br />他说的话我认为相当有分量。
+<br /><div class="quote_title">gigix 写道</div>
+<div class="quote_div">
+<br />我有点不明白你为什么会费这么大的劲，因为我看起来是一段很简单的程序，只要有IDE帮忙，根本连测试都不用写就可以重构出来。
+<br />
+<br />我的感觉是，你仍然着重于“理解它的逻辑”，然后调整它的结构。既然看过《重构》那么你应该知道，重构是一些形式化的过程，我相信你并没有认真去想这句话到底是什么意思。你应该再认真看看这本书，看看Opdyke的关于行为保持的论文，回头想一想你做的重构（特别是extract method）。如果你能保证每一步改变都是行为保持的那么你既不用理解原来的逻辑也不用增加测试，这段小程序很轻松就能弄完。重构看起来是件很容易说也很容易做的事，但如果你不去仔细想里面的道道你就会这样，二十分钟能干完的事用掉两小时。
+<br />
+<br />（补充：我绝不是提倡不在重构的同时增加测试，请任何人都不要误解。） 
+<br />
+</div>
+<br />
+<br />
+<br /><div class="quote_title">gigix 写道</div>
+<div class="quote_div">
+<br />因为你并没有在一个完全不熟悉的、超级复杂的系统里去专门做重构──大多数人做的大多数重构，都是与自己的开发实践结合在一起的，这固然是很正常的，但是也决定了大多数人缺乏机会去专门思考重构本身的技术实践。
+<br />简单的说，在你重构的过程中，你就逐渐理解原来的程序了</span>。
+<br />这才使得重构成为一个可操作的实践。否则你就会遇到一个两难境地：你要先理解原来程序才重构，但最需要重构的程序是你无法理解的。 
+<br />
+</div>
+<br />
+<br />
+<br />
+<br />总结一下： 
+<br />
+<br />1. 用的最多的重构方法：extract method, rename. 
+<br />
+<br />2. 最重要的事：必须有一个单元测试，才能开始重构。而这里最难的是：建立测试数据和
+<br />&#160;&#160; 测试用例的assert。
+<br />
+<br />3. 可恶的全局变量（代码中的 instance），折腾死我了。
+<br />
+<br />有两个问题：
+<br />
+<br />1. 觉得自己的测试用例写的很难看。建立测试对象的过程比较麻烦，new了一个又一个。各位
+<br />朋友都是怎么解决的呢？
+<br />
+<br />2. 我这样仅仅对我认为必要的方法进行单元测试，是不是密度不够？但是如果每个protected方法
+<br />都做测试的话，我又觉得有点多余。测试的就重复了。我的想法对吗？
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />下面是重构全过程
+<br />
+<br />-----------------------------&#160; 分割线&#160; 第一步 --------------------------------------------------------
+<br />大家早上好~~~
+<br />本想搞定了一起发上来，但似乎有点久， 怕忘记，所以写一点发一点吧。
+<br />
+<br />第一步，先看看我们的重构目标代码。
+<br />
+<br />没有任何注释的原因，是因为这个类是我通过Jode反编译得到的。它的存在原因，是项目老大要求用
+<br />这位哥的代码，必须用。而这位哥属于另一个外包公司，不提供源代码。仅仅给个jar，没有javadoc.
+<br />所以在项目进行时我们遇到了N多问题。为了排查问题小弟只好反编译下了。
+<br />
+<br />
+<br /><pre class="java">    public void assignTask(JbpmBaseBean flowBean, boolean isStart,
+            boolean isTransition, String transitionPath) {
+        try {
+            instance = jbpmTemplate
+                    .findProcessInstance(flowBean.getProcessId());
+            instance.setJbpmTemplate(jbpmTemplate, instance.getId());
+            instance.setDescName((new StringBuilder("\u62BD\u5355")).append(
+                    instance.getDescName()).toString());
+            Collection col = instance.getTaskMgmtInstance(
+                    Long.valueOf(instance.getId())).getTaskInstances();
+            System.out.println((new StringBuilder("---------")).append(
+                    col.size()).toString());
+            for (Iterator it = col.iterator(); it.hasNext();) {
+                TaskInstance taskInstance = (TaskInstance) it.next();
+                System.out.println((new StringBuilder("---id-")).append(
+                        taskInstance.getId()).append("=single is=").append(
+                        taskInstance.isSignalling()).toString());
+                if (taskInstance.isSignalling()) {
+                    flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+                    cancelTask(flowBean);
+                }
+            }
+
+            Map map = instance.getTaskMgmtInstance(
+                    Long.valueOf(instance.getId())).getTaskMgmtDefinition()
+                    .getTasks();
+            for (Iterator iterator = map.keySet().iterator(); iterator
+                    .hasNext();) {
+                Task task = (Task) map.get(iterator.next());
+                if (task.getParent() instanceof TaskNode) {
+                    TaskNode taskNode = task.getTaskNode();
+                    Long parentId = Long.valueOf(taskNode.getId());
+                    if (parentId.equals(flowBean.getNodeId())) {
+                        flowBean = getUserByeNodId(Long.valueOf(instance
+                                .getId()), Long.valueOf(task.getId()));
+                        instance.getContextInstance().setVariable("flowBean",
+                                flowBean);
+                        Transition leavingTransition = new Transition(
+                                transitionPath);
+                        System.out.println((new StringBuilder("to node name="))
+                                .append(taskNode.getName()).toString());
+                        leavingTransition.setTo(instance.getProcessDefinition()
+                                .getNode(taskNode.getName()));
+                        instance.getRootToken().getNode().addLeavingTransition(
+                                leavingTransition);
+                        if (isTransition)
+                            if (!instance.hasEnded()) {
+                                if (transitionPath != null
+                                        &amp;&amp; !"".equals(transitionPath))
+                                    instance.signal(transitionPath);
+                                else
+                                    instance.signal();
+                            } else {
+                                instance.end();
+                            }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        jbpmTemplate.getHibernateTemplate().saveOrUpdate(instance);
+    }
+
+</pre>
+<br />
+<br />
+<br />然后用看程序。大概耗时30分钟。加了注释，
+<br />
+<br />
+<br />
+<br />
+<br /><pre class="java">/**
+ * 为task做标志？
+ * @author 架构哥
+ */
+public void assignTask(JbpmBaseBean flowBean, boolean isStart,
+        boolean isTransition, String transitionPath) {
+    try {
+        instance = jbpmTemplate
+                .findProcessInstance(flowBean.getProcessId());
+        instance.setJbpmTemplate(jbpmTemplate, instance.getId());
+        
+        //呃。。啥意思？ 使用propertiesEditor得知，是“抽单”
+        instance.setDescName((new StringBuilder("\u62BD\u5355")).append(
+                instance.getDescName()).toString());
+        //java.util.Collection
+        //TaskMgmtInstance org.jbpm.graph.exe.ProcessInstance.getTaskMgmtInstance(Long processid)
+        //取得所有的 TaskMgmtInstance
+        Collection col = instance.getTaskMgmtInstance(
+                Long.valueOf(instance.getId())).getTaskInstances();
+        System.out.println((new StringBuilder("---------")).append(
+                col.size()).toString());
+        
+        //遍历它，想干嘛？
+        for (Iterator it = col.iterator(); it.hasNext();) {
+            TaskInstance taskInstance = (TaskInstance) it.next();
+            System.out.println((new StringBuilder("---id-")).append(
+                    taskInstance.getId()).append("=single is=").append(
+                    taskInstance.isSignalling()).toString());
+            //如果有 isSignalling()的，就把它的id  赋予本方法的第一个参数, setTaskId()
+            //然后 运行cancelTask()这个方法。通过看调用它的Service的javadoc,得知
+            //cancelTask()的意思是：中止流程，这个方法先不深究。
+            if (taskInstance.isSignalling()) {
+                flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+                cancelTask(flowBean);
+            }
+        }
+
+        //啊？怎么又搞出个getTaskMgmtInstance? 前面不是已经有一个了么？
+        //哦，与前面的稍微不同。。。这个是取 Tasks.
+        Map map = instance.getTaskMgmtInstance(
+                Long.valueOf(instance.getId())).getTaskMgmtDefinition()
+                .getTasks();
+        
+        //遍历
+        for (Iterator iterator = map.keySet().iterator(); iterator
+                .hasNext();) {
+            //取得一个org.jbpm.taskmgmt.def.Task
+            Task task = (Task) map.get(iterator.next());
+            
+            //如果是org.jbpm.graph.node.TaskNode的实例的话，
+            if (task.getParent() instanceof TaskNode) {
+                
+                //。。。官方文档是这么用的么？熟悉JBPM的朋友说一下。先放着
+                TaskNode taskNode = task.getTaskNode();
+                //得到个parentId.呃。。。只出现了一次。
+                Long parentId = Long.valueOf(taskNode.getId());
+                if (parentId.equals(flowBean.getNodeId())) {
+                    //取得了这个东东：flowBean
+                    flowBean = getUserByeNodId(Long.valueOf(instance
+                            .getId()), Long.valueOf(task.getId()));
+                    instance.getContextInstance().setVariable("flowBean",
+                            flowBean);
+                    //org.jbpm.graph.def.Transition
+                    Transition leavingTransition = new Transition(
+                            transitionPath);
+                    //呃。。。这位哥的debug...
+                    System.out.println((new StringBuilder("to node name="))
+                            .append(taskNode.getName()).toString());
+                    //貌似是设置transition 的下一个流程
+                    leavingTransition.setTo(instance.getProcessDefinition()
+                            .getNode(taskNode.getName()));
+                    //Node org.jbpm.graph.exe.Token.getNode()
+                    //往Node中增加这个Transition
+                    instance.getRootToken().getNode().addLeavingTransition(
+                            leavingTransition);
+                    
+                    //第四个参数闪亮登场：如果isTransition，就运行下面的东东。
+                    if (isTransition)
+                        if (!instance.hasEnded()) {
+                            if (transitionPath != null
+                                    &amp;&amp; !"".equals(transitionPath))
+                                instance.signal(transitionPath);
+                            else
+                                instance.signal();
+                        } else {
+                            instance.end();
+                        }
+                }
+            }
+        }
+
+    //打印 异常
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    //最后保存。
+    jbpmTemplate.getHibernateTemplate().saveOrUpdate(instance);
+    }
+
+}
+</pre>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />--------------------------------------&#160; 分割线 第二步&#160; -----------------------------------------------
+<br />接下来是第二步： 
+<br />
+<br />建立单元测试，它的父类是BaseSpringTestCase（继承了AbstractTransactionalSpringContextTests），
+<br />spring的配置也弄好了。大概是这样：
+<br />
+<br /><pre class="java">/**
+ * @author sg552
+ */
+public class WorkflowServiceImplTest extends BaseSpringTestCase {
+    protected WorkflowServiceImpl workflowService;
+    
+
+    public void testAssignTask(){
+        JbpmBaseBean flowBean = new JbpmBaseBean();
+        boolean isStart = true;
+        boolean isTransition = false;
+        String transitionPath = "someTransitionPath";
+        
+        //呃。。。写到这里发现，自己还不清楚如何assert.
+        workflowService.assignTask(flowBean, isStart, isTransition, transitionPath);
+    }
+
+    public void setWorkflowService(WorkflowServiceImpl workflowService) {
+        this.workflowService = workflowService;
+    }
+
+</pre>
+<br />
+<br />于是 查找了一下，发现了一段这个方法的使用代码：
+<br />
+<br /><pre class="java">flowBean = new JbpmBaseBean();
+...
+public void drawoutTaskAssigen(Long workflowId, Long nodeId) {
+        flowBean.setProcessId(workflowId);
+        flowBean.setNodeId(nodeId);
+        workflowService.assignTask(flowBean, true, true, "returnback");
+......
+</pre>
+<br />呃。。。用到了flowBean的 setProcessId()和setNodeId()的方法。也就是找到
+<br />两个id:&#160; workflowId, nodeId.&#160; 继续找，看看他们是怎么来的：
+<br />
+<br /><pre class="java">workflowOperator.drawoutTaskAssigen(Long.valueOf(hrProcess.getId()), node.getId());
+</pre>
+<br />
+<br />看到这里我明白了。我调用过这个方法。而且有现成的测试数据。
+<br />hrProcess.getId() = 424
+<br />node.getId() = 126
+<br />
+<br />于是现在的单元测试是：
+<br /><pre class="java">    protected static final Long PROCESS_ID = 424L;
+    protected static final Long NODE_ID = 126L;
+
+    public void testAssignTask(){
+        JbpmBaseBean flowBean = new JbpmBaseBean();
+        flowBean.setProcessId(PROCESS_ID);  
+        flowBean.setNodeId(NODE_ID);
+        boolean isStart = true;
+        boolean isTransition = false;
+        String transitionPath = "someTransitionPath";
+        
+        workflowService.assignTask(flowBean, isStart, isTransition, transitionPath);
+    }
+</pre>
+<br />
+<br />ok, 跑一下，&#160; alt+ shift + x&#160; + t 。。。出错了。&#160; HibernateMapping找不到。
+<br />于是回头修改测试使用的Hibernate配置文件，再来~&#160;&#160; OK,绿条！
+<br />
+<br />不过绿条仅仅表示XML配置文件没问题，可以跑通。我还没有加上 测试用例。 
+<br />怎么加捏？ 瞅瞅原来的方法，找出所有修改变量的地方。我觉得有3处：
+<br />
+<br />1. 需要判断 task 会被cancel掉。
+<br /><pre class="java">...
+cancelTask(flowBean);  
+</pre>
+<br />2. 需要判断 这个leavingTransition
+<br /><pre class="java">...
+instance.getRootToken().getNode().addLeavingTransition(
+                            leavingTransition);
+...
+
+</pre>
+<br />3. 这个。。。我觉得直接extract method就可以了。
+<br /><pre class="java">//第四个参数闪亮登场：如果isTransition，就运行下面的东东。
+if (isTransition)
+    if (!instance.hasEnded()) {
+        if (transitionPath != null
+             &amp;&amp; !"".equals(transitionPath))
+            instance.signal(transitionPath);
+        else
+            instance.signal();
+    } else {
+        instance.end();
+    }
+</pre>
+<br />
+<br />
+<br />
+<br />-----------------------------------&#160; 分割线&#160;&#160; 第三步&#160; ---------------------------------------------
+<br />
+<br />第三步，重构开始~~~&#160; 终于开始了！
+<br />
+<br />因为这个方法是void的，无法通过返回值来验证它的结果。我觉得只能通过考察它的参数来验证。
+<br />
+<br />刚才看到程序中有3处对持久层的数据进行了改动，而前两处判断都比较麻烦，第三处不用判断。
+<br />因为它非常独立，而且由于这个方法的4个参数中，后面两个参数都在那一小段代码中，所以我们使用 
+<br />extract method.来“掰蚱蜢腿”~嘿嘿。跟大家一样，我最喜欢这个了！（另一个是rename)
+<br />
+<br />
+<br />3. 1&#160;&#160; 选中下面的这段代码，然后 alt + shift + m。 起个名字，叫。。。呃。。。。
+<br />setTransitionPathOrEndOrSignalAnInstanceIfIsTransition吧。
+<br />我想表达的意思是：当 isTransition的时候，setTransitionPath或者signal()或者end()一个instance... 
+<br /><pre class="java">if (isTransition)
+        if (!instance.hasEnded()) {
+            if (transitionPath != null
+                    &amp;&amp; !"".equals(transitionPath))
+                instance.signal(transitionPath);
+            else
+                instance.signal();
+        } else {
+            instance.end();
+        }
+    }
+</pre>
+<br />
+<br />然后，把原来方法的剩余部分，也extract method. 现在原方法看起来应该是：
+<br />
+<br /><pre class="java">   .....
+   //Node org.jbpm.graph.exe.Token.getNode()
+   //往Node中增加这个Transition
+   instance.getRootToken().getNode().addLeavingTransition(
+              leavingTransition);
+                    
+   // 新抽取出来的方法，我觉得这个方法是不用测试的。如果它原来是正确的话。
+   setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+              isTransition, transitionPath);
+   }
+   .......
+</pre>
+<br />
+<br />
+<br />
+<br />3.2 不过现在程序看起来还是很大，仔细观察，发现其中的这段代码是实现了一个功能：
+<br />考察一个 JbpmBaseBean的所有TaskInstance.如果它 isSignalling,就cancelTask().
+<br />所以抽取出来，取个新名字 cancelSignallingTasksWhichInSameInstance：
+<br /><pre class="java">    Collection col = instance.getTaskMgmtInstance(
+            Long.valueOf(instance.getId())).getTaskInstances();
+    System.out.println((new StringBuilder("---------")).append(
+            col.size()).toString());
+    
+    //遍历它，想干嘛？
+    for (Iterator it = col.iterator(); it.hasNext();) {
+        TaskInstance taskInstance = (TaskInstance) it.next();
+        System.out.println((new StringBuilder("---id-")).append(
+                taskInstance.getId()).append("=single is=").append(
+                taskInstance.isSignalling()).toString());
+        //如果有 isSignalling()的，就把它的id  赋予本方法的第一个参数, setTaskId()
+        //然后 运行cancelTask()这个方法。通过看调用它的Service的javadoc,得知
+        //cancelTask()的意思是：中止流程，这个方法先不深究。
+        if (taskInstance.isSignalling()) {
+            flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+            cancelTask(flowBean);
+        }
+    }
+</pre>
+<br />
+<br />
+<br />3.2&#160; 同样道理，原来的方法对于 Map的 循环处理也很大，于是抽取方法。
+<br />呃。。。这个方法看起来有点大，姑且叫做 processTasks吧：
+<br />
+<br /><pre class="java">private void processTasks(JbpmBaseBean flowBean, boolean isTransition,
+        String transitionPath) {
+    //啊？怎么又搞出个getTaskMgmtInstance? 前面不是已经有一个了么？
+    //哦，与前面的稍微不同。。。这个是取 Tasks.
+    Map map = instance.getTaskMgmtInstance(
+            Long.valueOf(instance.getId())).getTaskMgmtDefinition()
+            .getTasks();
+    
+    //遍历
+    for (Iterator iterator = map.keySet().iterator(); iterator
+            .hasNext();) {
+        //取得一个org.jbpm.taskmgmt.def.Task
+        Task task = (Task) map.get(iterator.next());
+        
+        //如果是org.jbpm.graph.node.TaskNode的实例的话，
+        if (task.getParent() instanceof TaskNode) {
+            
+            //。。。官方文档是这么用的么？熟悉JBPM的朋友说一下。先放着
+            TaskNode taskNode = task.getTaskNode();
+            //得到个parentId.呃。。。只出现了一次。
+            Long parentId = Long.valueOf(taskNode.getId());
+            if (parentId.equals(flowBean.getNodeId())) {
+                //取得了这个东东：flowBean
+                flowBean = getUserByeNodId(Long.valueOf(instance
+                        .getId()), Long.valueOf(task.getId()));
+                instance.getContextInstance().setVariable("flowBean",
+                        flowBean);
+                //org.jbpm.graph.def.Transition
+                Transition leavingTransition = new Transition(
+                        transitionPath);
+                //呃。。。这位哥的debug...
+                System.out.println((new StringBuilder("to node name="))
+                        .append(taskNode.getName()).toString());
+                //貌似是设置transition 的下一个流程
+                leavingTransition.setTo(instance.getProcessDefinition()
+                        .getNode(taskNode.getName()));
+                //Node org.jbpm.graph.exe.Token.getNode()
+                //往Node中增加这个Transition
+                instance.getRootToken().getNode().addLeavingTransition(
+                        leavingTransition);
+                
+                // 第四个参数闪亮登场：如果isTransition，就运行下面的东东。
+                setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+                            isTransition, transitionPath);
+            }
+        }
+    }
+}
+</pre>
+<br />
+<br />
+<br />3.3 这个现在原来的方法已经小多了。但是还可以再小点。把下面的代码 extract method:
+<br /><pre class="java">    instance = jbpmTemplate
+            .findProcessInstance(flowBean.getProcessId());
+    instance.setJbpmTemplate(jbpmTemplate, instance.getId());
+    instance.setDescName((new StringBuilder("\u62BD\u5355")).append(
+            instance.getDescName()).toString());
+</pre>
+<br />得到个新方法： private void setJbpmTemplateAndDescName(JbpmBaseBean flowBean) 
+<br />
+<br />
+<br />欧了。现在的原方法看起来是这样：
+<br /><pre class="java">    public void assignTask(JbpmBaseBean flowBean, boolean isStart,
+            boolean isTransition, String transitionPath) {
+        try {
+            setJbpmTemplateAndDescName(flowBean);
+            cancelSignallingTasksWhichInSameInstance(flowBean);
+            processTasks(flowBean, isTransition, transitionPath);
+            // 打印 异常
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 最后保存。
+        jbpmTemplate.getHibernateTemplate().saveOrUpdate(instance);
+    }
+</pre>
+<br />
+<br />感觉比原来清爽很多！不过两个方法名值得考量：
+<br />cancelSignallingTasksWhichInSameInstance(flowBean);&#160;&#160; //对TaskInstance的处理
+<br />processTasks(flowBean, isTransition, transitionPath); //对Task进行处理
+<br />单从方法名上看，第一个方法会混淆我们，所以改名： cancel...TaskInstance..
+<br />然后把 e.printStackTrace() 修改成log4j.
+<br />
+<br />现在的 原方法是这样：
+<br /><pre class="java">    public void assignTask(JbpmBaseBean flowBean, boolean isStart,
+            boolean isTransition, String transitionPath) {
+        try {
+            setJbpmTemplateAndDescName(flowBean);
+            cancelSignallingTaskInstanceWhichInSameInstance(flowBean);
+            processTasks(flowBean, isTransition, transitionPath);
+        } catch (Exception e) {
+            logger.error(e,e);
+        }
+        jbpmTemplate.getHibernateTemplate().saveOrUpdate(instance);
+    }
+
+</pre>
+<br />
+<br />运行一下单元测试！果然是绿条。最喜欢ExtractMethod和Rename的一点，就是它们很少
+<br />需要assert. 嘿嘿
+<br />
+<br />
+<br />
+<br />--------------------------------&#160; 分割线&#160;&#160; 第四步 ---------------------------------------------------
+<br />
+<br />不过没完，我的单元测试中还没有assert，没法判断我修改的到底是对是错。
+<br />所以现在应该有两个小方法需要写测试用例：
+<br /><pre class="java">cancelSignallingTaskInstancesWhichInSameInstance(flowBean);
+processTasks(flowBean, isTransition, transitionPath);
+</pre>
+<br />
+<br />3.4 写cancelSignallingTaskInstancesWhichInSameInstance()的测试用例：
+<br /><pre class="java">    public void testCancelSignallingTaskInstancesWhichInSameInstance(){
+        JbpmBaseBean flowBean = new JbpmBaseBean();
+        workflowService.cancelSignallingTaskInstanceWhichInSameInstance(flowBean);
+    }
+</pre>
+<br />呃。。。。怎么写捏，回头看看这个方法的代码。把原来的System.out替换成log4j,
+<br />然后把 Collection col 重命名成 Collection taskMgmtInstances，得到：
+<br />
+<br /><pre class="java">    protected void cancelSignallingTaskInstanceWhichInSameInstance(
+            JbpmBaseBean flowBean) {
+        Collection taskMgmtInstances = instance.getTaskMgmtInstance(
+                Long.valueOf(instance.getId())).getTaskInstances();
+        for (Iterator it = taskMgmtInstances.iterator(); it.hasNext();) {
+            TaskInstance taskInstance = (TaskInstance) it.next();
+            if(logger.isDebugEnabled()){
+                logger.debug("taskInstance, id:"  + taskInstance.getId()
+                        +" isSignalling: " + taskInstance.isSignalling());
+            }
+            if (taskInstance.isSignalling()) {
+                flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+                cancelTask(flowBean);
+            }
+        }
+    }
+</pre>
+<br />
+<br />现在可以一眼就看出，程序在 if 那里修改了持久层。于是把它抽取出来，得到：
+<br /><pre class="java">    private void cancelTaskInstanceWhichIsSignalling(JbpmBaseBean flowBean,
+            TaskInstance taskInstance) {
+        if (taskInstance.isSignalling()) {
+            flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+            cancelTask(flowBean);
+        }
+    }
+</pre>
+<br />我觉得需要测试的是： cacelTask(flowBean) 这个方法。 只要它是正确的，那么
+<br />调用它的 cancelSignallingTaskInstanceWhichInSameInstance()也是正确的。
+<br />所以。。。。把 UnitTest中的 testCancelSignallingTaskInstancesWhichInSameInstance()
+<br />删掉。
+<br />
+<br />
+<br />
+<br />
+<br />3.5&#160;&#160; 现在就剩 processTasks() 这个方法需要写测试用例了。把它整理一下，发现下面的
+<br />代码可以抽取：
+<br /><pre class="java">if (task.getParent() instanceof TaskNode) {
+            TaskNode taskNode = task.getTaskNode();
+            Long parentId = Long.valueOf(taskNode.getId());
+            if (parentId.equals(flowBean.getNodeId())) {
+                flowBean = getUserByeNodId(Long.valueOf(instance
+                        .getId()), Long.valueOf(task.getId()));
+                instance.getContextInstance().setVariable("flowBean",
+                        flowBean);
+                Transition leavingTransition = new Transition(
+                        transitionPath);
+                leavingTransition.setTo(instance.getProcessDefinition()
+                        .getNode(taskNode.getName()));
+                instance.getRootToken().getNode().addLeavingTransition(
+                        leavingTransition);
+                setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+                            isTransition, transitionPath);
+            }
+        }
+</pre>
+<br />alt + shift + m ,发现有4个变量： flowBean,&#160; isTransition, transitionPath, task
+<br />看能不能减少一个变量。&#160; 把 map 重命名成 taskMgmtInstances,并且extract method，得到:
+<br /><pre class="java">private Map getTaskMgmtInstancesByTaskInstanceId() {
+    Map taskMgmtInstances = instance.getTaskMgmtInstance(
+            Long.valueOf(instance.getId())).getTaskMgmtDefinition()
+            .getTasks();
+    return taskMgmtInstances;
+}
+</pre>
+<br />这样就去掉了 一个临时变量。
+<br />然后把taskNode 这个临时变量去掉，用task.getTaskNode()代替。现在的 processTasks()方法，
+<br />除了iterator就很清爽了。（注意：java.util.Iterator 的变量声明要保留，我一年前犯过错误。嘿嘿）
+<br />
+<br />再次 alt + shift + m ，发现还是有4个变量： flowBean,&#160; isTransition, transitionPath, task
+<br />看了一下，他们都很难去掉。所以就保留了。抽取出新方法：
+<br />
+<br /><pre class="java">    private void doProcessIfParentOfTaskIsTaskNode(JbpmBaseBean flowBean,
+            boolean isTransition, String transitionPath, Task task) {
+        if (task.getParent() instanceof TaskNode) {
+            Long parentId = Long.valueOf(task.getTaskNode().getId());
+            if (parentId.equals(flowBean.getNodeId())) {
+                flowBean = getUserByeNodId(Long.valueOf(instance.getId()), Long
+                        .valueOf(task.getId()));
+                instance.getContextInstance().setVariable("flowBean", flowBean);
+                Transition leavingTransition = new Transition(transitionPath);
+                leavingTransition.setTo(instance.getProcessDefinition()
+                        .getNode(task.getTaskNode().getName()));
+                instance.getRootToken().getNode().addLeavingTransition(
+                        leavingTransition);
+                setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+                        isTransition, transitionPath);
+            }
+        }
+    }
+</pre>
+<br />
+<br />做到这里，发现两个嵌套的 if , 这个是不必要的，可以用 &amp;&amp; 来修改。并且从功能上看，
+<br />可以抽取出个新函数addLeavingTransitionForRootTokenNode()：
+<br /><pre class="java">    protected void doProcessIfParentOfTaskIsTaskNode(JbpmBaseBean flowBean,
+            boolean isTransition, String transitionPath, Task task) {
+        if ( (task.getParent() instanceof TaskNode)
+                &amp;&amp; (Long.valueOf(task.getTaskNode().getId()).equals(flowBean.getNodeId()))
+        ) {
+            //这个方法需要写测试： getUserByeNodId....本来就是这个名字 -_-!
+            flowBean = getUserByeNodId(Long.valueOf(instance.getId()), Long
+                    .valueOf(task.getId()));
+            instance.getContextInstance().setVariable("flowBean", flowBean);
+            addLeavingTransitionForRootTokenNode(transitionPath, task);
+            setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+                    isTransition, transitionPath);
+        }
+    }
+
+    /**
+     * 这个方法需要写测试
+     */
+    protected void addLeavingTransitionForRootTokenNode(String transitionPath, Task task) {
+        Transition leavingTransition = new Transition(transitionPath);
+        leavingTransition.setTo(instance.getProcessDefinition()
+                .getNode(task.getTaskNode().getName()));
+        instance.getRootToken().getNode().addLeavingTransition(
+                leavingTransition);
+    }
+
+</pre>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />----------------------------------&#160; 分割线 第五步 ------------------------------------------------
+<br />
+<br />最后理一下思路：
+<br />
+<br />现在需要有2个方法要写 测试用例：
+<br />
+<br /><pre class="java">protected void addLeavingTransitionForRootTokenNode(String transitionPath, Task task) 
+public JbpmBaseBean getUserByeNodId(Long processid, Long taskId)</pre>
+<br />其中第二个方法是 架构哥提供给我的东东，我没有改。理论上应该是没问题的。
+<br />所以暂时写 第一个方法的单元测试就好了。因为它是我重构出来的方法，需要验证。
+<br />
+<br />于是在 UnitTest中增加测试方法。
+<br /><pre class="java">    public void testAddLeavingTransitionForRootTokenNode(){
+        Task task = new Task();
+        workflowService.addLeavingTransitionForRootTokenNode("somePath", task);
+    }
+</pre>
+<br />编译可以通过。但是运行发现出现空指针异常。原来需要对Task进行一点设置。于是经过观察，
+<br />发现需要task.getTaskNode().getName()，这个 TaskNode.name 是数据库中定义的工作流的中文名。
+<br />于是修改我的测试方法：
+<br />
+<br /><pre class="java">    public void testAddLeavingTransitionForRootTokenNode(){
+        final String taskNodeName = "三级正经理评估普通员工";
+        Task task = new Task();
+        task.setTaskNode(new TaskNode());
+        task.getTaskNode().setName(taskNodeName);
+        workflowService.addLeavingTransitionForRootTokenNode("somePath", task);
+    }
+</pre>
+<br />
+<br />绿条。哈哈。&#160; 
+<br />
+<br />好，下面进行assert
+<br />
+<br />
+<br />&#160;&#160;&#160; <pre class="java">    @SuppressWarnings("unchecked")
+    public void testAddLeavingTransitionForRootTokenNode(){
+        final String taskNodeName = "三级正经理评估普通员工";
+        Task task = new Task();
+        task.setTaskNode(new TaskNode());
+        task.getTaskNode().setName(taskNodeName);
+        workflowService.addLeavingTransitionForRootTokenNode("somePath", task);
+        
+        List&lt;Transition&gt; leavingTransitions = 
+            workflowService.instance.getRootToken().getNode().getLeavingTransitions();
+        //我们刚才的 taskNodeName  一定在这个 List 的元素里面，所以结果size() &gt; 0
+        assertTrue(leavingTransitions.size() &gt;0 );
+        
+    }</pre>
+<br />
+<br />运行一下。呃。。。。。 红条。 第10行空指针异常。
+<br />getRootToken() = null. 仔细想了一下， 看来还需要设置这个instance变量，而且不能简单的new一个。
+<br />于是参考原方法的代码，使用&#160; instance = jbpmTemplate.findProcessInstance(Long); 来取得它
+<br />
+<br />整理后的测试用例：
+<br /><pre class="java">        ...
+        task.getTaskNode().setName(taskNodeName);
+        // 在这里进行被测试类的成员变量的设置。 instance 被我修改成了 protected型。
+        // 已经定义好的常量： protected static final Long PROCESS_ID = 424L;
+        workflowService.instance = jbpmTemplate.findProcessInstance(PROCESS_ID);
+        workflowService.addLeavingTransitionForRootTokenNode("somePath", task);
+        ...
+</pre>
+<br />
+<br />alt + shift + x + t, 哦也，终于绿了，不容易啊！
+<br />
+<br />好，完善测试用例。 在得到的 leavingTransitions中，一定有一个元素，它的getName()是我们
+<br />设置的 final String taskNodeName = "三级..."
+<br />
+<br /><pre class="java">        boolean result = false;
+        for(int i=0 ; i &lt; leavingTransitions.size(); i++){
+            if(leavingTransitions.get(i).getTo().getName().contains(taskNodeName)){
+                result = true;
+                break;
+            }
+        }
+        assertTrue(result);</pre>
+<br />
+<br />呃。。。。发现不行。搞了2个小时，终于发现问题所在，原来 workflowService.instance 与
+<br />workflowService.getInstance()得到的居然不是一个东西。我无语了。。。为workflowService手工增加方法：
+<br /><pre class="java">    public ProcessInstance getInstance(){
+        return this.instance;
+    }
+</pre>
+<br />
+<br />并且由于原方法中使用了 instance作为全局变量，需要在 
+<br />protected void setJbpmTemplateAndDescName(JbpmBaseBean flowBean) 中进行初始化，因此耽误了
+<br />时间。
+<br />
+<br />
+<br />呵呵。现在单元测试通过了。基本就是这样了。
+<br />下面是整理后的代码：
+<br />
+<br /> 单元测试类&#160; ：&#160; 
+<br /><pre class="java">/**
+ * @see WorkflowServiceImpl
+ * @author sg552 shensiwei(at)sina.com
+ *
+ */
+public class WorkflowServiceImplTest extends BaseSpringTestCase {
+    protected WorkflowServiceImpl workflowService;
+    protected JbpmTemplate jbpmTemplate;
+    
+    protected static final Long PROCESS_ID = 424L;
+    protected static final Long NODE_ID = 126L;
+    
+    public void testAssignTask(){
+        JbpmBaseBean flowBean = new JbpmBaseBean();
+        flowBean.setProcessId(PROCESS_ID);  
+        flowBean.setNodeId(NODE_ID);
+        boolean isStart = true;
+        boolean isTransition = false;
+        String transitionPath = "someTransitionPath";
+        
+        workflowService.assignTask(flowBean, isStart, isTransition, transitionPath);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testAddLeavingTransitionForRootTokenNode(){
+        final String taskNodeName = "三级正经理评估普通员工";
+        Task task = new Task();
+        task.setTaskNode(new TaskNode());
+        task.getTaskNode().setName(taskNodeName);
+        JbpmBaseBean jbpmBaseBean = new JbpmBaseBean();
+        jbpmBaseBean.setProcessId(PROCESS_ID);
+        workflowService.setJbpmTemplateAndDescName(jbpmBaseBean);
+        workflowService.addLeavingTransitionForRootTokenNode("普通员工填写个人年度绩效计划", task);
+
+        //我们刚才的 taskNodeName  一定在这个 List 的元素里面
+        List&lt;Transition&gt; leavingTransitions = workflowService.getInstance()
+                .getRootToken().getNode().getLeavingTransitions();
+        boolean result = false;
+        for(int i=0 ; i &lt; leavingTransitions.size(); i++){
+            if(leavingTransitions.get(i).getTo().getName().equals(taskNodeName)){
+                result = true;
+                break;
+            }
+        }
+        assertTrue(result);
+    }
+    .....//getters and setters.
+</pre>
+<br />
+<br />
+<br />被测试的类&#160;&#160; ：
+<br />
+<br /><pre class="java">
+public class WorkflowServiceImpl....
+
+    //org.springmodules.workflow.jbpm31.JbpmTemplate
+    private JbpmTemplate jbpmTemplate;
+    
+    //org.jbpm.graph.exe.ProcessInstance
+    protected ProcessInstance instance;
+
+    /**
+     * 为task做标志？
+     * @param isStart 这个参数没用。
+
+     * @author 架构哥 sg552重构
+     */
+    public void assignTask(JbpmBaseBean flowBean, boolean isStart,
+            boolean isTransition, String transitionPath) {
+        try {
+            setJbpmTemplateAndDescName(flowBean);
+            cancelSignallingTaskInstanceWhichInSameInstance(flowBean);
+            processTasks(flowBean, isTransition, transitionPath);
+        } catch (Exception e) {
+            logger.error(e, e);
+        }
+        jbpmTemplate.getHibernateTemplate().saveOrUpdate(instance);
+    }
+    /**
+     * 汉字：抽单
+     */
+    public static final String REARRANGE_PROCESS = "\u62BD\u5355";
+
+    public static final String VARIABLE_FLOW_BEAN="flowBean";
+    
+    protected void setJbpmTemplateAndDescName(JbpmBaseBean flowBean) {
+        instance = jbpmTemplate.findProcessInstance(flowBean.getProcessId());
+        instance.setJbpmTemplate(jbpmTemplate, instance.getId());
+        instance.setDescName(REARRANGE_PROCESS+instance.getDescName());
+    }
+
+    protected void processTasks(JbpmBaseBean flowBean, boolean isTransition,
+            String transitionPath) {
+        for (Iterator iterator = getTaskMgmtInstancesByTaskInstanceId()
+                .keySet().iterator(); iterator.hasNext();) {
+            Task task = (Task) getTaskMgmtInstancesByTaskInstanceId().get(
+                    iterator.next());
+            doProcessIfParentOfTaskIsTaskNode(flowBean, isTransition,
+                    transitionPath, task);
+        }
+    }
+
+
+
+    /**
+     * 很不好意思，四个参数。 
+     */
+    protected void doProcessIfParentOfTaskIsTaskNode(JbpmBaseBean flowBean,
+            boolean isTransition, String transitionPath, Task task) {
+        if (isShouldDoProcess(flowBean, task)) {
+            flowBean = getUserByeNodId(Long.valueOf(instance.getId()), Long
+                    .valueOf(task.getId()));
+            instance.getContextInstance().setVariable(VARIABLE_FLOW_BEAN, flowBean);
+            addLeavingTransitionForRootTokenNode(transitionPath, task);
+            setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+                    isTransition, transitionPath);
+        }
+    }
+
+    private boolean isShouldDoProcess(JbpmBaseBean flowBean, Task task) {
+        return (task.getParent() instanceof TaskNode)
+                &amp;&amp; (Long.valueOf(task.getTaskNode().getId()).equals(flowBean
+                        .getNodeId()));
+    }
+
+    protected void addLeavingTransitionForRootTokenNode(String transitionPath,
+            Task task) {
+        Transition leavingTransition = new Transition(transitionPath);
+        leavingTransition.setTo(instance.getProcessDefinition().getNode(
+                task.getTaskNode().getName()));
+
+        instance.getRootToken().getNode().addLeavingTransition(
+                leavingTransition);
+    }
+
+    private Map getTaskMgmtInstancesByTaskInstanceId() {
+        return instance.getTaskMgmtInstance(
+                Long.valueOf(instance.getId())).getTaskMgmtDefinition()
+                .getTasks();
+    }
+
+    protected void cancelSignallingTaskInstanceWhichInSameInstance(
+            JbpmBaseBean flowBean) {
+        Collection taskMgmtInstances = instance.getTaskMgmtInstance(
+                Long.valueOf(instance.getId())).getTaskInstances();
+        for (Iterator it = taskMgmtInstances.iterator(); it.hasNext();) {
+            TaskInstance taskInstance = (TaskInstance) it.next();
+            cancelTaskInstanceWhichIsSignalling(flowBean, taskInstance);
+        }
+    }
+
+    private void cancelTaskInstanceWhichIsSignalling(JbpmBaseBean flowBean,
+            TaskInstance taskInstance) {
+        if (taskInstance.isSignalling()) {
+            flowBean.setTaskId(Long.valueOf(taskInstance.getId()));
+            cancelTask(flowBean);
+        }
+    }
+
+    /**
+     * 这里比较简单，没有考虑使用多态。
+     */
+    private void setTransitionPathOrEndOrSignalAnInstanceIfIsTransition(
+            boolean isTransition, String transitionPath) {
+        if (isTransition)
+            if (!instance.hasEnded()) {
+                if (transitionPath != null &amp;&amp; !"".equals(transitionPath))
+                    instance.signal(transitionPath);
+                else
+                    instance.signal();
+            } else {
+                instance.end();
+            }
+    }
+
+    public ProcessInstance getInstance() {
+        return this.instance;
+    }
+</pre>
+<br />
+<br />
+<br />
+<br />----------------------&#160; 昨天的帖子
+<br />呃。。。好吧。我解释一下。 说的不对的地方请大家指正。
+<br />
+<br />1. package名 —— 哦。我弄错了。原来只有package的第一个词要求小写，对后面的没要求。
+<br /><a target="_blank" href="http://java.sun.com/docs/books/jls/second_edition/html/packages.doc.html">http://java.sun.com/docs/books/jls/second_edition/html/packages.doc.html</a>
+<br />The first component of a unique package name is always written in all-lowercase ASCII letters
+<br />也就是说，下面这个代码风格是正确的。怪我自己弄错了。
+<br /><pre class="java">package com.ibm.bmcc.app.eHR;
+....
+</pre>
+<br />
+<br />2. 某个别人提供的工具类的代码&#160; —— 这里应该有正确的javadoc吧？&#160; 说明这个方法的用处，并且加上
+<br />必要的 @param&#160; @return&#160; 等等。 另外，怎么可以让System.out出现呢？使用log4j才对。
+<br /><pre class="java">public String nextflow(){//流程处理下一步
+    System.out.println("-----user------"+flowBean.getUserId());
+    System.out.println("-----user group------"+flowBean.getUserGroup());
+</pre>
+<br />
+<br />3. 同一个类里的两个方法： —— java程序的风格是： 方法名使用骆驼表示法。
+<br />首单词的开头字母小写，后面单词的开头字母大写。 
+<br /><pre class="java">public void startmidperson(OrgChartInfoNew ocif){
+......
+
+public void StartBeginYear(OrgChartInfoNew ocin,String starttype){
+......
+</pre>
+<br />
+<br />4. 我看了五遍还不明白的逻辑(HibernateDao)：&#160; —— 这个HQL语句 最后两行不是重复吗？
+<br /><pre class="java">select ... from JBPM_TASKINSTANCE jti 
+where  ...
+and jti.id_=tap.taskinstance_ 
+and tap.taskinstance_=jti.id_
+</pre>
+<br />
+<br />5. 某方法：&#160; —— 这个方法的坏味道已经非常非常重了。
+<br />1. 参数太多，不应该超过3个。
+<br />2. System.out ，e.printStackTrace，楼下已经有朋友指出来了。应该全部替换成log4j
+<br />3. 太大太复杂。应该 extract method ，重构成若干小方法
+<br />4. if里有if,里面还有if. 要么 抽取方法，要么使用多态。
+<br /><pre class="java">public void xxxx(参数1，参数2，参数3，参数4){
+    try{
+        var1= ...
+        var2= ...
+        var3=...
+        System.out...
+        for(...) {
+            .....  //多行
+            System.out....
+            if....
+        }
+        Map ....
+        for(...) {
+            var4=...
+            if(){
+                if(){ 
+                    ... (多行）
+                    System.out....
+                    if(){
+                        if(){
+                        }esle{
+                        }
+                    }else{
+                        ...
+                    }
+                }
+            }
+        }
+    }catch(Exception e){
+        e.printStackTrace();
+    }
+    .....
+}
+</pre>
+<br />
+<br />
+  </div>
