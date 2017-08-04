@@ -1,0 +1,267 @@
+<p>注意：这个文章只针对Rails3.0.x 对于 后面的版本 &#160;, 请看 $ rails plugin new  (Enginex is only available for Rails 3.0. *For Rails 3.1 onwards, Enginex was ported to Rails as `rails plugin new` by Piotr Sarnacki.* )</p>
+<p>参考： <a href="http://coding.smashingmagazine.com/2011/06/23/a-guide-to-starting-your-own-rails-engine-gem/" target="_blank">http://coding.smashingmagazine.com/2011/06/23/a-guide-to-starting-your-own-rails-engine-gem/</a>
+</p>
+<p>昨天上午打算发布自己的第一个RAILS GEM （也叫 rails engine gem)  ，但是失败了，原因是不知道如何引入，或者扩展RAILS 的controller, views 等等。搜了一些文章，终于找到关键的了，所以一步一步的记录下来。 </p>
+<p>我们使用 enginex 这个gem, 作者是 Rails 的核心提交人员。这个GEM的作用是使大家对于RAILS ENGINE的开发更加快速，不必关注一些边缘的知识，把精力用在刀刃上～ 。</p>
+<p> 先看它是如何安装的</p>
+<pre>$ gem install enginex
+$ engine audited_controller
+
+      STEP 1  Creating gem skeleton
+      create  
+      create  audited_controller.gemspec
+      create  Gemfile
+      create  MIT-LICENSE
+      create  README.rdoc
+      create  Rakefile
+      create  lib/audited_controller.rb
+      create  test
+      create  test/audited_controller_test.rb
+      create  test/integration/navigation_test.rb
+      create  test/support/integration_case.rb
+      create  test/test_helper.rb
+      create  .gitignore
+
+      STEP 2  Vendoring Rails application at test/dummy
+      create  
+      create  README
+      create  Rakefile
+      create  config.ru
+      create  .gitignore
+      .....
+     STEP 3  Configuring Rails application
+       force  test/dummy/config/boot.rb
+       force  test/dummy/config/application.rb
+
+      STEP 4  Removing unneeded files
+      remove  test/dummy/.gitignore
+      remove  test/dummy/db/seeds.rb
+      remove  test/dummy/doc
+      ......
+
+</pre>
+<p>1. 修改 gemspec 文件。加入必要的内容</p>
+<pre># audited_controller.gemspec
+Gem::Specification.new do |s| 
+  s.name = "audited_controller"
+  s.summary = "a tool to help auditing the actions of controller."
+  s.description = "easily audit your actions"
+  #s.files = Dir["{app,lib,config}/**/*"] + ["MIT-LICENSE", "Rakefile", "Gemfile", "README.rdoc"]
+  s.version = AuditedController::VERSION
+  s.authors = ["Siwei Shen"]
+  s.email = ["sg552sg552@gmail.com"]
+  s.homepage = "siwei.me"
+  s.files = `git ls-files`.split("\n")
+  s.executables = `git ls-files`.split("\n").map{|f| f =~ /^bin\/(.*)/ ? $1 : nil}.compact
+  s.require_path = 'lib'
+end
+
+</pre>
+<p> 2. 编辑 Gemfile</p>
+<pre># Gemfile
+source "http://rubygems.org"
+  
+gem "rails", "&gt;= 3.0.0"
+gem "capybara", "&gt;= 0.4.0"
+gem "sqlite3"
+</pre>
+<p> 3. 增加3个文件</p>
+<pre>1. version.rb :  
+# lib/audited_controller/version.rb
+ module AuditedController
+   VERSION='0.0.7'
+ end
+
+2.
+# lib/audited_controller.rb
+require 'active_support/dependencies'
+module AuditedController
+  mattr_accessor :app_root
+  def self.setup
+    yield self
+  end 
+end
+require 'audited_controller/engine'
+
+
+3. engine.rb
+# lib/audited_controller/engine.rb
+module AuditedController
+  class Engine &lt; Rails::Engine
+    initialize 'audited_controller.load_app_instance_data' do |app|
+      config.app_root = app.root
+    end 
+    initialize "team_page.load_static_assets" do |app|
+      app.middleware.use ::ActionDispatch::Static, "#{root}/public"
+    end 
+
+  end 
+end
+</pre>
+<p> 4. 重点来了： 建立 model.  在这个GEM中，我要用到一个model:  audit.  所以，要有一个task 来运行migration:   </p>
+<pre># file: lib/generators/audited_controller/audited_controller_generator.rb
+require 'rails/generators'
+require 'rails/generators/migration'
+    
+class AuditedControllerGenerator &lt; Rails::Generators::Base
+  include Rails::Generators::Migration
+  def self.source_root
+    @source_root ||= File.join(File.dirname(__FILE__), 'templates')
+  end
+
+  def self.next_migration_number(dirname)
+    if ActiveRecord::Base.timestamped_migrations
+      Time.new.utc.strftime("%Y%m%d%H%M%S")
+    else
+      "%.3d" % (current_migration_number(dirname) + 1)
+    end
+  end
+
+  def create_migration_file
+    migration_template 'migration.rb', 'db/migrate/create_audits_table.rb'
+  end
+end
+</pre>
+<p>4.2 还要增加对应的migration 模板文件： </p>
+<pre>#  lib/generators/audited_controller/templates/migration.rb
+# -*- encoding : utf-8 -*-
+class CreateAudits&lt; ActiveRecord::Migration
+  def change
+    create_table :audits, :comment =&gt; '记录用户操作日志' do |t|
+      t.string :action, :comment =&gt; '用户访问的action'
+      t.string :controller, :comment =&gt; '用户访问的controller'
+      t.string :description, :comment =&gt; '具体描述'
+      t.string :user_name, :comment =&gt; '用户名'
+      t.text :params, :comment =&gt; 'request的详细参数'
+      t.string :remote_ip, :comment =&gt; '用户的IP地址'
+      t.string :restful_method, :comment =&gt; 'RESTful method, get, put, post, delete 中的一种'
+
+      t.timestamps
+    end
+  end
+end 
+
+</pre>
+<p>4.3 还要增加对应的model  文件</p>
+<pre># app/models/audited_controller/audit.rb
+# -*- encoding : utf-8 -*-
+class Audit &lt; ActiveRecord::Base
+  attr_accessible :action, :controller, :description, :user_name, 
+    :params, :remote_ip, :restful_method
+  AUDIT_TYPE_NO_GET = 'no get'
+  AUDIT_TYPE_PUSH = 'push'
+  AUDIT_TYPE_CREATE_MESSAGE = 'create_message'
+  AUDIT_TYPE_UPDATE_MESSAGE = 'update_message'
+  AUDIT_TYPE_APPROVAL = 'approval'
+end
+</pre>
+
+<p>5.  配置正确的话， rubygem中的 app 和  config 目录是会被自动加载的。所以。... 建立我们的config/routes.rb : </p>
+<pre># config/routes.rb 
+Rails.application.routes.draw do
+  resources :audits
+end
+</pre>
+<p>6. 还要加上controllers 啊亲！ </p>
+<pre># application_controller.rb 
+# -*- encoding : utf-8 -*-
+class ApplicationController &lt; ActionController::Base
+  puts "== in gem's application_controller"
+  def add_to_audit
+    audit_config = HashWithIndifferentAccess.new(YAML.load(File.read(
+      File.expand_path("#{Rails.root}/config/audits.yml", __FILE__))))
+    controller = params[:controller]
+    action = params[:action]
+    request_type = restful_method(params)
+    return if !audit_get_request?(audit_config) &amp;&amp; request_type == 'get'
+    Audit.create!(action: action, controller: controller, user_name: current_user.login,
+      description: audit_config[controller][action],
+      :params =&gt; params.inspect,
+      remote_ip: request.remote_ip, restful_method: restful_method(params) )
+  end
+  private
+  def audit_get_request?(audit_config)
+    audit_config["audit_get_request"]
+  end
+  # return: get, post, put or delete
+  def restful_method(params)
+    params[:authenticity_token].blank? ? 'get' : ((params[:_method]) || 'post')
+  end
+
+end   
+</pre>
+<p> 以及对应的 audits_controller.rb
+</p>
+<pre># app/controllers/application_controller.rb
+# -*- encoding : utf-8 -*-
+class AuditsController &lt; ApplicationController
+  before_filter CASClient::Frameworks::Rails::Filter
+  def index
+    @audits = params[:user_name].blank? ?
+      Audit :
+      Audit.where("user_name like ?",  "%#{params[:user_name]}%")
+    @audits = case params[:audits_type]
+      when Audit::AUDIT_TYPE_NO_GET then @audits.where("restful_method != 'get'")
+      when Audit::AUDIT_TYPE_PUSH then @audits.where("action = 'confirm_push'")
+      when Audit::AUDIT_TYPE_APPROVAL then @audits.where("action = 'update_approval'")
+      when Audit::AUDIT_TYPE_CREATE_MESSAGE then @audits.where("description = '建立了一条消息'")
+      when Audit::AUDIT_TYPE_UPDATE_MESSAGE then @audits.where("description= '更新消息'")
+      else @audits
+      end 
+    @audits = @audits.where("created_at &gt;= ? ", params[:created_at_before]) unless params[:created_at_befo
+    @audits = @audits.where("created_at &lt;= ? ", DateTime.strptime(params[:created_at_after], '%Y-%m-%d').t
+    @audits = @audits.order('created_at desc').page(params[:page])
+  end 
+end
+</pre>
+<p> 以及这个controller: </p> 
+<pre># -*- encoding : utf-8 -*-
+class AuditsController &lt; ApplicationController
+  before_filter CASClient::Frameworks::Rails::Filter
+  def index
+    @audits = params[:user_name].blank? ?
+      Audit :
+      Audit.where("user_name like ?",  "%#{params[:user_name]}%")
+    @audits = case params[:audits_type]
+      when Audit::AUDIT_TYPE_NO_GET then @audits.where("restful_method != 'get'")
+      when Audit::AUDIT_TYPE_PUSH then @audits.where("action = 'confirm_push'")
+      when Audit::AUDIT_TYPE_APPROVAL then @audits.where("action = 'update_approval'")
+      when Audit::AUDIT_TYPE_CREATE_MESSAGE then @audits.where("description = '建立了一条消息'")
+      when Audit::AUDIT_TYPE_UPDATE_MESSAGE then @audits.where("description= '更新消息'")
+      else @audits
+      end
+    @audits = @audits.where("created_at &gt;= ? ", params[:created_at_before]) unless params[:created_at_befo
+    @audits = @audits.where("created_at &lt;= ? ", DateTime.strptime(params[:created_at_after], '%Y-%m-%d').t
+    @audits = @audits.order('created_at desc').page(params[:page])
+  end 
+end
+
+</pre>
+<p> 6 .增加 views </p>
+<pre>用户的操作日志
+&lt;%# render :partial =&gt; 'search_form' %&gt;
+&lt;%# paginate @audits %&gt;
+
+&lt;% @audits.each do |audit| %&gt;
+  
+&lt;% end %&gt;
+<table class="table table-hover">
+  <tbody><tr>
+    <th style="width: 100px"> 用户名</th>
+    <th>操作</th>
+    <th style="width: 180px">时间</th>
+    <th>IP</th>
+    <th style="width: 300px">详细参数</th> 
+  </tr>
+<tr>
+    <td>&lt;%= audit.user_name %&gt;</td>
+    <td>&lt;%= audit.description %&gt;</td>
+    <td>&lt;%= audit.created_at %&gt;</td>
+    <td>&lt;%= audit.remote_ip %&gt;</td>
+    <td>&lt;%= audit.params %&gt;</td>
+  </tr>
+</tbody>
+</table>
+&lt;%# paginate @audits %&gt;
+]]&gt;
+</pre>
