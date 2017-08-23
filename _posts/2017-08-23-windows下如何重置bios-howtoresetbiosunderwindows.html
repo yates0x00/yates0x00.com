@@ -1,0 +1,13 @@
+<p>太不容易了。今天折腾了我一个早上。 (this morning I fixed this problem by using the 'debug' command under DOS. )</p>
+<p>我的笔记本从来都是 无法进入BIOS， 只能每次都是进入一个莫名其妙的windows loader 还是什么东东。我把硬盘拆了都不管用。(my laptop is not able to enter the bios and install ubuntu because of a strange windows load manager or so. It could not be removed even if the harddisk is removed. )</p>
+<p>查了一早上。发现时 现在的主板，一般使用UEFI/EFI 来取代原来的 BIOS。 我郁闷。无法搞定啊。 (after google around for 2 hours , not solution found)&#160;</p>
+<p>把CMOS电池拆了也没用。&#160;</p>
+<p>后来找到个光盘，进入了WIN PE， (at last, I found a windows boot CD and enter the win PE , which supports DOS command)&#160;</p>
+<p>因为刚才搜索的时候，看到有帖子说 debug -o 的那个命令可以给CMOS 放电。（也想起了自己高中时候，在电脑课上用同样的方法给学校的机房换密码，改背景桌面，匿名留言说自己是黑客，全年级的同学都看到了哈哈） 于是试了一下，太爽了啊。</p>
+<p>步骤： ( so I tried this command and successfully enter my bios :)&#160;</p>
+<pre>$ debug
+-o 70 16
+-o 71 16
+-q 
+</pre>
+<p>爽歪歪了有木有！ &#160;(oh yeah! )</p>
