@@ -1,0 +1,23 @@
+<p>refinery_cms is not bad. I have been using it for my personal website(siwei.me, aka shensiwei.com), its default database is sqlite3. this guide will show you how to install it under mysql.</p>
+<p>step1. $ gem install refinery cms &#160;(following it official guide)</p>
+<p>step1.1 $ gem install sass-rails -v 3.2.3&#160;</p>
+<p>setp1.2 $&#160;apt-get install libsqlite3-dev&#160;</p>
+<p>step 1.9 $ refinerycms yangqigong (using the &#160;default settings)</p>
+<p>step2. $ vim Gemfile , config/database.yml, using mysql content. e.g.</p>
+<pre># Gemfile:
+ gem 'rails', '3.2.15'
+ gem 'mysql2', '0.2.6'
+
+# database.yml
+development:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: yangqigong_development
+  #database: yangqigong_development_two
+  pool: 5
+  username: root
+  password: ""
+  host: localhost</pre>
+<p>Step3. $ bundle install &amp;&amp; bundle exec rake db:create &amp;&amp; bundle exec rake db:migrate</p>
+<p>it's done. run 'bundle exec rails s' will start your application.&#160;</p>
