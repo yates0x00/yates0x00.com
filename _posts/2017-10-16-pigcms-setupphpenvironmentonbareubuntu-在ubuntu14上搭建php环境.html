@@ -1,0 +1,60 @@
+<p>UBUNTU 10：&#160;<br />参考：(refer to : <a href="https://gist.github.com/DaRaFF/3995789">https://gist.github.com/DaRaFF/3995789</a>)<br />PHP官方的文档简直没有可读性，摸索了一天，归纳出来了：&#160;</p>
+<pre>$ sudo apt-get install libapr1-dev libxml2-dev  libxslt-dev mysql-server libmysqlclient-dev
+ curl build-essential libssl-dev libreadline-dev libopenssl-ruby build-essential 
+ libssl-dev libreadline-dev vim git-core
+</pre>
+<pre>$aptitude install php5-cgi php5-mysql php5-fpm php5-curl php5-gd php5-idn php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-mhash php5-ming php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl php5-fpm
+
+$ sudo apt-get install php5-cli php5-common php-apc php-pear php5-xdebug php5-curl php5 php5-dev
+sudo apt-get install php5-xsl
+sudo apt-get install php5-intl
+$ sudo apt-get install gcc g++ libpcre++-dev zlib1g-dev make&#160;
+$ apt-get install nginx php5-fpm php5  （这一步很关键）
+$ apt-get install graphicsmagick libgraphicsmagick1-dev
+
+</pre>
+<p>修改配置文件： （这一步也很关键 this is the key! )</p>
+<pre># 
+#edit listen port in /etc/php5/fpm/pool.d/www.conf
+ ; Note: This value is mandatory.
+ ;listen = 127.0.0.1:9009
+ ; 分号表示注释，上面两行都不要
+ listen = /var/run/php5-fpm.sock
+
+# nginx server config
+  server {
+    listen       80; 
+    server_name  www.weixin.pe weixin.pe;
+    charset utf-8;
+    root /opt/weixin_cms/upload; # 这里一定要配置对，比如： /opt/weixin_cms/current/upload;
+    index index.html index.htm index.php;
+    location / { 
+      try_files $uri $uri/ /index.php;
+    }   
+    location ~ \.php$ {
+      try_files $uri =404;
+      fastcgi_pass unix:/var/run/php5-fpm.sock;
+      fastcgi_index index.php;
+      fastcgi_param SCRIPT_FILENAME html$fastcgi_script_name;
+      include fastcgi_params;
+    }   
+  }
+
+
+</pre>
+
+<p>then comes to setup the DB and PHP config:&#160;
+</p>
+<p>1.&#160;create database weixin_cms default charset utf8 COLLATE utf8_general_ci;</p>
+<p>2. use weixin_cms;</p>
+<p>3. source pigcms.sql;</p>
+<p>4.然后修改conf目录下的db.php数据库连接文件即可完成安装 ( access www.weixin.pe will show the result page)</p>
+<p>启动、停止 php:&#160;</p>
+<p>优先使用： $ service php5-fpm start/stop</p>
+<p>不建议使用： &#160;$ /etc/init.d/php5-fpm start/stop &#160;， 在ubuntu 14.04 上不行。说是 upstart 的问题。</p>
+<p>记得不但要重启 php5-fpm 还要重启nginx&#160;</p>
+<p>关于pig cms的配置：</p>
+<p>1. 根据它的后台给出的提示，该有的东东都要有。（登录后，设置api 等等）</p>
+<p>2. 登录weixin（官方后台， mp.weixin.qq.com ) 后， &#160;开发者中心 -&gt; &#160;接口在线调试工具 -&gt; 就可以看到你的appkey, appsecret 是否填写正确。&#160;</p>
+<p>3. 还要跟pigcms的同学沟通，看是否 你的域名设置的正确。 (refer to:&#160; <a href="http://up.pigcms.cn/oa/customerLogin.php?m=front&amp;c=login&amp;a=login">http://up.pigcms.cn/oa/customerLogin.php?m=front&amp;c=login&amp;a=login</a>)</p> 
+<p>4. 最后，还要在pigcms内做一定的设置，（14年底的时候，weixin的发消息的策略发生了变化，需要在pigcms内做一个设置）</p>
