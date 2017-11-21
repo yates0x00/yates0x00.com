@@ -1,0 +1,29 @@
+<p>如题。 这个在目前的app开发当中非常重要。</p>
+<p>p.s. 如何在 nginx 的层次加入对接口的访问控制。(pid? )</p>
+<p>refer to:&#160; <a href="http://www.tuicool.com/articles/6Vf6jm">http://www.tuicool.com/articles/6Vf6jm</a>
+<br />
+<a href="http://www.tuicool.com/articles/jQJV3i">http://www.tuicool.com/articles/jQJV3i</a>
+<br />
+<a href="http://www.cnblogs.com/chengmo/archive/2010/10/18/1854755.html">http://www.cnblogs.com/chengmo/archive/2010/10/18/1854755.html</a> <br />
+<a href="http://wiki.qcloud.com/wiki/%E6%8E%A5%E5%8F%A3%E9%89%B4%E6%9D%83">http://wiki.qcloud.com/wiki/%E6%8E%A5%E5%8F%A3%E9%89%B4%E6%9D%83</a>&#160; （腾讯的官方wiki ）</p>
+
+<p>在目前的http 请求中，所有参数都能被 黑客获知。那么服务器端该如何防范黑客的小动作呢？</p>
+<p>一般说来，需要用到 “数字签名”技术（ digital signature ) . 也就是通过在客户端加密一系列的参数，来达到在服务器端进行验证的目的。</p>
+<p style="color:red">这个技术的关键在于： 需要知道，总共有三个角色参与： 客户端，服务器端，以及黑客。</p>
+<p>黑客可以获知 客户端发起请求中的所有信息，但是不知道背后的算法。所以，只要我们掌握了某个参数的生成技术，就能够验证 某个request是来自于 正常的客户端，还是黑客了。</p>
+<p>最牛的签名算法，我所感知的，就是中国移动充值卡。。。。</p>
+<p>举个例子：</p>
+<p>正常客户端： request_url?a=1&amp;b=2&amp;sign=9z8x7y6w</p>
+<p>那么黑客就能知道， 呦西，这个服务器端会接收三个参数， a=1, b=2, signature=9z8x7y6w</p>
+<p>所以，我们就要提前做个约定，让黑客无法获知 signature的生成方式，同时，又能让server端知道。</p>
+<p>该如何做呢？ signature最常见的就是 md5([a:1], [b:2], [signature: '9z8x7y6w']), 也就是把全套参数重新digit一遍。</p>
+<p>因此，隐藏参数就出现了。 &#160;md5(request_url + hidden_value).</p>
+<p>在 client端和server端，共同约定这个暗号，例如： secure_token = 888, 那么，在两端生成md5的方式就是：</p>
+<p>md5([a:1], [b:2], [secure_token:888]) &#160;，这下连signature都省略了。&#160; 
+</p>
+<p>关键在于这个secure_token &#160;是不会出现在代码里的，它仅仅存在于： client的代码，以及 server的数据库中。</p>
+<p>所以黑客无法下手。
+</p>
+<p>这个 secure_token, 也有人叫它 primary_key (私钥）。 &#160;在微信中叫 token</p>
+<p>p.s. http request中的 私钥 跟 rsa 中的私钥，公钥 是不太一样的。 后者需要成对出现，前者自己出现就可以了。
+</p>
