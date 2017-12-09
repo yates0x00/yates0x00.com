@@ -1,0 +1,14 @@
+<p>我们的app一般要用到统计功能：</p>
+<p>我在安卓端的2个市场发布过我的app: 应用宝，360市场，如何知道我每天的100W访问量都分别是从哪里来的呢？</p>
+<p>光靠request_header是无法获知的。因为 user-agent都是一样的（假设安卓机型一致），所以，就需要在client request server时，加上 渠道id 这个参数。</p>
+<p>每家的 渠道id的参数都是不一样的，这个跟各家公司的评职系统的称呼不一样，有的叫T5， 有的叫P6。。。。应该是为了让hacker 不那么容易看出来吧。</p>
+<p>比如： 我在server 的nginx日志中，看到如下访问日志：</p>
+<pre>2015-01-01 09:10:25 GET /interface1?qudao_id=360_market ...
+2015-01-01 09:12:25 GET /interface1?qudao_id=360_market ...
+2015-01-01 09:13:25 GET /interface1?qudao_id=360_market ...
+2015-01-01 09:14:25 GET /interface1?qudao_id=yingyongbao
+2015-01-01 09:15:25 GET /interface1?qudao_id=yingyongbao
+2015-01-01 09:16:25 GET /interface1?qudao_id=360_market ...
+</pre>
+<p>我就能够知道，那天总共有6个request请求，4个来自于360市场 (360 market)，2个来自于应用宝(yingyongbao)</p>
+<p>这种数据对于统计是至关重要的。</p>
