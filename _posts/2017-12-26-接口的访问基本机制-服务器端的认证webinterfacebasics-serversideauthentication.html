@@ -1,0 +1,55 @@
+<p>refer to:&#160;
+<a href="http://nginx.org/en/docs/http/ngx_http_secure_link_module.html">http://nginx.org/en/docs/http/ngx_http_secure_link_module.html</a>
+<br />
+<a href="http://www.rackspace.com/blog/add-the-content-md5-http-header-to-nginx">http://www.rackspace.com/blog/add-the-content-md5-http-header-to-nginx/</a>
+</p>
+<p>对于接口的认证，在服务器端的两个地方可以做：</p>
+<p>1. nginx , 2. backend (rails, php, .net)等等</p>
+<p>在后端做的话，比较耗时。比如： 查询数据库，运行ruby代码，验证是否正确等等。 没有几十毫秒下不来。</p>
+<p>而且在 rails/php 等backend, 他们的对并发请求的处理表现是很差劲的。最NB的nodejs 输出 'hello world'也无法过4000.更别提查询数据库了。（一般我看到的是不过50 req/s，每次是1个并发请求）</p>
+<p>所以，最好在nginx这一层来做。 快速，而且直接（ 要知道nginx对于静态文件的请求速度轻松达到 每秒1000并发，15k个响应）</p>
+<p>ngx_http_secure_link_module 分成两种模式：</p>
+<p>1. secure_link_secret: 只进行验证  。&#160;</p>
+<p>2. secure_link + secure_link_md5: 不但验证，而且还可以检查超时
+</p>
+<h1>nginx secure_link 验证的机制：</h1>
+<p>它只接受两个参数： &#160; secure_link(md5,expiration_time) ，</p>
+<p>1. 先验证 md5 对不对。如果不对的话，就认为 $secure_link=''
+</p>
+<p>2. 如果md5 验证通过，但是发现时间已经过期，那么就把 $secure_link = 0</p>
+<p>3. 如果md5验证通过，并且时间也正常，那么 $secure_link = 1</p>
+<p>如果 expiration_time 设置了，就是 epoch 时间之后的秒数，如果没有设置，就认为它永不过期。</p>
+<p>例子：</p>
+<pre>location /s/ {
+    secure_link $arg_md5,$arg_expires;
+    secure_link_md5 "$secure_link_expires$uri$remote_addr my_secret";
+    if($secure_link=""){
+        return 403;   // md5检查未通过
+    }
+    if($secure_link="0"){
+        return 410;   // 过期了
+    }
+}
+</pre>
+<p>那么，这个请求：/s/link?md5=_e4Nc3iduzkWRm01TBBNYw&amp;expires=2147483647 ，就可以看出， md5是由 127.0.0.1 算出来的， secret token = 'my_secret' , 过期时间是 2038年一月19日&#160;</p>
+<p>手动生成这个 md5的方式：
+</p>
+<pre>echo -n '2147483647/s/link127.0.0.1 secret' | \
+    openssl md5 -binary | openssl base64 | tr +/ -_ | tr -d =
+</pre>
+<p>nginx secure_link_secret模式验证的机制：</p>
+<p>根据指定的md5进行验证，如果通过，则$secure_link 不变，否则， $secure_link="", &#160; 例子：</p>
+<pre>// 验证  /p/a1b2c3d4/interface_name 是否合法
+location /p/ {
+    secure_link_secret secret;
+    if ($secure_link=""){
+        return 403;
+    }
+    rewrite ^ /secure/$secure_link;
+}
+location /secure/ {
+    internal;
+}
+
+</pre>
+<p>例如，我们要传递的 link 的全型是： &#160;"/p/5e814704a28d9bc1914ff19fa0c4a00a/link", hacker无法从中获知 客户端的secret, 在server端则可以非常方便的进行识别。</p>
