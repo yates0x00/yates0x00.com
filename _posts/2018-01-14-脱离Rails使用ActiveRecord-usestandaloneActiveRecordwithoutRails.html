@@ -1,0 +1,24 @@
+<p>refer to:&#160; <a href="http://snippets.aktagon.com/snippets/257-how-to-use-activerecord-without-rails">http://snippets.aktagon.com/snippets/257-how-to-use-activerecord-without-rails</a>
+</p>
+
+<p>app.rb:</p>
+<pre>require 'active_record'
+require 'sqlite3'
+require 'logger'
+
+ActiveRecord::Base.logger = Logger.new('debug.log')
+configuration = YAML::load(IO.read('config/database.yml'))
+ActiveRecord::Base.establish_connection(configuration['development'])
+
+class User &lt; ActiveRecord::Base
+end
+</pre>
+
+
+<p>database.yml:</p>
+<pre>development:
+  adapter: sqlite3
+  database: db/data.sqlite3
+  pool: 5
+  timeout: 5000
+</pre>
