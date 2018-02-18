@@ -1,0 +1,44 @@
+<p>refer to:&#160; <a href="http://phantomjs.org/build.html">http://phantomjs.org/build.html and </a>
+<a href="http://stackoverflow.com/questions/8778513/how-can-i-setup-run-phantomjs-on-ubuntu">http://stackoverflow.com/questions/8778513/how-can-i-setup-run-phantomjs-on-ubuntu</a>
+</p>
+<p>phantomjs 是 nodejs 下实现 webkit 的组件. (可以认为它实现了native的模拟各大浏览器) 可以用来实现基于web的自动化测试, 截图等等.</p>
+<p>所以我们安装下~</p>
+<p>无脑方法:&#160;</p>
+<p>$ apt-get install phantomjs &#160; ( v 1.9.0 )&#160;</p>
+<p>$ npm install -g phantomjs</p>
+<p>1. &#160;下载源代码:&#160;</p>
+<p>2. 安装第三方包: (根据官方文档所说,我这里运行不了, 说是包的依赖有问题. 所以我用的是 apt-get 的方式)</p>
+<pre>$ sudo apt-get install g++ flex bison gperf ruby perl \
+  libsqlite3-dev libfontconfig1-dev libicu-dev libfreetype6 libssl-dev \
+  libpng-dev libjpeg-dev
+$ sudo apt-get install ttf-mscorefonts-installer
+$ git clone git://github.com/ariya/phantomjs.git
+$ cd phantomjs
+$ git checkout 2.0
+$ ./build.sh
+</pre>
+<p>使用:</p>
+<p>新建一个文件 hi.js</p>
+<pre>// hi.js
+console.info('hihihi');
+phantom.exit()
+</pre>
+<p>运行:&#160;</p>
+<pre>$ phantom hi.js
+
+# =&gt;
+hihihi </pre>
+<p>读取并且做些操作: &#160;(显示 标题)</p>
+<pre>url = 'http://siwei.me'
+var page = require('webpage').create();
+page.open(url, function(status) {
+  var title = page.evaluate(function() {
+    return document.title;
+  });
+  console.log('Page title is ' + title);
+  phantom.exit();
+});
+
+$ phantos test_evaluate.js
+# =&gt; Page title is 欢迎来到申思维的站点/Welcome to Siwei's site. - your site
+</pre>
