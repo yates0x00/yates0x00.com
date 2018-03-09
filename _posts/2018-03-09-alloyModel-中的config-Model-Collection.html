@@ -1,0 +1,122 @@
+<p>refer to:&#160; <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_Collection_and_Model_Objects">http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_Collection_and_Model_Objects</a>
+</p>
+<p>Alloy 中包含了 backbone框架. 用的是0.9.2的版本. &#160;</p>
+<p>Model: 是app的核心. 因为我们需要展示数据. model就是数据. &#160;backbone可以帮我们实现方便的 data-view binding. 说的通俗一些:</p>
+<p>如果某个controller的数据发生了变化, &#160;而页面需要更新这个数据的话, 之前需要人肉操作.&#160;</p>
+<p>但是有了 数据绑定( data binding )之后, 就可以实现 页面数据的自动刷新.&#160;</p>
+<h3>model的例子:</h3>
+<pre>exports.definition  = {
+  config: {}, 
+  extendModel: function(Model){
+    _.extend(Model.prototype, {});
+    return Model;
+  },  
+  extendCollection: function(Collection){
+    _.extend(Collection.prototype, {});
+    return Collection;
+  }
+
+}
+</pre>
+<p>如果希望在controller中调用model, 就这样:</p>
+<pre>var book = Alloy.createModel('book', {title: 'Refactoring', author: 'Martin Fowler'});
+var title = book.get('title');
+var author = book.get('author'); 
+$.label.text = title + 'by' + author; 
+</pre>
+
+<h3>Config 的例子:</h3>
+<pre>exports.definition  = {
+  config: {
+    "columns" : {           // 定义每个列.
+      "title": "String", 
+      "author": "String"
+    }, 
+    "defaults" : {          // 定义默认值
+      "title" : '-',  
+      "author" : '-'
+    },
+    "adapter" : {           // 使用sqlite 数据库
+      "type" : "sql", 
+      "collection_name" : "books" 
+    }
+  }, 
+  extendModel: function(Model){
+    _.extend(Model.prototype, {});
+    return Model;
+  },  
+  extendCollection: function(Collection){
+    _.extend(Collection.prototype, {});
+    return Collection;
+  }
+
+}
+</pre>
+<h3>extends model&#160;</h3>
+<p>可以扩展某个model. 例如, validate()方法是backbone预设好的方法,但是没有做具体的实现. &#160;它在某个model的 set, save方法之前执行. 也在 被调用 isValid()的时候执行.&#160;</p>
+<p>例如:&#160;</p>
+<pre>exports.definition  = {
+  config: {}, 
+  extendModel: function(Model) { 
+    _.extend(Model.prototype, {
+      validate: function(attrs){ 
+        for (var key in attrs) { 
+           var value = attrs[key];
+           if (key === 'title'){
+              if (value.length &lt;= 0)  return "error: no title";                  
+            } 
+        }
+      }, 
+      customProperty: 'book', 
+      customFunction: function(){  
+        Ti.API.info('I am a book model');
+      }
+    })
+    return Model
+  } 
+}
+</pre>
+<p>在controller中这样操作:&#160;</p>
+<pre>var book = Alloy.createModel('book', {title: 'Refactoring', author: 'Martin' });
+if(book.isValid() &amp;&amp; book.customProperty == 'book') {
+    book.save();
+} else{
+    book.destroy();
+}
+</pre>
+<h3>Collection</h3>
+<p>是某个model的多个instance集合. 只要你定义了某个Model (例如叫 book), 那么Alloy 就会自动为我们定义好对应的Collection</p>
+<pre>var books = Alloy.createCollection('book'); 
+books.fetch(); 
+</pre>
+<p> 下面是可以获取一个全局单例变量: (global singleton instance) :</p>
+<pre>var global_book = Alloy.createCollections.instance('book'); 
+</pre>
+<h3>extend Collection</h3>
+<p> 可以扩展对应的collection, 例如: </p>
+<pre>exports.definition = {
+  config: {},
+  extendModel: function(Model){
+    _.extend(Model.prototype, {});
+    return Model; 
+  } ,
+  extendCollection: function(Collection){
+    _.extend(Collection.prototype, {
+      comparator: function(book){  //对 comparator的实现
+        return book.get('title');
+      }
+    });
+    return Collection;
+  }
+}
+</pre>
+<h3>注意: Model, Collection只支持on, off, trigger , 不支持 Titanium 的add/removeEventListener, fireEvent()</h3>
+<p>Model 和 Collection 都可以调用这三个方法.例如:&#160;</p>
+<pre>var books = Alloy.createCollection('book');
+function  = event_callback(context){
+  var output = context || 'lala'; 
+  Ti.API.info(output);
+}
+books.on('change', event_callback);  //开始绑定
+books.trigger('change', 'lala');   //触发事件
+books.off();  // 取消一切事件绑定 </pre>
