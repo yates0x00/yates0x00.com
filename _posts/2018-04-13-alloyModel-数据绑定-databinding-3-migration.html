@@ -1,0 +1,15 @@
+<p>refer to:&#160; <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_Sync_Adapters_and_Migrations">http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_Sync_Adapters_and_Migrations</a>
+</p><p>跟　web 开发不同，　mobile开发我们无法console中直接操作 &#160;手机的数据库．　</p>
+<p>这点最烦，仿佛被蒙着眼睛编程．　无法直接观察到黑盒子里的内容．　只能通过其他的方式来看．</p>
+<p>Alloy 中的migration　写起来简单，但是如何运行呢？　</p>
+<p>没有 $ rake db:migrate, &#160; &#160;也没有　$ rake db:rollback, 　　</p>
+<p>需要在 model中定义．　例如：</p>
+<p>附录：　官方文档全文：</p>
+<p>Specify columns property as primary ID</p>
+<p>Define the idAttribute key-value pair in the config.adapter object to use a config.columns key as the primary ID for the SQLite table, which is used as the model ID for Backbone Model and Collection objects. In the previous example, the book_id column is used as the primary key for the table. If this key is not set, Alloy creates the alloy_id column in the table and generates a default GUID as the model ID.<br /></p>
+<p>Specify a migration to use</p>
+<p><br />Define the migration key-value pair in the config.adapter object to specify the database version to use. The value of this key is the datatime code of the migration file. Alloy upgrades or rolls back the database based on this value. If left undefined, Alloy upgrades the database based on the newest migration file.<br /></p>
+<p>Specify a database to use</p>
+<p><br />Define the db_name key-value pair in the config.adapter object to specify the name of the database to use. If left undefined, Alloy uses the default database _alloy_.<br /></p>
+<p>Specify a database file to preload</p>
+<p>Define the db_file key-value pair in the config.adapter object to specify the database file ('myfile.sqlite') to preload. Place this file in the app/assets directory of your Alloy project. Alloy creates a database using the name of the database file minus the file extension if one does not exist.</p>
