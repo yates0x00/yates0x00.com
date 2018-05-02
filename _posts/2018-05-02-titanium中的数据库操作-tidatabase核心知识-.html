@@ -1,0 +1,114 @@
+<p>refer to:&#160; <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Working_with_a_SQLite_Database">http://docs.appcelerator.com/titanium/latest/#!/guide/Working_with_a_SQLite_Database</a>
+</p>
+<p>and:&#160; <a href="http://docs.appcelerator.com/titanium/latest/#!/api/Titanium.Database.ResultSet">http://docs.appcelerator.com/titanium/latest/#!/api/Titanium.Database.ResultSet</a>
+</p>
+<p>这里的内容弄明白了,才能做Alloy 的数据库的内容.&#160;</p>
+<h1>介绍</h1>
+<p>sqlite &#160;被 苹果, google 同时支持. 简单好用.&#160;</p>
+<p>sqlite 是普通的TXT文件,没有经过加密.&#160;</p>
+<p>只有5种列: TEXT, &#160;NUMERIC, INTEGER, REAL, &#160;NONE.&#160;</p>
+<p>read是并发, &#160;write 是顺序执行. 这点对于多线程编程特别重要.&#160;</p>
+<p>table的列 不能修改,或者删除.&#160;</p>
+<p>不支持 RIGHT JOIN, &#160;FULL OUTER JOIN.&#160;</p>
+<h1>建立空的数据库(create db)</h1>
+<p>相当于 find or create 操作. 例如:</p>
+<pre>var db = Ti.Database.open('weatherDB');
+</pre>
+<p>需要注意:</p>
+<p>ios 中生成 "xx.sql" , 带有sql 后缀, 在android中则没有.</p>
+<p>ios 4/5/5.0.1+ , android, 都有不同的处理 db文件的策略. (放到不同的路径下)&#160;</p>
+<p>ios4: 放在 Application Support/database&#160;目录下&#160;</p>
+<p>ios5: 放在&#160;Private Documents folder 目录下</p>
+<p>ios 5.0.1+ : 会放到 icloud 备份文件中.&#160;</p>
+<p>android: &#160;默认放在:&#160;/data/data/com.example.yourappid/databases/dbname</p>
+<p>建立好数据库之后,就可以新建各种表了:</p>
+<pre>//bootstrap the database
+var db = Ti.Database.open('TiBountyHunter');
+db.execute('CREATE TABLE IF NOT EXISTS fugitives(id INTEGER PRIMARY KEY, name TEXT, captured INTEGER, url TEXT, capturedLat REAL, capturedLong REAL);');
+db.close();
+</pre>
+<h3>使用app自带的数据库文件 ( &#160;install &#160;db)</h3>
+<p>把我们的DB文件(weather_db) 放到 Ti 的 /Resources/my_db 目录下, 然后:&#160;</p>
+<pre>var db = Ti.Database.install('/my_db/weather_db', 'weather_db');
+</pre>
+<p>如果 手机上以及存在了 同名的sqlite文件, 那么这个操作就会失败,但是不会报任何错误信息.&#160;</p>
+
+<h1>增删改查</h1>
+<pre>// 新建个叫banana的数据库
+banana = Ti.Database.open('banana')  
+// 新建一个表, 叫bananas
+banana.execute('create table bananas(id integer primary key, name text)');
+
+// 向banana表中插入4条数据:
+banana.execute('insert into bananas(name) values("banana1")');
+banana.execute('insert into bananas(name) values("banana2")');
+banana.execute('insert into bananas(name) values("banana3")');
+banana.execute('insert into bananas(name) values("banana4")');
+
+// 查询: 
+&gt; a = banana.execute('select * from bananas');
+
+&gt; [REPL] [android, 4.1.2, 192.168.1.106] {
+    "bubbleParent": true,
+    "validRow": true,
+    "rowCount": 4,
+    "fieldCount": 2,
+    "apiName": "Ti.Database.ResultSet"
+// 更新
+banana.execute('update bananas set name="new name banana2" where id=2');
+// 删掉一个: 
+banana.execute('delete from bananas where id = 3');
+
+// 打印出来:
+while(rs.isValidRow()) {   // 或者 rs.validRow
+    console.info(rs.fieldByName('id') + ", " + rs.fieldByName('name')); 
+    rs.next(); 
+}
+
+&gt; [INFO] [android, 4.1.2, 192.168.1.106] 1, banana1
+[INFO] [android, 4.1.2, 192.168.1.106] 2, new name banana2
+[INFO] [android, 4.1.2, 192.168.1.106] 4, banana4
+
+
+// 关闭数据库连接:
+a.close(); // close result set
+banana.close(); // close db
+
+</pre>
+<h1>修改表结构</h1>
+<p>可以drop, create table,&#160;</p>
+<p>可以 add_column&#160;</p>
+<p>可以 rename table&#160;</p>
+<p>不可以drop_column , 不可以 rename_column .&#160;</p>
+<h1>最佳实践</h1>
+<h3>做完操作后, 务必 释放资源: db.close();&#160;</h3>
+<h3>有个 current_database_version 表, 保存当前 app对应的数据库版本号</h3>
+<p>用来表明当前是 的数据库 migration的版本号. &#160;</p>
+<p>注意: 跟rails的不同, 可能rails的 schema_migrations 中保存的内容是:</p>
+<pre># schema_migrations   包含了多个 version 
+201401011000
+201402011000
+201403011000
+</pre>
+<p> 而 mobile app 中的sqlite db由于不支持 drop_column, rename_column, rename_table 等操作,所以无法像rails 那样rollback 等等...
+只能保存一个值: </p>
+<pre># current_database_version
+201403011000
+</pre>
+<p>记得在每次更新数据库时, 直接删掉原有库的内容,或者直接新建个数据库文件 ( my_app_db_001, my_app_db_002)&#160;</p>
+
+
+<h3>要操作的数据比较多的话,使用transaction;&#160;</h3>
+<pre>// playlist 是一个100行的大数据 
+var db = Ti.Database.open('myDatabase');
+db.execute('BEGIN'); // begin the transaction
+for(var i=0, var j=playlist.length; i &lt; j; i++) {
+	var item = playlist[i];
+	db.execute('INSERT INTO albums (disc, artist, rating) VALUES (?, ?, ?)', item.disc, item.artist, item.comment);
+}
+db.execute('COMMIT');
+db.close();
+</pre>
+<h3>不要让数据库的初始数据过大.&#160;</h3>
+<p>造成用户下载app比较慢</p>
+<p>非要下载数据的话,让用户在第一次运行时, 过来网站下载.</p>
