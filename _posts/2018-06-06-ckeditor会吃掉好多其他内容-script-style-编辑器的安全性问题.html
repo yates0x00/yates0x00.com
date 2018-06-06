@@ -1,0 +1,8 @@
+<p>之前写过 &#160;ckeditor 会默认吃掉inline style (<a href="http://siwei.me/blog/posts/ckeditor-inline-style-preserve-inline-style-in-ckeditor">http://siwei.me/blog/posts/ckeditor-inline-style-preserve-inline-style-in-ckeditor</a>) 
+</p>
+<p>其实, ckeditor, 还会吃掉: &#160;&lt;script&gt; , &#160;&lt;style&gt;, &#160;以及所有的 '&lt;' 标签. (把它转换成: &#160;&amp;lt; )</p>
+<p>为什么呢? &#160;这是考虑到 安全性.&#160;</p>
+<p>设想一个场景: &#160;某个 CSDN 的 BLOG 用户,发布了一个博客文章, 里面嵌入了一段js hacker的代码:&#160;</p>
+<p>&lt;script &gt; &#160;some_dirty_code ... &lt;/script&gt;&#160;</p>
+<p>那么就会对所有访问这个页面的人造成损失.&#160;</p>
+<p>所以, CKEDITOR , 以及其他好多编辑器,都是默认输入的内容是有限制性的.&#160;</p>
