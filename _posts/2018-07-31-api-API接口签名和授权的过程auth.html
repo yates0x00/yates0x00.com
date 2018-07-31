@@ -1,0 +1,29 @@
+<p>## 授权的原理:</p>
+<p>对于WEB页面来说, 需要 "用户名" +　＂密码＂</p>
+<p>对于API来说，　就是需要　＂公钥＂　＋ "私钥"&#160; &#160;(&#160; 关键在这里)</p>
+<p>用户名 = 公钥 ,  密码 = 私钥</p>
+<p>至于把 用户名( 例如 jim@starcraft.com) 换成 公钥(例如 a1b2c3d4 ) 的原因,<br />可能就是不希望被人网络抓包的时候,知道 当前的连接,对应的是哪个用户名</p>
+<p>当前连接:  api.coiex.io/some_interface?key=a1b2c3d4<br />看起来比:  api.coiex.io/some_interface?key=jim@starcraft.com</p>
+<p>的可读性差一些.</p>
+<p>## 验证的原理</p>
+<p>对于传统的WEB授权, 数据库中不会保存铭文密码. 而是保存经过MD5转换后的密码,</p>
+<p>MD5是一种不可逆的算法. 可以提取一段字符串(无论多大size) 的特征字符串(32位长度)</p>
+<p>例如  用户输入  username=jim,  password=88888888,<br />数据库中存在的密码,则是  md5(88888888) (不考虑加salt的情况)  =  'd3379f609e1aa88da2f50018d4fa218f'</p>
+<p>后台程序会把 用户输入的密码, 经过md5转换后, 跟 'd3379f609e1aa88da2f50018d4fa218f' 做对比.</p>
+<p>API授权也是这样的.</p>
+<p>1. 先找到 客户端传来的 公钥 public_key<br />2. 根据公钥,找到数据库中该用户对应的私钥<br />3. 根据 公钥, 私钥, 和特定的 md5算法 得到一个 字符串(往往叫做signature)<br />4. 把该signature 与 客户端传来的signature 做对比. 如果匹配,则通过.</p>
+<p>对于API, 不存在session.  (除非使用JWT,不过这个在国内并没有人在用. 考虑到国情, 我们还是向<br />BAT看齐 )</p>
+<p>每次请求需要"授权"的API的时候,都需要把 公钥和私钥以一种特定的组合方式罗列出来.<br />(参考微信:</p>
+<p>1. 所有的参数,都是按照字母顺序排序</p>
+<p>例如:   /interface/a=1&amp;b=2&amp;c=3&amp;public_key=goodgoodstudy</p>
+<p>2. 要加上个 随机参数 nonce .  作为md5的加密的"salt". 有了这个salt, 得到的结果就会不同<br />(所以它是密码的调味品, 叫做盐,很形象. 但是我们都是直接用salt这个术语)</p>
+<p>nonce 可以是当前的时间戳</p>
+<p>例如:   /interface/a=1&amp;b=2&amp;c=3&amp;nonce=172038273</p>
+<p>3. 把这个字符串按照md5加密</p>
+<p>注意,这个时候的加密, 是多个一个参数,叫做private_key=daydayup</p>
+<p>signature = md5('a=1&amp;b=2&amp;c=3&amp;nonce=172038273&amp;private_key=daydayup') # d3379f609e1aa88da2f50018d4fa218f</p>
+<p>4. 把得到的东东(signature 和 public_key都放到url中)</p>
+<p>/interface/a=1&amp;b=2&amp;c=3&amp;nonce=172038273&amp;signature=d3379f609e1aa88da2f50018d4fa218f&amp;public_key=day_day_up</p>
+<p>注意: 上面的url, 隐藏了 private_key. (这个参数除了客户端和服务器端,谁也不知道)<br />public_key 是否参与md5加密,不重要.<br />private_key 则必须参与md5加密. 因为这个参数是唯一无法被黑客从网络抓包的参数</p>
+<p>5. (服务器端) 得到参数后,</p>
+<p>5.1 先找到 参数中的public_key, 根据该public_key, 找到数据库中对应的用户的private_key<br />5.2 根据5.1中的private_key, 和 客户端传递过来的其他参数(正常参数,和nonce 这样的用户生成签名的参数)<br />生成signature<br />5.3 把5.2 生成的signature 与 客户端传递过来的参数做个比较. 通过,则直接给客户端做操作的权限.</p>
