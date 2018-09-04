@@ -1,0 +1,29 @@
+<p>1. 下载iso. 官网： kali.org&#160; &#160; 下载地址：&#160;https://www.kali.org/downloads/</p>
+<p>2. 找到一个iso就可以了。 我下载的是 windows 64.&#160; &#160;kali linux 64 . 其他的有很多的发行版。 我就下载了没用任何后缀的。&#160;</p>
+<h2>下面使用 vmware来安装</h2>
+<p>3. 安装vmware 14.&#160;</p>
+<p>4. 运行 vmware 14 pro 就可以（我没用过 vmware player）</p>
+<p>5. 新建虚拟机，分配好足够的硬盘和内存。&#160;</p>
+<p>6. 加载 kali iso</p>
+<p>7. 正常安装即可，就是最普通的 ubuntu.</p>
+<p>8. 安装完之后，&#160; 记得安装 vm-tools:&#160;&#160;
+</p>
+<pre># 安装vmware增加组件
+apt-get install open-vm-tools
+apt-get install open-vm-tools-desktop 
+</pre>
+
+<p> 然后安装：</p>
+<pre>apt-get update
+# 各种第三方包
+apt-get install libapr1-dev libxml2-dev  libxslt-dev  git curl build-essential libssl-dev libreadline-dev build-essential libssl-dev libreadline-dev vim</pre>
+<p>设置屏幕分辨率： 按win 然后选择 display, 往下拉，就可以看到各种分辨率的选项了！</p>
+<p>爽！</p>
+<h2>下面是使用 virtual box的安装方式， 不建议。(warning: don't use this)</h2>
+<p>3. 下载 virtual box.&#160;https://www.virtualbox.org/wiki/Downloads</p>
+<p>4. 安装， 打开。 会按照各种要求， 建立一个新的virtual machine . 选择分区的时候， 要选择 debian&#160; linux 的分区。 指定一个磁盘大小。 我选择 89G. 内存3G。&#160;&#160;</p>
+<p>5. 运行该虚拟机。 virtual box 会提示没有 启动磁盘。 这个时候， 选择刚才下载的iso 即可。&#160;</p>
+<p>6. 按照提示来安装。 就是最常见的 ubuntu 的安装方式。 一路下来 ~&#160; 分区的时候， 选择最简单的 all in one partition&#160; 就可以了。&#160;
+</p>
+<p>7. 然后就是等待。 大约
+</p>
