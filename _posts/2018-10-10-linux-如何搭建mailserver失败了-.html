@@ -1,0 +1,66 @@
+<p>这个领域我一直没有涉足过. 之前只是在使用 qqmail, 163 mail, 不过现在这两者似乎开始不支持 自定义域名了. 一个域名邮箱一千块,没有啥技术含量(来自软件程序员的藐视... @.@ ) 所以我打算自己搭建了.&#160;</p>
+<p>参考:&#160; <a href="https://www.howtoforge.com/tutorial/perfect-server-ubuntu-18-04-nginx-bind-dovecot-and-ispconfig-3">https://www.howtoforge.com/tutorial/perfect-server-ubuntu-18-04-nginx-bind-dovecot-and-ispconfig-3/</a>
+</p>
+<p>已经说的非常明确了.&#160;</p>
+<p>1. 注册. 我选择的是 linode,&#160; &#160;google cloud 太TMD贵了....&#160; linode&#160; 2G内存. 一个月 20$. 好便宜</p>
+<p>2. 安装 ubuntu 18&#160;</p>
+<p>3. apt-get update,&#160; apt-get upgrade, 修改 SSH端口号.</p>
+<p>4.&#160;dpkg-reconfigure dash&#160; &#160; ,提问时,选择 No</p>
+<p>5. 干掉 apparmor.&#160;</p>
+<p>service apparmor stop<br />update-rc.d -f apparmor remove<br />apt-get remove apparmor apparmor-utils</p>
+<p>6. 同步系统时钟</p>
+<p>apt-get -y install ntp ntpdate</p>
+<p>7.&#160;</p>
+<p>service sendmail stop; update-rc.d -f sendmail remove&#160; &#160;(对于干净系统来说, 不需要这个)</p>
+<p>apt-get -y install postfix postfix-mysql postfix-doc mariadb-client mariadb-server openssl getmail4 rkhunter binutils dovecot-imapd dovecot-pop3d dovecot-mysql dovecot-sieve dovecot-lmtpd sudo</p>
+<p>7.1 提问:&#160; &#160; internal site.&#160;</p>
+<p>7.2&#160; system mail name:&#160; my.server</p>
+<p>7.3 修改配置文件:/etc/postfix/master.cf&#160; &#160;增加下面的内容.&#160; &#160; (&#160; -o&#160; 前面一定要有空格啊亲)</p>
+<pre>smtp      inet  n       -       y       -       -       smtpd
+  -o syslog_name=postfix/smtps
+  -o smtpd_tls_wrappermode=yes
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+submission inet n       -       y       -       -       smtpd
+  -o syslog_name=postfix/submission
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+</pre>
+<p>7.4 重启 postfix:&#160;&#160;service postfix restart</p>
+<p>7.5 编辑 数据库(类似 mysql 的 mariadb)&#160;&#160;nano /etc/mysql/mariadb.conf.d/50-server.cnf</p>
+<p>注释掉:&#160;&#160;bind-address           = 127.0.0.1&#160; &#160;这句话. (前面保证加上# 就好了 )</p>
+<p>7.6&#160;mysql_secure_installation&#160; 做一些配置就好了.&#160;</p>
+<p>7.7&#160;echo "update mysql.user set plugin = 'mysql_native_password' where user='root';" | mysql -u root</p>
+<p>7.8&#160;nano /etc/mysql/debian.cnf&#160; 把这个文件中的password填上 .</p>
+<p>7.9 重启 数据库:&#160;&#160;service mysql restart&#160; &#160; (Maria DB 也是这个命令)&#160; &#160;</p>
+<p>可以使用这个命令查看mysql是否在运行:&#160;netstat -tap | grep mysql</p>
+<p>8. 安装一系列的 软件:&#160;Amavisd-new, SpamAssassin, And ClamAV</p>
+<p><br />8.1 apt-get -y install amavisd-new spamassassin clamav clamav-daemon unzip bzip2 arj nomarch lzop cabextract apt-listchanges libnet-ldap-perl libauthen-sasl-perl clamav-docs daemon libio-string-perl libio-socket-ssl-perl libnet-ident-perl zip libnet-dns-perl postgrey</p>
+<p>8.2&#160;service spamassassin stop<br />update-rc.d -f spamassassin remove</p>
+<p>freshclam (这个命令会报错,没关系, 只要有这样的进程跑着就可以了 )<br />service clamav-daemon start</p>
+<p>8.3 为 amavisd 打补丁</p>
+<p>cd /tmp<br />wget https://git.ispconfig.org/ispconfig/ispconfig3/raw/stable-3.1/helper_scripts/ubuntu-amavisd-new-2.11.patch<br />cd /usr/sbin<br />cp -pf amavisd-new amavisd-new_bak<br />patch &lt; /tmp/ubuntu-amavisd-new-2.11.patch</p>
+<p>9. 安装 XMPP服务器</p>
+<p>9.1&#160;</p>
+<p>apt-get -y install git lua5.1 liblua5.1-0-dev lua-filesystem libidn11-dev libssl-dev lua-zlib lua-expat lua-event lua-bitop lua-socket lua-sec luarocks luarocks</p>
+<p>luarocks install lpc</p>
+<p>9.2&#160; 安装&#160; Metronome.&#160;</p>
+<p>adduser --no-create-home --disabled-login --gecos 'Metronome' metronome</p>
+<p>cd /opt; git clone https://github.com/maranda/metronome.git metronome<br />cd ./metronome; ./configure --ostype=debian --prefix=/usr<br />make<br />make install</p>
+<p>10. 安装 nginx</p>
+<p>10.1 apt-get install nginx<br />service nginx start<br />apt-get -y install php7.2-fpm<br />apt-cache search php7.2<br />apt-get -y install php7.2 php7.2-common php7.2-gd php7.2-mysql php7.2-imap php7.2-cli php7.2-cgi php-pear mcrypt imagemagick libruby php7.2-curl php7.2-intl php7.2-pspell php7.2-recode php7.2-sqlite3 php7.2-tidy php7.2-xmlrpc php7.2-xsl memcached php-memcache php-imagick php-gettext php7.2-zip php7.2-mbstring php-soap php7.2-soap</p>
+<p>10.2&#160; 编辑:&#160;/etc/php/7.2/fpm/php.ini</p>
+<p>[...]<br />cgi.fix_pathinfo=0<br />[...]<br />date.timezone="Asia/Shanghai"<br />[...]</p>
+<p>10.3&#160;service php7.2-fpm reload</p>
+<p>10.4&#160;apt-get -y install fcgiwrap</p>
+<p>10.5&#160;apt-get -y install phpmyadmin php-mbstring php-gettext</p>
+<p>这个时候会有两个窗口需要选择:</p>
+<p>Web server to reconfigure automatically: &lt;-- select none (because only apache2 and lighttpd are available as options)&#160; &#160;就是, 啥也不选, (不要在对应选项上按空格) 然后按OK就行.<br />MySQL application password for phpmyadmin: &lt;-- Press Enter&#160; 这里就是输入phpadmin的密码.</p>
+<p>11.&#160;</p>
+<p>apt-get -y install hhvm</p>
+<p>apt-get -y install certbot</p>
+<p>certbot register</p>
+<p>apt-get -y install mailman&#160; 这里至少选择一个语言(英语)</p>
+<p>newlist mailman 从管理员的视角查看. 所以这一步会创建一个 mailman的管理员账号, 记住用户名和密码1</p>
+<p>vim&#160;/etc/aliases</p>
