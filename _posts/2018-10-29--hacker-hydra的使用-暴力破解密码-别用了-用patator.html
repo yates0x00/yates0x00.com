@@ -1,0 +1,18 @@
+<p>参考&#160; 
+<a href="http://blog.51cto.com/simeon/2066269" style="background-color: transparent;">http://blog.51cto.com/simeon/2066269</a>&#160;（貌似原作者是：
+<a href="http://www.freebuf.com/sectool/159488.html" style="background-color: transparent;">http://www.freebuf.com/sectool/159488.html</a>）
+</p>
+<p>hydra的使用， 需要跟字典配合。 可以参考这个字典项目：(300MB)&#160;&#160; <a href="https://github.com/danielmiessler/SecLists">https://github.com/danielmiessler/SecLists</a>
+</p>
+<h3>hydra的优点</h3>
+<p>支持多种协议： http, ftp, cvs, mysql, svn, oracle ....</p>
+<p>对于SSH的，参考上面的就可以了。 </p>
+<h3>HTTP form: </h3>
+<p>hydra  -l admin -P my_password.txt -t 2 -w 5 -s 3333 192.168.0.116 http-post-form "/books/login:username=^USER^&amp;password=^PASS^:failed"</p>
+<p>for more details of http-post-form, type:</p>
+<p>$ hydra -U http-post-form </p>
+<h3>FTP:</h3>
+<p>hydra -V -L ftp_name.txt -P Passwords/darkweb2017-top1000.txt -t 1 -w 5 -s 21 www.7788d.top ftp</p>
+<h3>缺点：需要设置request header, 特别麻烦</h3>
+<p>参考：https://security.stackexchange.com/questions/57839/hydra-bruteforce-and-json</p>
+<p>还是不用了。用patator.&#160;&#160;</p>
