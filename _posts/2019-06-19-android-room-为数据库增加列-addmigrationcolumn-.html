@@ -1,0 +1,45 @@
+<p>参考:&#160;&#160; <a href="https://developer.android.com/training/data-storage/room/migrating-db-versions">https://developer.android.com/training/data-storage/room/migrating-db-versions</a>
+</p>
+<p>1. room 的入口文件要找到, 在我的项目如下. ( 增加 @Database 中的version, MIGRATION... 以及 db()函数中的语句)&#160;</p>
+
+<pre>// 这里的version = 2 很重要, 会自动执行migration ( 类似 rake db:migrate) 
+@Database(entities = {Market.class}, version = 2, exportSchema = false)
+public abstract class SQLite extends RoomDatabase {
+  public abstract MarketDao marketDao();
+
+  private static SQLite db;
+
+  // 1 号migration, 起点是版本1, 终点是版本2
+  static final Migration MIGRATION_1_ADD_HIGH_LOW_TO_MARKETS  = new Migration(1, 2){
+    @Override
+    public void migrate(SupportSQLiteDatabase database){
+      database.execSQL("alter table markets add column high real");
+      database.execSQL("alter table markets add column low real");
+    }
+  };
+
+  public static SQLite db() {
+    if (db == null) {
+      // SQLite数据库文件存储在 /data/data/${package_name}/databases/${app_name}.sqlite 中
+      db = Room.databaseBuilder(BaseApplication.getContext(), SQLite.class, Constants.APP_NAME + ".sqlite")
+        .allowMainThreadQueries() // 允许主线程执行SQL语句
+        .addMigrations(MIGRATION_1_ADD_HIGH_LOW_TO_MARKETS)   // 自动加载migration . 
+        .build();
+    }
+    return db;
+  }
+}
+</pre>
+<p>2. 修改对应的model 文件,把增加的两个列,加上.</p>
+<pre> @Entity(tableName = "markets")
+public class Market { 
+
++  @ColumnInfo(name = "high")
++  public Double high;
++  @ColumnInfo(name = "low")
++  public Double low;
++
++
+}
+</pre>
+<p>3. 其他地方,正常使用即可.&#160;&#160;</p>
