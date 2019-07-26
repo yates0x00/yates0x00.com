@@ -1,0 +1,56 @@
+<p>参考：<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/recognize-expanded-volume-linux.html">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/recognize-expanded-volume-linux.html</a>
+</p>
+<p>1. 登录后台， 找到硬盘， 为该硬盘扩容。</p>
+<p>&#160;console -&gt; ec2 -&gt; volumes -&gt; 修改即可</p>
+<p>2. df -kh 可以看到现在的硬盘容量。</p>
+<p>同时需要查看当前硬盘的文件系统的类型（ext 系列还是ntfs .. 等等）</p>
+<p>file -s /dev//nvme0*</p>
+<pre>$ sudo file -s /dev//nvme0*
+/dev//nvme0:     ERROR: cannot read `/dev//nvme0' (Invalid argument)
+/dev//nvme0n1:   DOS/MBR boot sector
+/dev//nvme0n1p1: Linux rev 1.0 ext4 filesystem data, UUID=8abb4f2d-c7e0-4daf-80b5-24e1c814cf55, volume name "cloudimg-rootfs" (needs journal recovery) (extents) (64bit) (large files) (huge files)
+
+</pre>
+<p>3. lsblk&#160; 则可以看到扩容后的硬盘容量。例如：</p>
+<pre>ubuntu@cadae_mysql_slave1:~$ lsblk 
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0         7:0    0   18M  1 loop /snap/amazon-ssm-agent/1480
+loop1         7:1    0 93.8M  1 loop /snap/core/8935
+loop3         7:3    0 91.4M  1 loop /snap/core/8689
+loop4         7:4    0   18M  1 loop /snap/amazon-ssm-agent/1566
+nvme0n1     259:0    0  500G  0 disk                  （ 这里从200G -&gt; 500G)
+└─nvme0n1p1 259:1    0  200G  0 part /           （这里仍然是200G) 
+</pre>
+<p>4. 使用growpart为 parition扩容 </p>
+<pre>( 注意下面的最后参数是 1 ，不应该是 0 ）
+$ sudo growpart /dev/nvme0n1 1
+CHANGED: partition=1 start=2048 old: size=419428319 end=419430367 new: size=1048573919,end=1048575967
+
+</pre>
+<p> 5 使用  resize2fx 为file system 扩容 </p>
+<pre>$ sudo resize2fs /dev/nvme0n1p1 
+resize2fs 1.44.1 (24-Mar-2018)
+Filesystem at /dev/nvme0n1p1 is mounted on /; on-line resizing required
+old_desc_blocks = 25, new_desc_blocks = 63
+The filesystem on /dev/nvme0n1p1 is now 131071739 (4k) blocks long.
+
+</pre>
+<p>6. 查看最新的磁盘空间</p>
+<pre>$ df -kh
+Filesystem      Size  Used Avail Use% Mounted on
+udev             16G     0   16G   0% /dev
+tmpfs           3.1G  816K  3.1G   1% /run
+/dev/nvme0n1p1  485G  193G  293G  40% /
+</pre>
+<h3>下面是vmware上的操作过程&#160; （基本同上， 把 硬盘换成&#160; /dev/sda即可）</h3>
+<p>1. 先通过 lsblk 发现，对应的磁盘是&#160; &#160;/dev/sda</p>
+<p>sda      8:0    0    50G  0 disk <br />└─sda1   8:1    0    50G  0 part /<br /></p>
+<p>2.使用file命令看一眼。 sudo file -s /dev/sda</p>
+<p>dev/sda: DOS/MBR boot sector&#160; （看一眼就行，没啥用）</p>
+<p>3. 安装growpart命令 ( vmware 下的默认没有）</p>
+<p>sudo apt install cloud-guest-utils</p>
+<p>4. 使用growpart 做扩容.&#160; 记得sda 后面是空格，然后才是1</p>
+<p>sudo growpart /dev/sda 1<br /></p>
+<p>5.&#160;sudo resize2fs /dev/sda1</span>
+</p><p>  6.&#160; df -kh<br /></p>
+<p>可以发现已经弄好了。</p>
