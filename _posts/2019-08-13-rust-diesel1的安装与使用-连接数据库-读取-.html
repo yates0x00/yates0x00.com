@@ -1,0 +1,153 @@
+<p>diesel 是 rust世界的 持久层框架。 官方网址&#160; diesel.rs&#160; （域名很有意思）</p>
+<p>截止 2020-5-18 , 5500关注， 支持的数据库是&#160; postgres, mysql , sqlite&#160;</p>
+<h3>一 创建数据库，表，映射，并查询数据</h3>
+<p>1. cargo new --lib test_diesel</p>
+<p>会创建一个新文件夹： test_diesel</p>
+<p>2. 修改Cargo.toml</p>
+<p>[dependencies]<br />diesel = { version = "1.0.0", features = ["postgres"] }<br />dotenv = "0.9.0"</p>
+<p>3. cargo install diesel_cli</p>
+<p>4. 增加新文件： .env&#160; ， 内容如下：</p>
+<p>DATABASE_URL=mysql://root:666666@localhost/diesel_demo</p>
+<p>5. $ diesel setup&#160; , 会分别创建一个文件夹和一个数据库</p>
+<p>Creating migrations directory at: /workspace/test_rust/test_diesel2/migrations<br />Creating database: diesel_demo</p>
+<p>6. 运行migration&#160;</p>
+<p>diesel migration generate create_posts</p>
+<p>分别增加对应的up/down.sql</p>
+<p>up.sql:&#160; ( 这里是mysql的语句， 跟官方自带的postgres语句不太一样，稍有修改）</p>
+<pre>create table posts (
+  id int(11) not null auto_increment,
+  title varchar(255) not null,
+  body text,
+  published boolean not null default false,
+  primary key (`id`)
+)
+
+</pre>
+<p>down.sql:</p>
+<pre>drop database posts
+</pre>
+<p>7. 运行：</p>
+<p>diesel migration run&#160; ( 回退的话，就用redo)</p>
+<p>这个操作会自动的更新 src/schema.rs 的内容：</p>
+<pre>table! {
+    posts (id) {
+        id -&gt; Integer,
+        title -&gt; Varchar,
+        body -&gt; Nullable&lt;Text&gt;,
+        published -&gt; Bool,
+    }
+}
+
+</pre>
+
+<p>8. 连接数据库：</p>
+<p>src/lib.rs</p>
+<pre>#[macro_use]
+extern crate diesel;
+extern crate dotenv;
+
+pub mod models;
+pub mod schema;
+
+use diesel::prelude::*;
+use dotenv::dotenv;
+use std::env;
+
+pub fn establish_connection() -&gt; MysqlConnection {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    MysqlConnection::establish(&amp;database_url)
+        .unwrap_or_else(|_| panic!("error connecting to {}", database_url));
+
+}
+
+</pre>
+
+<p>9. 增加： src/models.rs 作为 持久层的映射。  </p>
+<pre>// 这里的 order struct中的属性的顺序一定要跟 schema.rs 中的order表中的列的顺序一致。
+#[derive(Queryable)]
+pub struct Order {
+    pub id: i32,
+    pub title: String,
+    pub body: Option,
+    pub published: bool,
+}
+
+</pre>
+<p>10.&#160; src/bin/show_posts.rs</p>
+
+<pre> src/bin/show_posts.rs 
+// 声明需要用到的外部模块
+extern crate test_diesel2;
+extern crate diesel;
+
+use self::test_diesel2::*;
+use self::models::*;
+use self::diesel::prelude::*;
+
+fn main(){
+    use test_diesel2::schema::posts::dsl::*;
+
+    let connection = establish_connection();
+    let results = posts.filter(published.eq(true))
+        .limit(5)
+        .load::(&amp;connection)
+        .expect("Error loading posts");
+    println!("Displaying {} posts", results.len());
+    for post in results {
+        println!("======");
+        println!("{:?}", post.title);
+        println!("{:?}", post.body);
+    }
+}
+</pre>
+<p>11. 运行： cargo run ，就可以看到，读取数据库的内容了： </p>
+<pre>cargo run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.03s
+     Running `target/debug/show_posts`
+Displaying 0 posts
+</pre>
+<h3> 二. 我们开始创建新记录</h3>
+<p>修改 models.rs 增加以下内容：</p>
+<pre>use super::schema::posts;
+
+#[derive(Insertable)]
+#[table_name="posts"]  
+pub struct NewPost&lt;'a&gt; {
+    pub title: &amp;'a str,
+    pub body: &amp;'a str,
+}</pre>
+<p>创建src/bin/write_post.rs , 增加以下内容：</p>
+<pre>extern crate test_diesel2;
+extern crate diesel;
+
+use self::test_diesel2::*;
+use std::io::{stdin, Read};
+
+fn main() {
+    let connection = establish_connection();
+
+    let post = create_post(&amp;connection, "lalala", "I am the body");
+    println!(" saved title : lalaal with ");
+}
+</pre>
+<p>为 src/lib.rs 增加以下内容：</p>
+<pre>use self::models::{Post, NewPost};
+
+pub fn create_post&lt;'a&gt;(conn: &amp;MysqlConnection, title: &amp;'a str, body: &amp;'a str)  {
+    use schema::posts;
+    let new_post = NewPost{
+        title: title,
+        body: body,
+    };
+
+    diesel::insert_into(posts::table)
+        .values(&amp;new_post)
+        .execute(conn)
+        .expect("Error saving new post");
+
+}
+</pre>
+<p>运行：cargo run --bin write_post</p>
+<p>就可以看到，内容被保存了。 （ 这里id 不会返回， 需要调用 select last_insert_id() 来 获得最新的id )</p>
