@@ -1,0 +1,40 @@
+<p>参考：<a href="https://blog.csdn.net/hsd2012/article/details/51464409">https://blog.csdn.net/hsd2012/article/details/51464409</a>
+</p>
+<p>在rust的持久层框架diesel中，insert操作仅支持postgres, 会返回id.&#160; 对于&#160; mysql 与 sqlite都不支持。</p>
+<p>所以我们需要用对应的办法。</p>
+<p>使用 last_insert_id 是可以的。 在高并发操作下是准确的。</p>
+<p>查询和插入所使用的Connection对象必须是同一个才可以，否则返回值是不可预料的</p>
+<p>下面是 翱翔同学提供的例子： ( rust 例子）</p>
+<pre>async fn create_user(
+    db_pool: &amp;MySqlPool,
+    name: &amp;str,
+    datetime: chrono::NaiveDateTime,
+) -&gt; u32 {
+    // BEGIN transaction
+    let mut transaction = db_pool.begin().await.unwrap();
+    mysql::query(
+        "INSERT INTO users \
+        (name, created_at, updated_at) \
+        VALUES (?, ?, ?);",
+    )   
+    .bind(name)
+    .bind(datetime)
+    .bind(datetime)
+    .execute(&amp;mut transaction)
+    .await
+    .unwrap();
+    // COMMIT transaction
+
+    // 获取刚刚在事务处理中创建了user的MySqlConnection
+    let mut db_conn = transaction.commit().await.unwrap();
+    let last_insert_user_id = sqlx::query_as::&lt;_, (u32,)&gt;("SELECT LAST_INSERT_ID();")
+        .fetch_one(&amp;mut db_conn)
+        .await
+        .unwrap()
+        .0; 
+    // 这里已经在函数的结尾处了，就懒得手动释放内存了
+    // drop(db_conn);
+    debug_assert_ne!(last_insert_user_id, 0); 
+    last_insert_user_id
+}
+</pre>
