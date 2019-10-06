@@ -1,0 +1,6 @@
+<p>这篇文章很有意思: <a href="https://www.jianshu.com/p/9a052b4f0656">https://www.jianshu.com/p/9a052b4f0656</a> 写了从解压到重新编译的过程. </p>
+<p>Linux:<br />Download Linux wrapper script (Right click, Save Link As apktool)<br />Download apktool-2 (find newest here)<br />Rename downloaded jar to apktool.jar<br />Move both files (apktool.jar &amp; apktool) to /usr/local/bin (root needed)<br />Make sure both files are executable (chmod +x)<br />Try running apktool via cli</p>
+<p>apktool d xx.apk&#160;</p>
+<p>就可以了.</p>
+<p>重新打包: apktool b xx (xx是 上面的反编译命令 运行之后得到的文件夹)&#160;&#160;</p>
+<p>这样得到的smali 代码,一般是不可读的. 目前仅用于反编译,做一点点修改,然后重新打包.&#160;</p>
