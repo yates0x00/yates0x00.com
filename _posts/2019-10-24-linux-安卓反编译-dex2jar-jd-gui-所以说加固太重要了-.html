@@ -1,0 +1,10 @@
+<p>dex2jar: 是一个工具,直接https://sourceforge.net/projects/dex2jar/ 这里下载.</p>
+<p>下载后解压缩,能得到一系列的命令&#160; &#160;d2j-jar2dex.sh 这个就是咱们需要的.&#160;</p>
+<p>把它放到PATH下,就可以直接使用.&#160;</p>
+<p>那么问题来了,如何反编译apk:&#160;</p>
+<p>1. 下载某个apk .&#160; 并且重命名&#160; &#160;xx.apk -&gt; xx.zip</p>
+<p>2. unzip xx.zip 能得到一个文件夹,包含了若干&#160; class.dex&#160; class2.dex ...</p>
+<p>3. 使用 d2j-jar2dex.sh *.dex&#160;</p>
+<p>就可以得到若干 jar 文件:&#160; classes-dex2jar.jar,&#160; classes2-dex2jar.jar ...</p>
+<p>4. 使用 jd-gui 打开即可.&#160;</p>
+<p>可以看到其中的内容一览无余. 加固太重要了.</p>
