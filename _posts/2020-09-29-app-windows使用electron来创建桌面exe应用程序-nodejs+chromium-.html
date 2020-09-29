@@ -1,0 +1,26 @@
+<p>electron 是个非常牛的项目 ， 8W的star&#160; 可以创建跨平台应用。&#160; 需要直接使用这个项目&#160;<a href="https://github.com/electron/electron" style="background-color: transparent;">https://github.com/electron/electron</a>
+</p>
+<h3>1. window 下下载 nvm （注意不是nodejs, 因为版本号可能会改变）</h3>
+<h3>2. 安装一系列的依赖，见</h3>
+<p>http://siwei.me/blog/posts/electron-sqlite3-windows-sdk</p>
+<p>包括：</p>
+<p>windows sdk</p>
+<p>visual studio 2019 +&#160;</p>
+<p>python 等。。。</p>
+<h3>3. 同时注意 node, electron, sqlite3 的各种版本号是否兼容。</h3>
+<p>参考：&#160;http://siwei.me/blog/posts/electron-electron-vue-sqlite3-node-electron-sqlite3</p>
+<h3>4. 不要 安装 cnpm （很奇怪的问题，cnpm 不好用。会报错， 例如 vue找不到。。。）</h3>
+<h3>5. 然后使用electron 或者 electron-vue 都可以</h3>
+<p>$ git clone https://github.com/electron/electron-quick-start</span>
+</p><p>$ cd electron-quick-start<br />$ npm install<br />$ npm start</p>
+<p>就可以看到一个demo运行起来了，确实强大！</p>
+<h3>转换成exe&#160;&#160;</h3>
+<p>npm install yarn -g&#160; &#160;全局安装yarn</p>
+<p>npm run build --windows 即可。 （需要在win10平台上搭建环境， 编译运行）</p>
+<h3>electron + vue&#160;</h3>
+<p>参考这里：</p>
+<p>https://github.com/SimulatedGREG/electron-vue</p>
+<p>electron 有两种进程: main , renderer
+</p>
+<p>main 进程: 可以认为是 nodejs 在后台运行的内容,会直接调用操作系统的各种接口,负责一直维持该app的存在</p>
+<p>renderer 进程: 仅仅渲染不同的页面(HTML). 可以存在多个. 一个挂掉,不会影响另外一个.</p>
