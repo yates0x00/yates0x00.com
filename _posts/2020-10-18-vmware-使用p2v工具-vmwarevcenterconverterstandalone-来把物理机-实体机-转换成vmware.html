@@ -1,0 +1,12 @@
+<p>参考：</p>
+<p>https://www.nakivo.com/blog/vmware-p2v-linux-conversion-comprehensive-walkthrough/</p>
+<p>1. 先注册vmware 并下载 vmware vcenter converter standalone&#160;&#160; <a href="https://my.vmware.com/en/group/vmware/downloads/info/slug/infrastructure_operations_management/vmware_vcenter_converter_standalone/6_2_0#product_downloads">https://my.vmware.com/en/group/vmware/downloads/info/slug/infrastructure_operations_management/vmware_vcenter_converter_standalone/6_2_0#product_downloads</a>
+</p>
+<p>2. 在windows上安装该软件</p>
+<p>3. 在windows上运行该软件, 并且填写如下内容：</p>
+<img src="http://files.sweetysoft.com/image_after_2021_02_23/3528/temp_p2v_1.jpg" />
+<p>4.&#160; &#160;在ubuntu上， 设置好ssh server : apt install openssh-server</p>
+<p>5.&#160; 在ubuntu上， 将ssh 用户的sudo 权限加上， （也就是说该用户 , siwei, 在使用sudo的时候不需要输入密码）</p>
+<p>修改&#160; /etc/sudoers, 在最下方增加：</p>
+<p>siwei ALL=(ALL)&#160; NOPASSWD:ALL&#160;&#160;</p>
+<p>然后， 在windows上，下一步：</p>
