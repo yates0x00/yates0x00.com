@@ -1,0 +1,41 @@
+<p>（不要用这个）SQLI LAB 地址：https://github.com/Audi-1/sqli-labs&#160;&#160;&#160; 最近一次更新 2014.11.1 </p>
+<p>注意： 上面的是原版，在php5.5是不好用的。连接数据库的函数变了。所以，建议使用这个php7版本；</p>
+<p><a href="https://github.com/skyblueee/sqli-labs-php7">https://github.com/skyblueee/sqli-labs-php7</a>
+</p>
+<p>
+这里还附赠了一个中文版的sqli 心得。地址在;  <a href="https://raw.githubusercontent.com/lcamry/sqli-labs/master/mysql-injection.pdf">https://raw.githubusercontent.com/lcamry/sqli-labs/master/mysql-injection.pdf</a>
+</p> 
+<p>安装phpstudy的过程参考：<a href="http://siwei.me/blog/posts/php-windows-phpstudy">http://siwei.me/blog/posts/php-windows-phpstudy</a>
+</p>
+<p>1. 下载.zip文件。 解压缩。 </p>
+<p>2. 扔到本地搭建的 PHP 文件夹。</p>
+<p>3. 修改文件：&#160; sql-connections/db-creds.inc&#160; , 填入对应的root/密码。</p>
+<p>访问
+</p>
+<p>http://localhost/sqliphp7 &#160;&#160;&#160;&#160; 就可以看到站点被创建了。（注意要关掉代理）</p>
+<p>1. 先点击 setup database链接。 </p>
+<p>看到下面的输出，就可以了：</p>
+<pre>SETTING UP THE DATABASE SCHEMA AND POPULATING DATA IN TABLES:
+localhostroot[*]...................Old database 'SECURITY' purged if exists
+[*]...................Creating New database 'SECURITY' successfully
+[*]...................Creating New Table 'USERS' successfully
+[*]...................Creating New Table 'EMAILS' successfully
+[*]...................Creating New Table 'UAGENTS' successfully
+[*]...................Creating New Table 'REFERERS' successfully
+[*]...................Inserted data correctly into table 'USERS'
+[*]...................Inserted data correctly into table 'EMAILS'
+[*]...................Old database purged if exists
+[*]...................Creating New database successfully
+[*]...................Creating New Table '6NK31W2YKP' successfully
+[*]...................Inserted data correctly into table '6NK31W2YKP'
+[*]...................Inserted secret key 'secret_1UUR' into table
+</pre>
+<p>2. 记得&#160; php 连接字符串的方式： </p>
+<pre>&lt;?php
+  $hi = "hihihi";
+
+  echo "===".$hi;   (用. 来拼接）
+  echo "===$hi";    ( 在双引号中，直接 $var ) 
+  echo "==={$hi}";  ( 或者，在$var 前后加上大括号, 让变量定义更加明确 )
+?&gt;</pre>
+<p>以上代码都是直接输出：&#160; ===hihihi ,&#160; </p>
