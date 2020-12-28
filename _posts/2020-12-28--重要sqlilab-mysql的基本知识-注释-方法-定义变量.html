@@ -1,0 +1,129 @@
+<p><br />这里有个文章，提供了思路：<a href="https://www.sqlsec.com/2020/05/sqlilabs.html">https://www.sqlsec.com/2020/05/sqlilabs.html</a>
+</p>
+<p>这里可以看到mysql的绝大部分函数: <a href="https://www.w3schools.com/sql/sql_ref_mysql.asp">https://www.w3schools.com/sql/sql_ref_mysql.asp</a>
+<br />
+</p>
+<h3>注释</h3>
+<p>'-- ' , 两个--后面紧跟一个空格。 是最常用的SQLI注释。</p>
+<p>在 url 中，--+ , --%20, --%23 , 前2个是"--空格"， 第三个是&#160; --# 的意思。</p>
+<p># 这个在SQLI中不常用。因为 # 以及后面的内容不会作为参数从客户端传给服务器</p>
+<p>/* .. */</p>
+<p>你看到的&#160; payload中， --+, --# 则表示， 在-- 之后做一些事情。</p>
+<h3>/*! 可以执行的语句 */ 这个可以直接绕过WAF</h3>
+<h3>union 把两个表的查询合并在一起，要求2个select的列名相同</h3>
+<div>select username as email from users union select email_id as email from emails</div>
+<pre>email
+Dumb
+Angelina
+Dummy
+secure
+stupid
+superman
+batman
+admin
+admin1
+admin2
+admin3
+dhakkan
+admin4
+Dumb@dhakkan.com
+Angel@iloveu.com
+Dummy@dhakkan.local
+secure@dhakkan.local
+stupid@dhakkan.local
+superman@dhakkan.local
+batman@dhakkan.local
+admin@dhakkan.com</pre>
+<h3>定义变量&#160; set 与 @your_var:= </h3>
+<pre>SET @myindex=0;
+SELECT id,username, @myindex:=@myindex+3 AS my_index FROM users;
+会得到：
+
+id	username	my_index
+1	Dumb	3
+2	Angelina	6
+3	Dummy	9
+4	secure	12
+5	stupid	15
+6	superman	18
+7	batman	21
+8	admin	24
+9	admin1	27
+10	admin2	30
+11	admin3	33
+12	dhakkan	36
+14	admin4	39
+
+</pre>
+<h3>普通函数, 直接在select 语句中使用即可。</h3>
+<p>SELECT SYSTEM_USER(), SESSION_USER(), USER(), VERSION(), CURRENT_USER(), DATABASE(), @@datadir, @@version_compile_os;</p>
+<pre>SYSTEM_USER()	SESSION_USER()	USER()	VERSION()	CURRENT_USER()	DATABASE()	@@datadir	@@version_compile_os
+root@localhost	root@localhost	root@localhost	5.7.26-log	root@localhost	sqli	D:\phpstudy\Extensions\MySQL5.7.26\data\	Win32
+
+</pre>
+
+<h3>concat 函数：把结果合并的一起&#160; </h3>
+<p>例如： SELECT id, username, PASSWORD, CONCAT(id, "+", userNAME) AS full_name FROM users limit 3</p>
+<p>可以看到：</p>
+<pre>1	Dumb	Dumb	1+Dumb
+2	Angelina	I-kill-you	2+Angelina
+3	Dummy	p@ssword	3+Dummy
+4	secure	crappy	4+secure
+5	stupid	stupidity	5+stupid
+6	superman	genious	6+superman
+7	batman	mob!le	7+batman
+8	admin	admin	8+admin
+9	admin1	admin1	9+admin1
+10	admin2	admin2	10+admin2
+11	admin3	admin3	11+admin3
+12	dhakkan	dumbo	12+dhakkan
+14	admin4	admin4	14+admin4</pre>
+<h3>group_concat&#160;&#160; 把一组结果变成一个结果</h3>
+<div>SELECT GROUP_CONCAT(username, PASSWORD SEPARATOR '&gt;&gt;') FROM users;</div>
+<pre>GROUP_CONCAT(username, PASSWORD SEPARATOR '&gt;&gt;')
+DumbDumb&gt;&gt;AngelinaI-kill-you&gt;&gt;Dummyp@ssword&gt;&gt;securecrappy&gt;&gt;stupidstupidity&gt;&gt;supermangenious&gt;&gt;batmanmob!le&gt;&gt;adminadmin&gt;&gt;admin1admin1&gt;&gt;admin2admin2&gt;&gt;admin3admin3&gt;&gt;dhakkandumbo&gt;&gt;admin4admin4
+
+</pre>
+<h3>mid , substr&#160; substring&#160;&#160; , 截取字符串</h3>
+<div>下面两种形式是等价的。 </div>
+<div>select mid("good good study", 2, 6);&#160;&#160;&#160; </div>
+<div>select mid("good good study" from 2 for 6)</div>
+<div># =&gt; ood go</div>
+<div>最后一个参数可以省略：</div>
+<div>select mid("good good study", 2);</div>
+<div>select mid("good good study" from 2)</div>
+<div># =&gt; ood good study</div>
+<h3>if,else,case,when&#160; 条件语句</h3>SELECT if( 1&lt;2 , "true result", "false result") as result;
+<pre>result
+true result
+</pre>
+<p>SELECT *, if(id &lt; 5, "small", "big") as result FROM users;</p>
+<pre>id	username	password	result
+1	Dumb	Dumb	small
+2	Angelina	I-kill-you	small
+3	Dummy	p@ssword	small
+4	secure	crappy	small
+5	stupid	stupidity	big
+6	superman	genious	big
+7	batman	mob!le	big
+8	admin	admin	big
+9	admin1	admin1	big
+10	admin2	admin2	big
+11	admin3	admin3	big
+12	dhakkan	dumbo	big
+14	admin4	admin4	big
+
+</pre>
+<h3>sleep&#160;&#160; 让查询时间延长n秒</h3>
+<div>select sleep(1) ;</div>
+<div># 啥也不查询，直接返回： </div>
+<div>sleep(1)&#160;&#160; # 列名</div>
+<div>0&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; # 值</div>
+<div># 这个语句，是每个记录会消耗1秒。 总共3条记录，会超过3秒的查询：</div>
+<div>select sleep(1), id, username from users limit 3 ;</div>
+
+<pre>sleep(1)	id	username
+0		1	Dumb
+0		2	Angelina
+0		3	Dummy
+</pre>
