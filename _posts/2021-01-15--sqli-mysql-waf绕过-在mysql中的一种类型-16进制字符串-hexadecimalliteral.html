@@ -1,0 +1,21 @@
+<p>参考： </p>
+<p>官方文档： MYSQL 5.7 <a href="https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html">https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html</a>
+</p>
+<p>在线转换：<a href="https://stool.chinaz.com/hex">https://stool.chinaz.com/hex</a>
+</p>
+<p>选择Hex编码，解码。</p>
+<p>Table -&gt; %54%61%62%6c%65</p>
+<p>刚好对应官方文档中的：&#160; select 0x5461626c65&#160;&#160;&#160; # =&gt; Table </p>
+<p>( 注意：在windows的Heidi MySQL客户端上该结果仍然显示0x... ，这个不是你的问题，是该软件的问题。</p>
+<p>在正常的client或者php返回结果的页面中，仍然会正常显示Table这个文字结果的）</p>
+<p>奇怪。 不过我在另外一篇绕过WAF的文章中看到过这个。 </p>
+<p>在MySQL中，可以这样用： </p>
+<p># SELECT 0x00  # -&gt; 0x00<br /># SELECT X'' + 0  # =&gt; 0<br /># SELECT CHARSET(X''), LENGTH(X'')  # =&gt; binary, 0<br /># SELECT X'20' + 88; # =&gt; 120,  = 32 + 88 , = 0x20 + 88 ,  0x20 = 2 x 16 = 32<br /># SELECT X'20'  # =&gt; 0x20<br /># SELECT X'20' + 1 # =&gt; 33 = 0x20 +1 = 32 + 1</p>
+<p>所以，有一个例子：</p>
+<p>SELECT GROUP_CONCAT(username, PASSWORD SEPARATOR '&lt;br&gt;') FROM users;<br />SELECT GROUP_CONCAT(username, PASSWORD SEPARATOR 0x3c62723e) FROM users;</p>
+<p>上面的&#160; '&lt;br&gt;'&#160; 与下面的 0x3c62723e 是等价的。都会返回以下结果；</p>
+<p>GROUP_CONCAT(username, PASSWORD SEPARATOR 0x3c62723e)<br />DumbDumb&lt;br&gt;AngelinaI-kill-you&lt;br&gt;Dummyp@ssword&lt;br&gt;securecrappy</p>
+<p>在Mysql中，可以使用HEX函数来转换</p>
+<p>select hex('Banana'),&#160; # =&gt;&#160; 42616E616E61</p>
+<p>也可以把一个 hex转换成字符串：</p>
+<p>select CAST(unhex('42616E616E61') AS CHAR(100))&#160;&#160; # =&gt; Banana</p>
