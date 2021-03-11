@@ -1,0 +1,9 @@
+<p>1. 获得该表的所有列的数量：</p>
+<p>?id=3 order by 3 --+&#160; 原来是3列。</p>
+<p>于是以后就可以使用 </p>
+<p>?id=-1 union select 1, 2, (select group_concat(你想要的内容) from TABLE)</p>
+<p>来获得各种信息了</p>
+<p>lesson lesson 3, lesson 4 基本换汤不换药。 单引号换成双引号， 加个括号少个括号啥的。</p>
+<p>lesson 5, lesson 6: 还没学习。 有报错页面，但是没有内容展示页面。 没有深入学习</p>
+<p>lesson 7 写入文件（木马）</p>
+<p>lesson 11 开始使用form提交参数了。此时的参数可以不经过url encode了，例如 --+ 可以直接写成 "-- "</p>
