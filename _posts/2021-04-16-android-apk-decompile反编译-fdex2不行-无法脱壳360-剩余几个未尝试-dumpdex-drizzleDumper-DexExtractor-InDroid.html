@@ -1,0 +1,62 @@
+<p>这是一本在线书，特别简单易懂：https://book.crifan.com/books/android_app_security_crack/website/android_background/crack_apk_process.html</p>
+<p>参考：https://blog.csdn.net/vipzjyno1/article/details/21039349</p>
+<h3>下载apk tool:&#160;</h3>
+<p>github:&#160;https://ibotpeaches.github.io/Apktool/</p>
+<p>安装方式：https://ibotpeaches.github.io/Apktool/install/</p>
+<p>对于windows:&#160;</p>
+<p>1. 下载 apktool.bat&#160;&#160;https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat</p>
+<p>2. 下载 apktool - 2</p>
+<p>https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.5.0.jar</p>
+<p>并且重新命名成为 apktool.jar&#160;</p>
+<p>3. 上述两个文件放在一个目录下，并且放在PATH下。</p>
+<h3>下载 JD-GUI&#160; java decompiler&#160;</h3>
+<p>该软件用来查看java代码。（编译之后的。目的是为了把.class -&gt; java文件）</p>
+<p>来这里： http://java-decompiler.github.io/</p>
+<p>https://github.com/java-decompiler/jd-gui/releases/download/v1.6.6/jd-gui-windows-1.6.6.zip</p>
+<h3>下载Dex2jar&#160; &#160;</h3>
+<p>https://github.com/pxb1988/dex2jar/releases</p>
+<h3>开始反编译1</h3>
+<p>1. 把apk 文件使用 apktool进行转换。 这一步可以看到关键的配置信息，各种资源文件（图片，音乐等）</p>
+<p>apktool.bat d -f &lt;your_file.apk&gt;&#160; &#160; -f 表示删除之前编译的文件夹</p>
+<p>就可以了。会发现 文件会自动放到一个文件夹。&#160;</p>
+<pre>2021/03/15  11:18    &lt;DIR&gt;          .
+2021/03/15  11:18    &lt;DIR&gt;          ..
+2021/03/15  11:18            22,090 AndroidManifest.xml
+2021/03/15  11:18             2,359 apktool.yml
+2021/03/15  11:18    &lt;DIR&gt;          assets
+2021/03/15  11:18    &lt;DIR&gt;          kotlin
+2021/03/15  11:18    &lt;DIR&gt;          lib
+2021/03/15  11:18    &lt;DIR&gt;          original
+2021/03/15  11:18    &lt;DIR&gt;          res
+2021/03/15  11:18    &lt;DIR&gt;          smali
+2021/03/15  11:18    &lt;DIR&gt;          unknown
+               2 File(s)         24,449 bytes
+               9 Dir(s)  73,801,736,192 bytes free</pre>
+<p>该文件夹是&#160; cotlin和 smali的代码，可以看到有AndroidManifest.xml , 里面有很少的内容，一些app_key, app_private_key也可以看到。</p>
+<p>后面做出某些修改之后，可以使用 apktool.bat b YourApkFolder 来重新编译成apk. 编译成的apk 位于 YourApkFolder/dist目录下。</p>
+<h3>反编译2</h3>
+<p>1. 把apk 文件重命名成为 .zip</p>
+<p>2. 解压缩， 找到里面的 class.dex</p>
+<p>3. copy class.dex 到 dex-tools文件夹。 （应该不用这么傻，可以指定路径）</p>
+<p>4. 进入到dex-tools, 然后 d2j-dex2jar.bat classes.dex&#160;</p>
+<p>c:\files\app_decompile_apk\dex-tools-2.1&gt;d2j-dex2jar.bat classes.dex
+</p>
+<p>dex2jar classes.dex -&gt; .\classes-dex2jar.jar</p>
+<p>就可以得到这个jar文件，&#160;</p>
+<p>用 jd-gui打开，就可以看到内容。</p>
+<h3>尴尬时刻</h3>
+<p>classes.dex 是7MB,&#160; classes-dex2jar.jar&#160; 只有几k , 打开之后，映入眼帘的是qihoo 文件夹。</p>
+<p>看来是使用了360加固。</p>
+<p>这个博主也提到了： 使用&#160; apk -&gt; zip 的方法，无法脱壳。&#160;</p>
+<h3>所以要安装xposed ，参考这个文章:&#160;</h3>
+<p>下载：fdex2 闪退修复版</p>
+<p>http://www.xlhs.com/app/26218.html</p>
+<p>然后运行，找到你要反编译的工具，点击之，然后就会把源代码生成到一个文件夹。</p>
+<p>（它的原理是 - 我粘贴过来的 - ：通过Hook ClassLoader的loadClass方法，反射调用getDex方法取得Dex(com.android.dex.Dex类对象)，再将里面的dex写出，代码十分简单，就hook了一个方法而已）</p>
+<p>使用adb shell, 找到对应的文件夹， 下载到PC</p>
+<p>不行. 无法为360脱壳.&#160; 执行后找不到目标文件.</p>
+<p>根据 这个文章, 直接尝试frida . 其他方法不行. (文章地址:&#160;  <a href="https://zhangyongfa888.site/2019/11/29/%E4%BD%BF%E7%94%A8frida%E8%84%B1%E5%A3%B3/#FDex2">https://zhangyongfa888.site/2019/11/29/%E4%BD%BF%E7%94%A8frida%E8%84%B1%E5%A3%B3/#FDex2</a> ) </p>
+<p>接下来尝试 frida .&#160;
+</p>
+<p>参考:<a href="https://crifan.github.io/android_app_security_crack/website/android_crack_tool/app_to_dex">https://crifan.github.io/android_app_security_crack/website/android_crack_tool/app_to_dex/</a>
+</p>
