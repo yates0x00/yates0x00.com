@@ -1,0 +1,161 @@
+<p>参考:&#160;https://frida.re/docs/</p>
+<p>frida可以监控某个进程,修改进程的入口, 修改执行的内容. 特别强大</p>
+<p>在反编译的过程中会被使用.&#160;</p>
+<p>例子不说了.</p>
+<p>不过在我的本机上, 运行前面的单机例子没问题, 运行 Android的例子就不行了.&#160;</p>
+<p>安装 : 要使用pip3 来安装</p>
+<p>PC端: </p>
+<p>$  pip3 install frida-tools  (需要先安装好python 3 ) </p>
+<pre>C:\Users\luelue&gt;pip3 install frida-tools
+Collecting frida-tools
+  Downloading frida-tools-10.4.1.tar.gz (43 kB)
+     |████████████████████████████████| 43 kB 212 kB/s
+Collecting colorama&lt;1.0.0,&gt;=0.2.7
+  Downloading colorama-0.4.4-py2.py3-none-any.whl (16 kB)
+Collecting frida&lt;16.0.0,&gt;=15.0.0
+  Downloading frida-15.1.8.tar.gz (9.1 kB)
+Collecting prompt-toolkit&lt;4.0.0,&gt;=2.0.0
+  Downloading prompt_toolkit-3.0.21-py3-none-any.whl (374 kB)
+     |████████████████████████████████| 374 kB 312 kB/s
+Collecting pygments&lt;3.0.0,&gt;=2.0.2
+  Downloading Pygments-2.10.0-py3-none-any.whl (1.0 MB)
+     |████████████████████████████████| 1.0 MB 467 kB/s
+Requirement already satisfied: setuptools in c:\users\luelue\appdata\local\programs\python\python39\lib\site-packages (from frida&lt;16.0.0,&gt;=15.0.0-&gt;frida-tools) (49.2.1)
+Collecting wcwidth
+  Downloading wcwidth-0.2.5-py2.py3-none-any.whl (30 kB)
+Using legacy 'setup.py install' for frida-tools, since package 'wheel' is not installed.
+Using legacy 'setup.py install' for frida, since package 'wheel' is not installed.
+Installing collected packages: colorama, frida, wcwidth, prompt-toolkit, pygments, frida-tools
+    Running setup.py install for frida ... done
+    Running setup.py install for frida-tools ... done
+Successfully installed colorama-0.4.4 frida-15.1.8 frida-tools-10.4.1 prompt-toolkit-3.0.21 pygments-2.10.0 wcwidth-0.2.5
+</pre>
+<p>然后下载&#160; frida-server: （注意，这个frida-server是安装到安卓端的，并且需要跟 PC端的frida的版本相对应）</p>
+<p>https://github.com/frida/frida/releases/download/15.1.8/frida-core-devkit-15.1.8-android-arm64.tar.xz</p>
+<p>下载后解压缩,&#160; 然后&#160;</p>
+<p>$ 解压缩,把里面的文件 拿出来,例如叫&#160; frida-server-android&#160; &#160;&#160; </p>
+<p>$ unxz&#160; frida-server ..xz&#160;</p>
+<p>$ adb push frida-server-android /data/local/tmp/</p>
+<p>$ adb root&#160; &#160;(这里见我另外一篇文章 挨着本文)&#160;</p>
+<p>$ cd /data/local/tmp&#160;</p>
+<p>merlin:/data/local/tmp # su root&#160; (这一步特别关键! 否则会server 启动失败)&#160;</p>
+<p>merlin:/data/local/tmp # chmod 755 frida-server-14.2.13-android-arm64&#160;
+</p>
+<p>merlin:/data/local/tmp # ./frida-server-14.2.13-android-arm64&#160; -v&#160; (建议首次运行时,一定要输入&#160; -v ,&#160; verbose 的意思)</p>
+<p>总之就是执行上面的文件.&#160;
+</p>
+<p>然后在PC端 直接 :&#160;</p>
+<p>$ frida-ps -U 就可以看到结果</p>
+<h3>问题3. 如果frida-ps -U 不好用的话，就参考这里：https://github.com/frida/frida/issues/582</h3>
+<p>1. 在server端（android端），运行时，每次都要 su root&#160; 再运行</p>
+<p>2. 在server端，ifconfig, 查看当前 android的ip, 然后&#160; ./frida-server-15.1.8-android-arm64 -l 192.168.0.101 -v</p>
+<p>3. 保证 client(windows/linux) 跟android在同一个局域网内.&#160; 然后 frida-ps --host 192.168.0.101</p>
+<img src="https://files.sweetysoft.com/image_after_2021_11_01/4321/tmp.png" style="width: 1200px" />
+<p>就可以了。</p>
+<h3>问题1:&#160;&#160;提示: Failed to enumerate processes: unable to connect to remote frida-server: Unexpected lack of content trying to read a line</h3>
+<p>参考:https://stackoverflow.com/questions/62171745/frida-server-unable-to-connect/66652303#66652303</p>
+<p>或者参考:&#160;https://github.com/frida/frida/issues/764</p>
+<p>解决办法:&#160; 执行 frida-server 之前,务必 # su root&#160; ,&#160; (你可以先试着ifconfig , 看看是否有权限,不要相信你安装的adb root )&#160;</p>
+<h3>问题2&#160;&#160;unable to access zygote64 while preparing for app launch; try disabling Magisk Hide in case it is active</h3>
+<p>参考:&#160;https://stackoverflow.com/questions/56316329/frida-failed-to-spawn-unable-to-access-zygote64-while-preparing-for-app-launc</p>
+<p>1. magisk -&gt; settings -&gt; Magisk -&gt; MagiskHide , 要关掉.&#160; 否则会引起:</p>
+<p>2. 无论你是否在magisk 中安装了 magisk adb root,&#160; 在进入到adb shell 之后, 执行 frida-server之前,都需要手动切换成root:&#160; $ su root&#160;</p>
+<p>之后再执行 frida-server -v&#160;</p>
+<p>在我的机器上, frida-ps -U的结果如下:</p>
+<pre>$ frida-ps -U
+  PID  Name
+-----  ---------------------------------------------------
+14312  adbd
+  412  aee_aed
+  413  aee_aed64
+  414  aee_aedv
+  415  aee_aedv64
+ 9175  android.ext.services
+ 8444  android.hardware.audio@5.0-service-mediatek
+  766  android.hardware.biometrics.fingerprint@2.1-service
+  576  android.hardware.bluetooth@1.0-service-mediatek
+  577  android.hardware.cas@1.1-service
+  578  android.hardware.configstore@1.1-service
+  579  android.hardware.drm@1.0-service
+  580  android.hardware.drm@1.2-service.clearkey
+  581  android.hardware.drm@1.2-service.widevine
+  582  android.hardware.gatekeeper@1.0-service
+  583  android.hardware.gnss@2.0-service-mediatek
+  .... 还有好多
+</pre>
+<h3>使用: 绕过android https ( ssl 的验证)</h3>
+<p>假设,我们通过安卓逆向, 获得了目标app 的源代码, 对应校验证书的代码为:&#160;</p>
+<pre>package com.&lt;target&gt;.utilslibrary.retrofit;
+
+import android.content.Context;
+import java.io.BufferedInputStream;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import okhttp3.at;
+
+public class a { 
+  public static void a(Context paramContext, at paramat) {
+    CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+    BufferedInputStream bufferedInputStream = new BufferedInputStream(paramContext.getAssets().open("certs/cert.crt"));
+    Certificate certificate = certificateFactory.generateCertificate(bufferedInputStream);
+    bufferedInputStream.close();
+    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+    keyStore.load(null, null);
+    keyStore.setCertificateEntry("ca", certificate);
+    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    trustManagerFactory.init(keyStore);
+    SSLContext sSLContext = SSLContext.getInstance("TLS");
+    sSLContext.init(null, trustManagerFactory.getTrustManagers(), null);
+    paramat.a(sSLContext.getSocketFactory(), new b(certificate));
+  }
+}
+
+
+</pre>
+<p>创建一个脚本</p>
+<pre>import frida, sys, time
+
+# 该方法仅仅用于调试
+def on_message(message, data):
+    print("=== in on_message")
+    print(message)
+    print(data)
+
+# 这段是核心代码,多行javascript.
+jscode = """
+Java.perform(function () {
+  // 这里用的是class 的全名(package + class)
+  var target_class = Java.use('com.target.utilslibrary.retrofit.a');
+
+  // 这里的 target_class.a 就是我们需要绕过的方法
+  var the_method = target_class.a;
+
+  // 这里是对方法进行实现
+  the_method.implementation = function (p1, p2) {
+    // 该方法的实现中,没有任何内容.也就是说, 不做任何SSL证书的校验
+  };
+});
+"""
+
+device = frida.get_usb_device()
+
+# 根据android package名字来唤醒对应的app
+
+pid = device.spawn(["com.target.wallets"])  // 修改成你的目标app package
+device.resume(pid)
+
+# 进程停止1秒钟.让该APP启动
+time.sleep(1)
+
+script = device.attach(pid).create_script(jscode)
+
+script.on('message', on_message)
+print('==== script start ...')
+
+script.load()
+sys.stdin.read()
+
+</pre>
