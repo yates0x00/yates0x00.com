@@ -1,0 +1,104 @@
+<p>参考:&#160;https://segmentfault.com/a/1190000039007086</p>
+<p>折腾了2天.&#160; 终于解决了问题 . 使用路径如标题所示.&#160;</p>
+<p>个人备注：放在了我的笔记本linux ubuntu-20目录下。 /workspace/test_frida目录。哈哈</p>
+<h3>第一步 脱壳</h3>
+<p>1. 需要将 android 设备root</p>
+<p>2. 该设备上安装好magisk (root设备默认是安装的)</p>
+<p>3. 安装好magisk module : adb root</p>
+<p>4. pc 端 安装好frida-tools </p>
+<p>参考： http://siwei.me/blog/posts/frida-frida</p>
+<p>( pip3 install frida-server ) </p>
+<p>5. android端 运行frida-server&#160; &#160; （见5.1 , 5.2 ...）</p>
+<p>（具体参考这里：<a href="http://siwei.me/blog/posts/frida-frida">http://siwei.me/blog/posts/frida-frida</a>&#160;）&#160; , 此时通过pc 端 $ frida-ps -U&#160; 命令,可以看到输出.</p>
+<p>5.1 PC端：</p>
+<p>$ adb root</p>
+<p>$ adb shell</p>
+<p>5.2 (adb-android) # cd /data/local/tmp (假设你的 frida-server 被解压缩到了这里）</p>
+<p>5.3 (adb-android) # su root</p>
+<p>5.4 (adb-android) # ./frida-server -v&#160; （注意这里的-v 一定要加上，这样遇到报错就知道了。）</p>
+<p>如果没报错，就说明 android 上的frida-server跑起来了。</p>
+<p>以上 步骤都可以在我前几篇帖子中看到,不再赘述. 特别是第五步有坑&#160;&#160;</p>
+<p>6. pc端 下载好 frida-dexdump:&#160; $&#160;git clone https://github.com/hluwa/FRIDA-DEXDump.git</p>
+<p>7. android 端运行你希望反编译的app.</p>
+<p>8. pc端运行:&#160;&#160;</p>
+<p>frida_dexdump$ python3 main.py&#160; &#160;&#160;</p>
+<p>然后就可以看到下面的输出. (&#160;</p>
+<p>8.1 耗时几秒吧,&#160;</p>
+<p>8.2 需要先把app 运行, 该程序就会自动获得 package name, 不需要手动指定.&#160;</p>
+<p>8.3 该步骤有可能报错, 不要紧,再运行一次就好了. )</p>
+<pre>--------------------------------------------------------------------------------------------------------------------------------------------------
+                               ____________ ___________  ___        ______ _______   _______
+                               |  ___| ___ \_   _|  _  \/ _ \       |  _  \  ___\ \ / /  _  \
+                               | |_  | |_/ / | | | | | / /_\ \______| | | | |__  \ V /| | | |_   _ _ __ ___  _ __
+                               |  _| |    /  | | | | | |  _  |______| | | |  __| /   \| | | | | | | '_ ` _ \| '_ \
+                               | |   | |\ \ _| |_| |/ /| | | |      | |/ /| |___/ /^\ \ |/ /| |_| | | | | | | |_) |
+                               \_|   \_| \_|\___/|___/ \_| |_/      |___/ \____/\/   \/___/  \__,_|_| |_| |_| .__/
+                                                                                                            | |
+                                                                                                            |_|
+                                                   https://github.com/hluwa/FRIDA-DEXDump
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+03-16/18:59:56 INFO [DEXDump]: found target [19593] com.vip.lueluelue
+[DEXDump]: DexSize=0x2568, DexMd5=46003f6002c1afd2a00f54397537e779, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x7423450430.dex
+[DEXDump]: DexSize=0x6488a0, DexMd5=0ae7f9a20cd8ed14fed7dd36af445ce7, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74836c8000.dex
+[DEXDump]: DexSize=0x6aada4, DexMd5=57725757271ebd1b75e6a802d1845ab4, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x7483d17000.dex
+[DEXDump]: DexSize=0xb230, DexMd5=09e0fbff3f0176d2fa3cc32dbb5ee8ca, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x7484d7a030.dex
+[DEXDump]: DexSize=0xb230, DexMd5=3762036104e74864e9f60542d802cf3c, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74864c6c80.dex
+[DEXDump]: Skip duplicate dex 0x7487ef8030&lt;09e0fbff3f0176d2fa3cc32dbb5ee8ca&gt;
+[DEXDump]: DexSize=0x6b1cf4, DexMd5=af286664898ae848f4b1c653a64eb097, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74d5e46ce0.dex
+[Except] - Error: access violation accessing 0x74dd5dc000
+    at  (frida/runtime/core.js:127)
+    at memorydump (/script1.js:110)
+    at apply (native)
+    at  (frida/runtime/message-dispatcher.js:13)
+    at c (frida/runtime/message-dispatcher.js:23): {'addr': '0x74dd3c9d00', 'size': 6614352}
+[DEXDump]: DexSize=0x11c, DexMd5=f1771b68f5f9b168b79ff59ae2daabe4, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74df9c4a8e.dex
+[DEXDump]: DexSize=0x6dc, DexMd5=64ef4bb92459668cb1366f3d9e9abb63, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74e63a4010.dex
+[DEXDump]: DexSize=0x695a8, DexMd5=8345c73b46814e1384ff8462248b23af, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74e640702c.dex
+[DEXDump]: DexSize=0x1274a4, DexMd5=ecf7cddd075183ac84db1677966211d0, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74ed8bc0b8.dex
+[DEXDump]: DexSize=0x1557b4, DexMd5=e920130e06b5687afe980ddb8e3b4425, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74ed9e402c.dex
+[DEXDump]: DexSize=0x3255c8, DexMd5=ae45f4819db6771a26a82e74e06781f4, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74edb3a4b4.dex
+[DEXDump]: DexSize=0x4b7c0c, DexMd5=35829ed49150ab7d8357288b61c7358f, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x74ede60554.dex
+[DEXDump]: DexSize=0xecfc, DexMd5=2dd14f384bfe4741e5a9463e12c79c89, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x757225702c.dex
+[DEXDump]: DexSize=0x63e40, DexMd5=ff10edb26d2b46ddec856c9e8f42ef8b, SavePath=/workspace/test_frida/FRIDA-DEXDump/frida_dexdump/com.vip.lueluelue/0x7573c4602c.dex
+
+</pre>
+<p>然后, 在PC端当前路径下,会看到生成了一系列的.dex文件:</p>
+<pre>com.vip.lueluelue/0x74ede60554.dex
+com.vip.lueluelue/0x74edb3a4b4.dex
+com.vip.lueluelue/0x74864c6c80.dex
+com.vip.lueluelue/0x7573c4602c.dex
+com.vip.lueluelue/0x74e640702c.dex
+com.vip.lueluelue/0x74e63a4010.dex
+com.vip.lueluelue/0x74ed9e402c.dex
+com.vip.lueluelue/0x757225702c.dex
+.....</pre>
+<h3>第二步 dex -&gt; jar&#160;</h3>
+<p>使用d2j-dex2jar 命令即可.&#160; 记得用这个版本&#160;&#160;https://github.com/DexPatcher/dex2jar/releases</p>
+<p>例如:</p>
+<p>$ d2j-dex2jar.sh *.dex -d --skip-exceptions -f</p>
+<p>就会执行批处理了</p>
+<h3>第三步&#160; jar -&gt; java</h3>
+<p>使用 jd-gui, 找到目标jar, 然后 save all</p>
+<p>这里也可以使用命令行( jd-cli , 参考这里:http://siwei.me/blog/posts/java-jd-gui-jar-class-jd-gui　）</p>
+<h3>第四步 获得 AndroidManifest.xml&#160;</h3>
+<p>这里使用 apktool&#160;</p>
+<p>$ apktool d target.apk&#160;</p>
+<p>就可以获得 了.</p>
+<p>有了AndroidManifest + core source code, 就整齐了.</p>
+<h3>注意:</h3>
+<p>1. frida-dex-dump 不是100%会成功. (在获得dex的步骤), 所以,有2个可选:</p>
+<p>1.1 unzip apk</p>
+<p>1.2 apktool d &lt;apk_file&gt;</p>
+<p>1.3 d2j-dex2jar &lt;apk_file&gt;</p>
+<p>2. 如果你的 dump server 安装在了 /data/local/tmp 目录下, 然后发现 首次可以脱壳,第二次以后就无法得到正确的dex的话,删掉该目录下的re.frida.server 文件夹 ,应该是这里有缓存的原因</p>
+<pre>merlin:/data/local/tmp # ls -altrh
+total 97M
+drwxr-x--x 5 root  root  4.0K 2010-01-01 08:05 ..
+-rwxr-xr-x 1 root  root   39M 2021-11-01 17:37 frida-server-14.2.13-android-arm64
+-rwxrwxrwx 1 root  root    10 2021-12-19 09:37 hihihi
+drwxrwx--x 5 shell shell 4.0K 2021-12-19 09:38 .
+drwxr-xr-x 2 root  root  4.0K 2021-12-19 16:03 re.frida.server
+</pre>
+<p>3. 重新安装apk 文件.&#160;</p>
+
