@@ -1,0 +1,10 @@
+<p>有时候jar文件过大(例如7MB), 无法一次性的使用jd-gui来进行反编译. 会卡住.&#160;</p>
+<p>所以需要我们:&#160;</p>
+<p>1. 先解压缩.&#160; unzip&#160; target.jar 就可以.&#160; 或者使用任意一款压缩软件</p>
+<p>2. 删掉无用的.class的目录&#160;</p>
+<p>3. 使用jar 重新打包成.jar 文件, 例如&#160; $&#160; jar cvf target.jar &lt;target_folder&gt;</p>
+<p>4. 使用 jd-cli 来反编译 . (地址:&#160;https://github.com/kwart/jd-cli/releases/tag/jd-cli-1.2.0 )</p>
+<p>它的好处是有更多选项,例如 -g ( --logLevel ) 来查看.&#160;</p>
+<p>如果仍然卡住的话,使用 -g ALL 来查看日志</p>
+<p>$ jd-cli target.jar -od jar_result -g ALL</p>
+<p>看看卡在了哪个文件, 如果找到的话, 直接把它手动从jar中删掉(重新打包或者啥) ,然后批量转换其他. 最后手动复制粘贴jd-gui中的结果, 再粘贴到源代码目录.&#160;</p>
