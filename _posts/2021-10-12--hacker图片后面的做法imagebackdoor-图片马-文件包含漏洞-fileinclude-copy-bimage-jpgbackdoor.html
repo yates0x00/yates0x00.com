@@ -1,0 +1,24 @@
+<h3>图片马需要与 文件包含漏洞一起使用。&#160;</h3>
+<p>原理在这里：我个人非常满意的一个自问自答的问题<a href="https://stackoverflow.com/questions/66810262/how-is-the-backdoor-code-executed-in-the-end-of-an-image">https://stackoverflow.com/questions/66810262/how-is-the-backdoor-code-executed-in-the-end-of-an-image/ </a>
+</p>
+<h3>文件包含漏洞</h3>
+<p>就是说，需要在服务器端有一个中介文件 file_include.php&#160; , 内容如下：</p>
+<pre>&lt;?php
+  $file = $_GET['file']
+  include $file;
+?&gt;</pre>
+<p>然后，我们就可以使用 file_include.php?file=a.jpg&#160; 来实现 a.jpg 文件中的php代码片段了。（其他asp语言同理。）</p>
+<h3>jpeg的exif&#160;</h3>
+<p>参考：https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/hiding-webshell-backdoor-code-in-image-files/</p>
+<p> 这里提到了 在 jpeg  文件中，有一个部分叫做 exif 区域，该区域中包含了 jpeg 的信息，在PHP中很多组件都会用PHP代码读取并解析这里</p>
+<p>如果把php代码放在这里， 就可以实现后门 webshell backdoor</p>
+<p>这个文章非常齐全，介绍了好几种方法</p>
+<p><a href="https://gv7.me/articles/2017/picture-trojan-horse-making-method">https://gv7.me/articles/2017/picture-trojan-horse-making-method/</a>
+</p>
+<h3>恶意代码在图片尾部</h3>
+<p>同上。 猜测是使用了PHP引擎来处理 jpg图片</p>
+<h3>恶意代码在 jpeg的 exif中</h3>
+<p>略。</p>
+<p>使用gimp 来编辑即可。</p>
+<h3>恶意代码放在无法被图片引擎重新转换的地方。</h3>
+<p>例如， 一般都使用convert 命令来进行图片的剪裁。 可以对比一下上传前后的图片， 仔细观察哪里的代码没有改动（例如一片连续的白色），然后就可以尝试把恶意代码放在该区域。</p>
