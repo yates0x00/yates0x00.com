@@ -1,0 +1,39 @@
+<p>metasploit 是用ruby写的。 所以本质上就是如何把自定义的module放进去。</p>
+<p>kali下的默认位置；&#160;/usr/share/metasploit-framework/</p>
+<p>进来，可以发现有module文件夹，里面都是 各个cve 等漏洞的 exploit&#160;</p>
+<p>可以放在 ~/.msf4/modules目录下， 也可以放在默认安装路径下。&#160;</p>
+<p>我们以 cve-2017-7269为例子。</p>
+<h3>要注意目录结构： (auxiliary  encoders  evasion  exploits  nops  payloads  post )</h3>
+<p>1. 在 ~/.msf4/modules 目录下，创建exploits 文件夹&#160; -&gt; test文件夹， 放入文件 cve_2017_7269.rb, 内容略。</p>
+<p>使用reload_all 命令来重新加载。 （不用重新启动msfconsole）</span>
+</p><p>2. 也可以在msf 的rails目录下，按照上面的方式在增加module文件。</p>
+<p>缺点是需要退出msfconsole重新进入。就会自动加载了。</p>
+<h3>注意：必须放在 exploits 目录下，不能直接扔在 ~/.msf4/modules 目录下，不会识别。</h3>
+<h3>module name命名只能是 字母+数字 + 下划线，&#160;</h3>
+<p>例如 cve_2017_001.rb&#160;&#160;</p>
+<h3>增加好module文件之后， 要重启或者reload_all</h3>
+<p>1. （推荐）重启启动console ，</p>
+<p>2. (有时候可以）或者在 console中输如 reload_all&#160;</p>
+<h3>如果无法加载，查看log, 看看是啥原因。&#160;</h3>
+<p>例如，下面有3个.go 语言无法被加载，查看日志发现，是本机没有安装go语言。</p>
+<pre>msf6 &gt; reload_all 
+[*] Reloading modules from all module paths...
+[-] WARNING! The following modules could not be loaded!
+[-]     /usr/share/metasploit-framework/modules/exploits/my/cve-2017-7269.rb
+[-]     /usr/share/metasploit-framework/modules/auxiliary/scanner/msmail/onprem_enum.go
+[-]     /usr/share/metasploit-framework/modules/auxiliary/scanner/msmail/exchange_enum.go
+[-]     /usr/share/metasploit-framework/modules/auxiliary/scanner/msmail/host_id.go
+[-] Please see /root/.msf4/logs/framework.log for details.
+ _                                                    _
+/ \    /\         __                         _   __  /_/ __                                                                                                                 
+| |\  / | _____   \ \           ___   _____ | | /  \ _   \ \                                                                                                                
+| | \/| | | ___\ |- -|   /\    / __\ | -__/ | || | || | |- -|                                                                                                               
+|_|   | | | _|__  | |_  / -\ __\ \   | |    | | \__/| |  | |_                                                                                                               
+      |/  |____/  \___\/ /\ \\___/   \/     \__|    |_\  \___\                                                                                                              
+                                                                                                                                                                            
+
+       =[ metasploit v6.0.36-dev                          ]
++ -- --=[ 2108 exploits - 1131 auxiliary - 357 post       ]
++ -- --=[ 592 payloads - 45 encoders - 10 nops            ]
++ -- --=[ 8 evasion                                       ]
+</pre>
