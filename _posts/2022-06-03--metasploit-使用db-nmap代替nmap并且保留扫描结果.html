@@ -1,0 +1,16 @@
+<p>如题。</p>
+<p>$ db_nmap&#160; &#160;扫描</p>
+<p>$ hosts 查看结果</p>
+<p>hosts -u&#160; 显示UP的主机 。&#160; -c address 只显示某个列。</p>
+<h3>设置数据库</h3>
+<p>sudo su postgres</p>
+<p>$ psql&#160;</p>
+<p>postgres=# GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myroot;</p>
+<p>alter role myroot Superuser;&#160;&#160;</p>
+<p>\du 确认下， myroot是否有superuser的权限。</p>
+<p>1. 先确认 ./msfdb 这个命令的内容， 57行 db_port 是不是5432&#160; （ 我的居然是5433 ）</p>
+<p>需要配置好 config/database.yml&#160;</p>
+<p>另外，也需要确认 ~/.msf4/ 下的数据库配置database.yml 。 有时候居然是 5433 ,</p>
+<p>会引起 创建数据库报错</p>
+<h3>2. bundle exec rake db:create</h3>
+<h3>3. bundle exec rake db:migrate</h3>
