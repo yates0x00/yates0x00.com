@@ -1,0 +1,75 @@
+<p>SonarQube是管理代码质量一个开放平台，可以快速的定位代码中潜在的或者明显的错误，下面将会介绍一下这个工具的安装、配置以及使用。</p>
+<p>准备工作；</p>
+<p>1、jdk（不再介绍）</p>
+<p>2、sonarqube：http://www.sonarqube.org/downloads/</p>
+<p>3、SonarQube+Scanner:https://sonarsource.bintray.com/Distribution/sonar-scanner-cli/sonar-scanner-2.5.zip</p>
+<p>4、mysql数据库（不再介绍）</p>
+<p><strong>一、安装篇</strong></p>
+<p>1.下载好sonarqube后，解压打开bin目录，启动相应OS目录下的StartSonar。如本文演示使用的是win的64位系统，则打开D:\sonar\sonarqube-5.3\sonarqube-5.3\bin\windows-x86-64\StartSonar.bat</p>
+<p>2.启动浏览器，访问http://localhost:9000，如出现下图则表示安装成功。</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171924.png"></p>
+<p><strong>二、配置篇</strong></p>
+<p>1.打开mysql，新建一个数据库。</p>
+<p>2.打开sonarqube安装目录下的D:\sonar\sonarqube-5.3\sonarqube-5.3\conf\sonar.properties文件</p>
+<p>3.在mysql5.X节点下输入以下信息</p>
+<p>sonar.jdbc.url=jdbc:mysql://172.16.30.228:3306/qjfsonar?useUnicode=true&amp;characterEncoding=utf8&amp;rewriteBatchedStatements=true&amp;useConfigs=maxPerformance<br>
+sonar.jdbc.username=gmsd<br>
+sonar.jdbc.password=gmsdtrade<br>
+sonar.sorceEncoding=UTF-8<br>
+sonar.login=admin<br>
+sonar.password=admin</p>
+<p>url是数据库连接地址，username是数据库用户名，jdbc.password是数据库密码，login是sonarqube的登录名，sonar.password是sonarqube的密码</p><div style="width: 100%; height: auto; clear: both; text-align: center;" class="google-auto-placed ap_container"><ins style="display: block; margin: auto; background-color: transparent; height: 280px;" data-ad-format="auto" class="adsbygoogle adsbygoogle-noablate" data-ad-client="ca-pub-6384567588307613" data-adsbygoogle-status="done" data-ad-status="filled"><ins id="aswift_4_expand" style="border: medium none; height: 280px; width: 820px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-table;" tabindex="0" title="Advertisement" aria-label="Advertisement"><ins id="aswift_4_anchor" style="border: medium none; height: 280px; width: 820px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: block; overflow: visible;"><iframe id="aswift_4" name="aswift_4" style="left:0;position:absolute;top:0;border:0;width:820px;height:280px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-6384567588307613&amp;output=html&amp;h=280&amp;adk=782311644&amp;adf=1706875322&amp;pi=t.aa~a.1804357875~i.31~rp.4&amp;w=820&amp;fwrn=4&amp;fwrnh=100&amp;lmt=1657237726&amp;num_ads=1&amp;rafmt=1&amp;armr=3&amp;sem=mc&amp;pwprc=1107331026&amp;psa=1&amp;ad_type=text_image&amp;format=820x280&amp;url=https%3A%2F%2Fwww.jb51.net%2Farticle%2F200481.htm&amp;fwr=0&amp;pra=3&amp;rh=200&amp;rw=820&amp;rpe=1&amp;resp_fmts=3&amp;wgl=1&amp;fa=27&amp;dt=1657237726553&amp;bpp=1&amp;bdt=4767&amp;idt=-M&amp;shv=r20220630&amp;mjsv=m202206300101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3D35df99c5842cb995-22cc22e514d500b4%3AT%3D1657237728%3ART%3D1657237728%3AS%3DALNI_MYFi7_V7E9Y34pGGkDDhymPzGjMSA&amp;gpic=UID%3D00000779a5a55796%3AT%3D1657237728%3ART%3D1657237728%3AS%3DALNI_MbuQSFlfXq01eTsalMFshhfCIc_Gw&amp;prev_fmts=0x0%2C820x280%2C820x280%2C300x250&amp;nras=2&amp;correlator=4031632280928&amp;frm=20&amp;pv=1&amp;ga_vid=1695232297.1657237726&amp;ga_sid=1657237726&amp;ga_hid=540236444&amp;ga_fc=0&amp;u_tz=480&amp;u_his=1&amp;u_h=1080&amp;u_w=1920&amp;u_ah=1040&amp;u_aw=1920&amp;u_cd=24&amp;u_sd=1&amp;adx=367&amp;ady=2468&amp;biw=1903&amp;bih=955&amp;scr_x=0&amp;scr_y=882&amp;eid=44759876%2C44759927%2C44759842%2C44763507%2C31068196%2C42531605%2C42531607%2C31062931&amp;oid=2&amp;pvsid=1394888775609698&amp;tmod=1129182395&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3DOuJOJCZChKxQiHeTDGQsiDfUYVjLYrTBwnfBtAxXhyPxhidW6c08yPycGU2515trg64mFnUEOnHVhuSt1jbTTq%26wd%3D%26eqid%3De8184fa00029e56f0000000662c770d1&amp;eae=0&amp;fc=1408&amp;brdim=-8%2C-8%2C-8%2C-8%2C1920%2C0%2C1936%2C1056%2C1920%2C955&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=128&amp;bc=31&amp;ifi=5&amp;uci=a!5&amp;btvi=3&amp;fsb=1&amp;xpc=1U86eiy6Re&amp;p=https%3A//www.jb51.net&amp;dtd=22" data-google-container-id="a!5" data-google-query-id="CMOJ39H75_gCFe0AXAodWyUEiw" data-load-complete="true" width="820" height="280" frameborder="0"></iframe></ins></ins></ins></div>
+<p>4.重启sonarqube服务，再次访问http://localhost:9000，会稍微有点慢，因为要初始化数据库信息</p>
+<p>5.数据库初始化成功后，登录</p>
+<p>6.按照下图的点击顺序，进入插件安装页面</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171925.png"></p>
+<p>7.搜索chinese Pack，安装中文语言包</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171926.png"></p>
+<p>8.安装成功后，重启sonarqube服务，再次访问http://localhost:9000/，即可看到中文界面</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171927.png"></p>
+<p><strong>三、使用篇</strong></p>
+<p>1.打开D:\sonar\sonar-scanner-2.5\conf\sonar-runner.properties文件</p>
+<p>2.mysql节点下输入以下信息</p>
+<p style="background-color: rgb(235, 235, 235); text-align: center; padding: 0px; margin: 20px 0px;"><img style="border:none;padding:0" src="https://img.jbzj.com/erweima/javajsmb.png" alt="Java技术迷"></p><blockquote>
+<p>sonar.jdbc.url=jdbc:mysql://172.16.30.228:3306/qjfsonar?useUnicode=true&amp;characterEncoding=utf8&amp;rewriteBatchedStatements=true&amp;useConfigs=maxPerformance<br>
+sonar.jdbc.username=gmsd<br>
+sonar.jdbc.password=gmsdtrade</p>
+</blockquote>
+<p>注意：如果测试项目与服务器不在同一台机子，则需要添加服务器的IP：</p>
+<blockquote>
+<p>#----- Default SonarQube server</p>
+<p>sonar.host.url=http://XXX.XXX.XXX.XXX:9000[/code]</p>
+</blockquote>
+<p>3.配置环境变量</p>
+<p>a.新建变量，name=SONAR_RUNNER_HOME。value=D:\sonar\sonar-scanner-2.5</p>
+<p>b.打开path，输入%SONAR_RUNNER_HOME%\bin;</p>
+<p>c.sonar-runner -version，出现以下信息，则表示环境变量设置成功</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171928.png"></p>
+<p>4.打开要进行代码分析的项目根目录，新建sonar-project.properties文件</p>
+<p>5.输入以下信息</p>
+<blockquote>
+<p># must be unique in a given SonarQube instance<br>
+sonar.projectKey=my:project<br>
+# this is the name displayed in the SonarQube UI<br>
+sonar.projectName=apiautocore<br>
+sonar.projectVersion=1.0<br>
+<br>
+# Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.<br>
+# Since SonarQube 4.2, this property is optional if sonar.modules is set. <br>
+# If not set, SonarQube starts looking for source code from the directory containing <br>
+# the sonar-project.properties file.<br>
+sonar.sources=src<br>
+<br>
+# Encoding of the source code. Default is default system encoding<br>
+#sonar.sourceEncoding=UTF-8</p>
+</blockquote>
+<p>其中：projectName是项目名字，sources是源文件所在的目录</p>
+<p>6.设置成功后，启动sonarqube服务，并启动cmd</p>
+<p>7.在cmd进入项目所在的根目录，输入命令：sonar-runner，分析成功后会出现下图</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171929.png"></p>
+<p>8.打开http://localhost:9000/，我们会看到主页出现了分析项目的概要图</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411171930.png"></p>
+<p>9.我们点击项目，选择问题链接，会看到分析代码的bug，哇，好多</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411172031.png"></p>
+<p>10.选择一个最严重的bug，看看</p>
+<p style="text-align: center"><img alt="" src="//img.jbzj.com/file_images/article/202011/2020112411172032.png"></p>
