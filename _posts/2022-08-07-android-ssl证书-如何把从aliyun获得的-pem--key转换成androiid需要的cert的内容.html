@@ -1,0 +1,20 @@
+<p>1. 我们从aliyun上拿到的ssl证书文件都是这样的:
+</p>
+<p>1. 下载后是一个zip文件</p>
+<p>2. 该文件包含了 .pem,&#160; .key 2个文件</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20220711_081527.png" /></p>
+<p>所以很简单, 我们使用cat 命令, 把上面2个文件组合成一个文件即可.&#160; (记得key 文件的内容放在上面, pem的放在下面)</p>
+<p>cat *.key *.pem &gt; new_file.cert&#160;</p>
+<p>就可以了.</p>
+<p>组合好之后的 cert文件 看起来如下:</p>
+<pre>-----BEGIN RSA PRIVATE KEY-----   (这部分就是来自于 .key )
+MIIEowIBAAKCAQEAn4kJAsVn5TId/6LeK1e3Bfl8vAeXtrftwN0sv/0auWPhNDSJ
+......
+CtsTvwrwfzOz3QBiOI5uBAlnw3a3yvgZW4j21U2TSjR70tY21FA8
+-----END RSA PRIVATE KEY-----
+-----BEGIN CERTIFICATE-----      (从这里开始就是  .pem 的内容)
+MIIHkjCCBXqgAwIBAgIQCMrtjurCK6t1azVthByyETANBgkqhkiG9w0BAQsFADBc
+MQswCQYDVQQGEwJVUzEXMBUGA1UEChMORGlnaUNlcnQsIEluYy4xNDAyBgNVBAMT
+.....
+
+</pre>
