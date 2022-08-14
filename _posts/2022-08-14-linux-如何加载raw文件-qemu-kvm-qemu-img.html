@@ -1,0 +1,23 @@
+<p>refer to: https://www.aikaiyuan.com/10526.html</p>
+<p>一般这样的raw 文件都很大。属于虚拟机的最原始文件。</p>
+<p>可以这样查看</p>
+<pre> fdisk -lu m-xx_data_xvdb.raw
+Disk m-xx_data_xvdb.raw: 500 GiB, 536870912000 bytes, 1048576000 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes</pre>
+<p>这样的文件，可以直接加载：</p>
+<p>mkdir /mnt/xx</p>
+<p>mnt sudo mount -o loop m-xx_data_xvdb.raw /mnt/xx</p>
+<p>对于有的文件，需要计算偏移量，再mnt: </p>
+<pre>Disk m-yy.raw: 200 GiB, 214748364800 bytes, 419430400 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x77ba45a4
+
+Device                             Boot Start           End      Sectors  Size   Id  Type
+m-yy-raw1                          *    2048      419428351    419426304  200G   83  Linux</pre>
+<p>从上面可以看到， m-yy-raw1 对应的 start = 2048 ,所以mnt命令是：</p>
+<p>sudo mount -o loop,offset=$((2048 * 512 )) m-yy.raw /mnt/yy</p>
