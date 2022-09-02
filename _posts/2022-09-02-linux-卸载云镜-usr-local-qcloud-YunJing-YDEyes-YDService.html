@@ -1,0 +1,12 @@
+<p>refer to: https://blog.csdn.net/zhangpeterx/article/details/89704532</p>
+<p>发现一台机器上 YDService 的CPU运行时间是最长的 ，</p>
+<p>如果不是这台机器的CPU负载刚刚达到40多，我也不会理会这个小进程的。</p>
+<p>把它果断干掉啊。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20220903_175147.png" /></p>
+<p>sudo su</p>
+<p>cd /usr/local/qcloud/YunJing/</p>
+<p>./uninst.sh</p>
+<pre>./uninst.sh
+sh: 0: getcwd() failed: No such file or directory
+remove YunJing software success</pre>
+<p>这方面 腾讯一直很良心， 不像某些厂商，想删掉用sudo kill 都删不到</p>
