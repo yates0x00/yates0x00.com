@@ -1,0 +1,67 @@
+<p>refer to: <br /><a href="https://www.52pojie.cn/forum.php?mod=viewthread&amp;tid=1650667 " target="_blank">https://www.52pojie.cn/forum.php?mod=viewthread&amp;tid=1650667</a>
+</p>
+<p>1. 下载：</p>
+<div><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_154058.png" /></div>
+<p>2.正常安装即可。</p>
+<p>3. </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_155230.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_155310.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_155335.png" /></p>
+<p>然后就可以看到下面的页面，无法使用</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_155559.png" /></p>
+<p>使用管理员打开CMD， 然后输入：nessuscli.exe fetch --challenge</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_155825.png" /></p>
+<p>打开浏览器，输入这个URL： <a href="https://www.tenable.com/products/nessus/nessus-essentials " target="_blank">https://www.tenable.com/products/nessus/nessus-essentials</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_160036.png" /></p>
+<p>输入表格，然后查看邮件，</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_160118.png" /></p>
+<p>打开这个页面： <br /><a href="https://plugins.nessus.org/v2/offline.php " target="_blank">https://plugins.nessus.org/v2/offline.php</a>&#160; （很慢，直接打开不要使用浏览器， 2,3 分钟才打开）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_160510.png" /></p>
+<p>点击 submit之后，还是慢， 这里要等，</p>
+<p>这个是我翻车了。。。额。。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_161853.png" /></p>
+<p>换了一个email， 重复上面步骤，可以了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_162253.png" /></p>
+<p>会下载2个文件： nessus.license 和 all-2.0.tar.gz<br /><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_162331.png" /></p>
+<p>然后将这两个文件复制到安装目录下：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_162550.png" /></p>
+<p>然后使用管理员，进入到cmd line, </p>
+<p>nessuscli.exe update all-2.0.tar.gz</p>
+<p>时间会比较久，等一等.&#160; 注意这个 "template version 202210311525" </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_171330.png" /></p>
+<p>根据上面得到的 version, 在任意位置创建文件： （替换下文中的202206131808）plugin_feed_info.inc</p>
+<pre>PLUGIN_SET = "202206131808";
+PLUGIN_FEED = "ProfessionalFeed(Direct)";
+PLUGIN_FEED_TRANSPORT = "TenableNetwork Security Lightning";
+</pre>
+<p>将plugin_feed_info.inc分别复制到安装目录nessus\nessus和nessus\nessus\plugins目录下。</p>
+<p>然后将 nessus/plugins 整个目录都copy到某个位置。留着待用 这个文件夹很大</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221112_172941.png" /></p>
+<p>plugins文件夹复制完成后，输入net stop "Tenable Nessus"、netstart "Tenable Nessus"重启服务</p>
+<pre>C:\softwares\Nessus&gt;net stop "Tenable Nessus"
+Tenable Nessus 服务正在停止.
+Tenable Nessus 服务已成功停止。
+
+
+C:\softwares\Nessus&gt;net start "Tenable Nessus"
+Tenable Nessus 服务正在启动 .
+Tenable Nessus 服务已经启动成功。</pre>
+<p>此时回到浏览器，刷新页面，点击 "new scan", 会看到仍然无法扫描：(因为我们的破解还未结束）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_071020.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_071246.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_070656.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_070831.png" /></p>
+<h3>破解</h3>
+<p>等plugin编译好了之后，停止服务</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221113_091403.png" /></p>
+<p>停止服务：</p>
+<pre>c:\softwares\Nessus&gt;net stop "Tenable Nessus"
+Tenable Nessus 服务正在停止.
+Tenable Nessus 服务已成功停止。</pre>
+<p>然后把 plugins文件夹（刚才做了备份的那个） 和 文件 plugin_feed_info.inc copy 到 Nessus目录（这个是安装目录，例如完整名称 C:\softwares\Nessus）下的 nessus 目录 （该目录下原本包含了plugin目录）</p>
+<p>3、按顺序输入以下3个命令（实际路径需根据实际安装目录进行调整）。<br />attrib +s +r +h “E:\software\nessus\nessus\plugins\*.*”<br />attrib +s +r +h “E:\software\nessus\nessus\plugin_feed_info.inc”<br />attrib -s -r -h “E:\software\nessus\nessus\plugins\plugin_feed_info.inc”</p>
+<p>4、 启动服务net start "Tenable Nessus"。</p>
+<p>5、 打开浏览器https://127.0.0.1:8834等待插件编译完成。</p>
+<p> 6、 编译完成后，可以看到已经出现扫描功能</p>
+
