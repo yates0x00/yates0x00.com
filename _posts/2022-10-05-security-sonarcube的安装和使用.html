@@ -1,0 +1,130 @@
+<p>refer to: <br /><a href="https://docs.sonarqube.org/latest/setup/get-started-2-minutes/ " target="_blank">https://docs.sonarqube.org/latest/setup/get-started-2-minutes/</a>
+</p>
+<p>sonarcube (唢呐盒子？)&#160;&#160; sonar: 声呐 cube: 立方体。 好吧，我这翻译。。。 唢呐盒子挺好记~</p>
+<p>它是用来扫描漏洞的工具，主要是静态代码扫描</p>
+<p>注意：不一定准确，需要跟 fortify nessus, appscan , cve&#160; ，google ，fofa/shodan 等共同使用。</p>
+<h3>前提：</h3>
+<p>建议在虚拟机中安装和使用（没有的话也没事儿），及时切换JDK就行。</p>
+<h3>安装</h3>
+<p>安装 jdk11:&#160; <br /><a href="https://adoptium.net/releases.html?variant=openjdk11&amp;jvmVariant=hotspot " target="_blank">https://adoptium.net/releases.html?variant=openjdk11&amp;jvmVariant=hotspot</a>
+</p>
+<p>解压缩，然后设置JAVA_HOME&#160; （这里是个文件夹）和 SONAR_JAVA_PATH （这里是个java.exe 文件）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221106_073930.png" /></p>
+<h3>安装 sonarcube : </h3>
+<p>refer to: <br /><a href="https://docs.sonarqube.org/latest/setup/get-started-2-minutes/ " target="_blank">https://docs.sonarqube.org/latest/setup/get-started-2-minutes/</a>
+</p>
+<p>来这里下载：<a href="https://www.sonarqube.org/downloads/ " target="_blank">https://www.sonarqube.org/downloads/</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_082422.png" /></p>
+<p>直接解压缩就好。</p>
+<p>然后需要设置一个变量 ，注意该变量要指向 java.exe 文件</p>
+<p>SONAR_JAVA_PATH&#160;&#160; %JAVA_HOME%\bin\java.exe </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_082609.png" /></p>
+<p>然后进入到cmd line, 输入： </p>
+<p>C:\softwares\sonarqube-9.7.1.62043\bin\windows-x86-64&gt;StartSonar.bat</p>
+<p>就可以了</p>
+<p>控制台运行时输出</p>
+<p>可以看到自带了elastic search 等应用。</p>
+<pre>C:\softwares\sonarqube-9.7.1.62043\bin\windows-x86-64&gt;StartSonar.bat
+Starting SonarQube...
+2022.11.06 10:37:46 INFO  app[][o.s.a.AppFileSystem] Cleaning or creating temp directory C:\softwares\sonarqube-9.7.1.62043\temp
+2022.11.06 10:37:46 INFO  app[][o.s.a.es.EsSettings] Elasticsearch listening on [HTTP: 127.0.0.1:9001, TCP: 127.0.0.1:49713]
+2022.11.06 10:37:47 INFO  app[][o.s.a.ProcessLauncherImpl] Launch process[ELASTICSEARCH] from [C:\softwares\sonarqube-9.7.1.62043\elasticsearch]: C:\softwares\jdk11\bin\java -XX:+UseG1GC -Djava.io.tmpdir=C:\softwares\sonarqube-9.7.1.62043\temp -XX:ErrorFile=../logs/es_hs_err_pid%p.log -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djna.tmpdir=C:\softwares\sonarqube-9.7.1.62043\temp -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j2.formatMsgNoLookups=true -Djava.locale.providers=COMPAT -Dcom.redhat.fips=false -Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError -Delasticsearch -Des.path.home=C:\softwares\sonarqube-9.7.1.62043\elasticsearch -Des.path.conf=C:\softwares\sonarqube-9.7.1.62043\temp\conf\es -cp lib/* org.elasticsearch.bootstrap.Elasticsearch
+2022.11.06 10:37:47 INFO  app[][o.s.a.SchedulerImpl] Waiting for Elasticsearch to be up and running
+2022.11.06 10:38:26 INFO  app[][o.s.a.SchedulerImpl] Process[es] is up
+2022.11.06 10:41:36 INFO  app[][o.s.a.ProcessLauncherImpl] Launch process[WEB_SERVER] from [C:\softwares\sonarqube-9.7.1.62043]: C:\softwares\jdk11\bin\java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=C:\softwares\sonarqube-9.7.1.62043\temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.7.1.62043.jar;C:\softwares\sonarqube-9.7.1.62043\lib\jdbc\h2\h2-2.1.214.jar org.sonar.server.app.WebServer C:\softwares\sonarqube-9.7.1.62043\temp\sq-process16566744458069305756properties
+2022.11.06 10:44:15 INFO  app[][o.s.a.SchedulerImpl] Process[web] is up
+2022.11.06 10:44:15 INFO  app[][o.s.a.ProcessLauncherImpl] Launch process[COMPUTE_ENGINE] from [C:\softwares\sonarqube-9.7.1.62043]: C:\softwares\jdk11\bin\java -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.io.tmpdir=C:\softwares\sonarqube-9.7.1.62043\temp -XX:-OmitStackTraceInFastThrow --add-opens=java.base/java.util=ALL-UNNAMED --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Dcom.redhat.fips=false -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dhttp.nonProxyHosts=localhost|127.*|[::1] -cp ./lib/sonar-application-9.7.1.62043.jar;C:\softwares\sonarqube-9.7.1.62043\lib\jdbc\h2\h2-2.1.214.jar org.sonar.ce.app.CeServer C:\softwares\sonarqube-9.7.1.62043\temp\sq-process17889183540646455085properties
+2022.11.06 10:44:16 WARN  app[][startup] ####################################################################################################################
+2022.11.06 10:44:16 WARN  app[][startup] Default Administrator credentials are still being used. Make sure to change the password or deactivate the account.
+2022.11.06 10:44:16 WARN  app[][startup] ####################################################################################################################
+2022.11.06 10:44:39 INFO  app[][o.s.a.SchedulerImpl] Process[ce] is up
+2022.11.06 10:44:39 INFO  app[][o.s.a.SchedulerImpl] SonarQube is operational</pre>
+<p>浏览器打开 localhost:9000 即可。</p>
+<p>用户名 admin 密码 admin</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083008.png" /></p>
+<p>创建项目</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083110.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083133.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083201.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083224.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083242.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083404.png" /></p>
+<p>下载的文件是这个： sonar-scanner-cli-xx-windows.zip </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083515.png" /></p>
+<p>解压缩，然后 添加到PATH中：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_083725.png" /></p>
+<p>打开CMD， 进入到待分析的文件夹（终于开始开动了）</p>
+<p>可以看到，对于vuejs 项目，会自动的下载更新插件，</p>
+<p>（对于其他语言也是的）</p>
+
+<pre>sonar-scanner.bat -D"sonar.projectKey=my-test" -D"sonar.sources=." -D"sonar.host.url=http://localhost:9000" -D"sonar.login=sqp_e89f5add90bef5fe0fb1d96f392eede95951f???"
+
+
+C:\files\vue3_demo2&gt;sonar-scanner.bat -D"sonar.projectKey=my-test" -D"sonar.sources=." -D"sonar.host.url=http://localhost:9000" -D"sonar.login=sqp_e89f5add90bef5fe0fb1d96f392eede95951f6a8"
+INFO: Scanner configuration file: C:\softwares\sonar-scanner-cli-4.7.0.2747-windows\bin\..\conf\sonar-scanner.properties
+INFO: Project root configuration file: NONE
+INFO: SonarScanner 4.7.0.2747
+INFO: Java 11.0.14.1 Eclipse Adoptium (64-bit)
+INFO: Windows 10 10.0 amd64
+INFO: User cache: C:\Users\luelue\.sonar\cache
+INFO: Scanner configuration file: C:\softwares\sonar-scanner-cli-4.7.0.2747-windows\bin\..\conf\sonar-scanner.properties
+INFO: Project root configuration file: NONE
+INFO: Analyzing on SonarQube server 9.7.1.62043
+INFO: Default locale: "zh_CN", source code encoding: "GBK" (analysis is platform dependent)
+
+
+......
+INFO: 3 source files to be analyzed
+INFO: 3/3 source files have been analyzed
+INFO: Hit the cache for 0 out of 0
+INFO: Miss the cache for 0 out of 0
+INFO: Sensor CSS Rules [javascript] (done) | time=1919ms
+INFO: Sensor C# Project Type Information [csharp]
+INFO: Sensor C# Project Type Information [csharp] (done) | time=0ms
+INFO: Sensor C# Analysis Log [csharp]
+INFO: Sensor C# Analysis Log [csharp] (done) | time=33ms
+INFO: Sensor C# Properties [csharp]
+INFO: Sensor C# Properties [csharp] (done) | time=15ms
+INFO: Sensor HTML [web]
+INFO: Sensor HTML [web] (done) | time=240ms
+INFO: Sensor Text Sensor [text]
+INFO: 7 source files to be analyzed
+INFO: 7/7 source files have been analyzed
+INFO: Sensor Text Sensor [text] (done) | time=157ms
+INFO: Sensor VB.NET Project Type Information [vbnet]
+INFO: Sensor VB.NET Project Type Information [vbnet] (done) | time=15ms
+INFO: Sensor VB.NET Analysis Log [vbnet]
+INFO: Sensor VB.NET Analysis Log [vbnet] (done) | time=424ms
+INFO: Sensor VB.NET Properties [vbnet]
+INFO: Sensor VB.NET Properties [vbnet] (done) | time=0ms
+INFO: ------------- Run sensors on project
+INFO: Sensor Analysis Warnings import [csharp]
+INFO: Sensor Analysis Warnings import [csharp] (done) | time=3ms
+INFO: Sensor Zero Coverage Sensor
+INFO: Sensor Zero Coverage Sensor (done) | time=84ms
+INFO: SCM Publisher SCM provider for this project is: git
+INFO: SCM Publisher 5 source files to be analyzed
+INFO: SCM Publisher 5/5 source files have been analyzed (done) | time=1377ms
+INFO: CPD Executor 4 files had no CPD blocks
+INFO: CPD Executor Calculating CPD for 1 file
+INFO: CPD Executor CPD calculation finished (done) | time=31ms
+INFO: Analysis report generated in 542ms, dir size=127.7 kB
+INFO: Analysis report compressed in 264ms, zip size=23.1 kB
+INFO: Analysis report uploaded in 223ms
+INFO: ANALYSIS SUCCESSFUL, you can find the results at: http://localhost:9000/dashboard?id=my-test
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://localhost:9000/api/ce/task?id=AYRM97iMqXO6rV4GklQ0
+INFO: Analysis total time: 1:56.505 s
+INFO: ------------------------------------------------------------------------
+INFO: EXECUTION SUCCESS
+INFO: ------------------------------------------------------------------------
+INFO: Total time: 2:07.367s
+INFO: Final Memory: 17M/64M
+INFO: ------------------------------------------------------------------------</pre>
+<p>打开浏览器：可以看到json结果，但是没啥用。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_084127.png" /></p>
+<p>入口：projects -&gt; &lt;name&gt;</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_084203.png" /></p>
+<p>可以看到，这个项目还是比较安全的。（并不是）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_084236.png" /></p>
