@@ -1,0 +1,38 @@
+<p>refer to: <br /><a href="https://kubernetes.io/docs/home/ " target="_blank">https://kubernetes.io/docs/home/</a>
+</p>
+<p>K8S我其实不喜欢。这个东西太啰嗦复杂了。很难让全栈工程师上手。适用于 30人以上喜欢雇佣运维的公司。</p>
+<p>对于小团队来说，几个人，用一个ubuntu, 传统方式部署，就妥妥的了。 </p>
+<p>用K8S之前，先问问你的在线用户有多少，你的每秒并发有多少？ </p>
+<p>如果是个默默无闻的小破网站，过几年就倒闭的那种，就老老实实的别用K8S。</p>
+<p>作为程序员，我对它完全无感。</p>
+<h3>名称</h3>
+<p>k8s 由google在2014年开源，名称意为希腊语中的 舵手，飞行员。</p>
+<p>发音为 ku ber ne ti:s</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221105_081540.png" /></p>
+<h3>发展演进</h3>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221105_080524.png" /></p>
+<h3>kubernetes 的作用&#160; </h3>
+<p>可以负责启动和停止任务 ， 负责扩展， 负责 failover (故障转移）</p>
+<p>1. service的发现和 负载均衡 load balance</p>
+<p>2. 使用各种存储</p>
+<p>3. 对container的各种操作，rollout, rollback</p>
+<p>4. 自动化的为bin 打包</p>
+<p>5. 健康监测</p>
+<p>6. 密码和配置管理</p>
+<h3>kubectl </h3>
+<p><a href="https://kubernetes.io/docs/tasks/tools/ " target="_blank">https://kubernetes.io/docs/tasks/tools/</a>&#160;&#160;&#160;</p>
+<p>这是个控制k8s的工具。k8s 命令行</p>
+<p>安装</p>
+<p>curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"</p>
+<p>或者指定某个版本： curl -LO https://dl.k8s.io/release/v1.25.0/bin/linux/amd64/kubectl</p>
+<p>sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl</p>
+<p>测试：</p>
+<p>kubectl version --client</p>
+<pre>Client Version: version.Info{Major:"1", Minor:"25", GitVersion:"v1.25.3", GitCommit:"434bfd82814af038ad94d62ebe59b133fcb50506", GitTreeState:"clean", BuildDate:"2022-10-12T10:57:26Z", GoVersion:"go1.19.2", Compiler:"gc", Platform:"linux/amd64"}
+Kustomize Version: v4.5.7</pre>
+<p>单机版k8s: minikube , kind</p>
+<p>下面是kind的安装和使用</p>
+<pre>curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.17.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+</pre>
