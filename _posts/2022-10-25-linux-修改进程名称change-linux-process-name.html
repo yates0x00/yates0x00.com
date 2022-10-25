@@ -1,0 +1,18 @@
+<p>refer to <br /><a href="https://www.honeybadger.io/blog/how-to-change-the-process-name-in-ruby-for-top-and-ps/ " target="_blank">https://www.honeybadger.io/blog/how-to-change-the-process-name-in-ruby-for-top-and-ps/</a>
+</p>
+<p>找了几个。有2种方案</p>
+<p>1. 在ruby进程中修改名称。</p>
+<pre>Process.setproctitle("sleeper")
+
+puts 'hi, now sleep'
+sleep 1000
+</pre>
+<p> 然后就可以干掉它了： </p>
+<pre>ubuntu   3207073  0.2  0.6  77472 21648 pts/7    S+   14:19   0:00 sleeper
+
+kill -9 ....</pre>
+<p>无法影响puma进程，可以作用于普通进程</p>
+<p>2. 通过 exec -a 来实现 </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221013_142351.png" /></p>
+<p>缺点是 exec -a ... 启动的任务，无法修改puma的进程名称，而且一旦被干掉，当前登录的ssh terminal 也掉了。</p>
+<p>所以不太好用。</p>
