@@ -1,0 +1,78 @@
+<p>refer to: <a href="https://github.com/smartdec/smartcheck " target="_blank">https://github.com/smartdec/smartcheck</a>
+</p>
+<p><a href="https://www.getsecureworld.com/blog/top-10-solidity-smart-contract-audit-tools/ " target="_blank">https://www.getsecureworld.com/blog/top-10-solidity-smart-contract-audit-tools/</a>
+</p>
+<h3>安装</h3>
+<p>npm install @smartdec/smartcheck -g</p>
+<h3>使用</h3>
+<p>进入到项目目录。 </p>
+<p> smartcheck -p .</p>
+<p>例如，对这个sol, 就</p>
+<pre>contract EtherStore {
+    uint256 public withdrawalLimit = 1 ether;
+    mapping(address =&gt; uint256) public lastWithdrawTime;
+    mapping(address =&gt; uint256) public balances;
+
+    // 存款
+    function depositFunds() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    // 提款
+    function withdrawFunds (uint256 _weiToWithdraw) public {
+        require(balances[msg.sender] &gt;= _weiToWithdraw);
+        // limit the withdrawal
+        require(_weiToWithdraw &lt;= withdrawalLimit);
+        // limit the time allowed to withdraw
+        require(now &gt;= lastWithdrawTime[msg.sender] + 1 weeks);
+        require(msg.sender.call.value(_weiToWithdraw)());   // 这里应该使用transfer
+        balances[msg.sender] -= _weiToWithdraw;  // 这一步有漏洞，上面一行使用了call
+        lastWithdrawTime[msg.sender] = now;
+    }
+}
+</pre>
+<p>审查结果为：</p>
+<pre>Installing/Updating JRE in /home/siwei/.jdeploy...
+npm WARN deprecated har-validator@5.1.5: this library is no longer supported
+npm WARN deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm WARN deprecated node-jre@0.2.3: discontinued
+
+added 81 packages, and audited 82 packages in 23s
+
+3 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+./EtherStore.sol
+jar:file:/home/siwei/.asdf/installs/nodejs/16.15.1/.npm/lib/node_modules/@smartdec/smartcheck/jdeploy-bundle/smartcheck-2.0-jar-with-dependencies.jar!/solidity-rules.xmlruleId: SOLIDITY_CALL_WITHOUT_DATA
+patternId: om991k
+severity: 2
+line: 18
+column: 27
+content: call.value(_weiToWithdraw)()
+
+ruleId: SOLIDITY_UPGRADE_TO_050
+patternId: 83k1no
+severity: 1
+line: 18
+column: 27
+content: call.value(_weiToWithdraw)()
+
+SOLIDITY_UPGRADE_TO_050 :1
+SOLIDITY_CALL_WITHOUT_DATA :1</pre>
+<p>最关键的就是下面的2个。&#160; </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230104_182543.png" /></p>
+<p>然后，我们查一下 这2个都是啥。</p>
+<p>1. SOLIDITY_UPGRADE_TO_050 这个是可以被忽略的(ignore)</p>
+<p>2. SOLIDITY_CALL_WITHOUT_DATA 这个是 re-entrancy （重入漏洞）</p>
+<p>这个结果来自于这里：</p>
+<p><a href="https://github.com/smartbugs/smartbugs/wiki/Vulnerabilities-mapping " target="_blank">https://github.com/smartbugs/smartbugs/wiki/Vulnerabilities-mapping</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230104_183330.png" /></p>
+
