@@ -1,0 +1,34 @@
+<p>refer to: <br /><a href="https://www.lullabot.com/articles/installing-mailhog-for-ubuntu " target="_blank">https://www.lullabot.com/articles/installing-mailhog-for-ubuntu</a>
+</p>
+<p>只看官方文档不行，还是需要看上面的参考文档。</p>
+<p>MailHog是一个发送邮件的中间商。 </p>
+<p>1. 安装go</p>
+<p>2. 安装 MailHog</p>
+<p> go install github.com/mailhog/MailHog@latest<br />go install github.com/mailhog/mhsendmail@latest</p>
+<p>然后把 对应的两个 命令copy到 path文件夹下：</p>
+<p>cp /root/go/bin/MailHog /usr/local/bin/mailhog<br />cp /root/go/bin/mhsendmail /usr/local/bin/mhsendmail</p>
+<p>3. 安装php </p>
+<p>apt install php7.2-cli</p>
+<p>配置文件在&#160; /etc/php/7.2/cli</p>
+<p>在这个文件中，设置这个内容：</p>
+<p>sendmail_path = /usr/local/bin/mhsendmail</p>
+<p>4. 运行：</p>
+<p>php -r "\$from = \$to = 'iamyates.^Cina.com'; \$x = mail(\$to, 'subject'.time(), 'Hello World2222', 'From: '. \$from); var_dump(\$x);"</p>
+<p>上面的命令， 定义了 from, to 两个变量， 并且调用mail 方法。 （该方法使用了sendmail配置）</p>
+<p>5. 运行 MailHog:</p>
+<pre>mailhog \
+  -api-bind-addr 127.0.0.1:8025 \
+  -ui-bind-addr 127.0.0.1:8025 \
+  -smtp-bind-addr 127.0.0.1:1025
+</pre>
+<p>6. 打开MailHog, 可以看到啥都没有：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_125443.png" /></p>
+<p>7. 运行php命令，发送邮件：</p>
+<p>php -r "\$from = \$to = 'iamyates.^Cina.com'; \$x = mail(\$to, 'subject'.time(), 'Hello World2222', 'From: '. \$from); var_dump(\$x);"</p>
+<p>bool(true)&#160;&#160;&#160;&#160; # =&gt; 能立刻看到这个，就说明成功了。</p>
+<p>8. 进入到列表：</p>
+<p>点击一个邮件：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_125702.png" /></p>
+<p>点击这个按钮，设置release 选项：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_125633.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20221110_124943.png" /></p>
