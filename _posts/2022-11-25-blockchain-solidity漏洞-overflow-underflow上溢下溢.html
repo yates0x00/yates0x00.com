@@ -1,0 +1,96 @@
+<p>refer to: <br /><a href="https://medium.com/hackernoon/hackpedia-16-solidity-hacks-vulnerabilities-their-fixes-and-real-world-examples-f3210eba5148 " target="_blank">https://medium.com/hackernoon/hackpedia-16-solidity-hacks-vulnerabilities-their-fixes-and-real-world-examples-f3210eba5148</a>&#160;&#160; 见第二个例子</p>
+<p><a href="https://medium.com/loom-network/how-to-secure-your-smart-contracts-6-solidity-vulnerabilities-and-how-to-avoid-them-part-1-c33048d4d17d " target="_blank">https://medium.com/loom-network/how-to-secure-your-smart-contracts-6-solidity-vulnerabilities-and-how-to-avoid-them-part-1-c33048d4d17d</a>
+</p>
+
+<h3>上溢：</h3>
+<pre>  0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
++ 0x000000000000000000000000000000000001
+----------------------------------------
+= 0x000000000000000000000000000000000000
+</pre>
+<h3>下溢</h3>
+<pre>  0x000000000000000000000000000000000000
+- 0x000000000000000000000000000000000001
+----------------------------------------
+= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+</pre>
+<h3>一个例子</h3>
+<pre>pragma solidity 0.4.18;
+
+// Contract to test unsigned integer underflows and overflows
+// note: uint in solidity is an alias for uint256
+
+// Guidelines: Press "Create" to the right, then check the values of max and zero by clicking "Call"
+// Then, call overflow and underflow and check the values of max and zero again
+
+contract OverflowUnderFlow {
+    uint public zero = 0;
+    uint public max = 2**256-1;
+
+    // zero will end up at 2**256-1
+    function underflow() public {
+        zero -= 1;
+    }
+    // max will end up at 0
+    function overflow() public {
+        max += 1;
+    }
+}</pre>
+<p>一般说来 下溢 攻击更容易发生，因为网络上的转账 都是 “消耗” gas或者 balance的。</p>
+<h3>解决方案：使用SafeMath</h3>
+<p>openzepplin的源代码：</p>
+<pre>pragma solidity ^0.4.18;
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
+library SafeMath {
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    if (a == 0) {
+      return 0;
+    }
+    uint256 c = a * b;
+    assert(c / a == b);
+    return c;
+  }
+
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b &gt; 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b &lt;= a);
+    return a - b;
+  }
+
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    assert(c &gt;= a);
+    return c;
+  }
+}
+
+contract OverflowUnderFlowSafe {
+    using SafeMath for uint;
+    uint public zero = 0;
+    uint public max = 2**256-1;
+
+    // Will throw
+    function underflow() public {
+        zero = zero.sub(1);
+    }
+    // Will throw
+    function overflow() public {
+        max = max.add(1);
+    }
+
+// Contract to test unsigned integer underflows and overflows
+// note: uint in solidity is an alias for uint256
+
+// Guidelines: Press "Create" to the right, then check the values of max and zero by clicking "Call"
+// Then, call overflow and underflow and check the values of max and zero again
+}
+</pre>
