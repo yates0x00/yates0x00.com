@@ -1,0 +1,43 @@
+<p>1. python版本要正确。我现在用的是3.10</p>
+<p>2. 安装好python后，需要弄几下cmd 才可以。</p>
+<p>3. 不要通过py 来运行python ,而是要通过python3 来运行 。否则会报错 modue not found : frida </p>
+<p>4. 不要简单的复制粘贴这一段js代码，而是要手动敲一下，否则会报错； not a function</p>
+<pre>import frida, sys, time
+
+def on_message(message, data):
+    print("=== in on_message")
+    print(message)
+    print(data)
+
+jscode = """
+Java.perform(function () {
+  var target_class = Java.use('com.xx.utilslibrary.retrofit.a');
+  // var target_class = Java.use('com.xx.utilslibrary.retrofit.a');
+  var the_method = target_class.a;
+  // var the_method = target_class.a;
+//  console.info("==== step 1");
+//  the_method.implementation = function(a, b) {  // 这个代码是我之前复制粘贴的，就报错。
+//    console.info('====  a: ', a);
+//  };
+  the_method.implementation = function(a,b) {  // 这个代码是我亲手敲的，就可以。
+    console.info('==== a:', a);
+  }
+});
+"""
+
+#process = frida.get_usb_device().attach('com.xx.tong')
+#script = process.create_script(jscode)
+
+device = frida.get_usb_device()
+pid = device.spawn(["com.xx.tong"])
+device.resume(pid)
+time.sleep(1)
+
+script = device.attach(pid).create_script(jscode)
+
+script.on('message', on_message)
+print('==== script start ...')
+script.load()
+sys.stdin.read()
+
+</pre>
