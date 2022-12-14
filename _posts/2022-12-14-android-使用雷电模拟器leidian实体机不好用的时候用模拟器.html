@@ -1,0 +1,18 @@
+<p>refer to: <br /><a href="https://blog.csdn.net/qq_44361142/article/details/126705557 " target="_blank">https://blog.csdn.net/qq_44361142/article/details/126705557</a>
+</p>
+<p>注意：</p>
+<p>如果你的host机器安装了docker, wsl 等，就不要刻意去改变这个底层机制（也就是不要修改现有的hyper-v, wsl 2 等设置，否则docker就该失效了，wsl也该失效了）</p>
+<p>下载的时候 记得选择 android 9 的版本。 </p>
+<p>1. 安装个 终端模拟器。 <br /><a href="https://www.downkuai.com/android/168833.html " target="_blank">https://www.downkuai.com/android/168833.html</a>
+</p>
+<p>不要下载github上的 termux, 貌似跟雷电9 不兼容。 <br />
+</p>
+<p>2. 下载目标apk </p>
+<p>3. 雷电模拟器 -&gt; 右上角 -&gt; 设置 -&gt; 其他设置 -&gt; root 权限，打开即可。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230102_110440.png" /></p>
+<p>4. 网络 -&gt; 桥接模式 -&gt; 安装网卡驱动 -&gt; 重启 </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230102_110647.png" /></p>
+<p>5. 可以查看本机ip了</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230102_110319.png" /></p>
+<p>6. adb shell 登录后，正常操作即可。</p>
+
