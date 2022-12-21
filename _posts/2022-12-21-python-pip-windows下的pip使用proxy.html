@@ -1,0 +1,11 @@
+<p>refer to: <br /><a href="https://stackoverflow.com/questions/43473041/how-to-configure-pip-per-config-file-to-use-a-proxy-with-authentification " target="_blank">https://stackoverflow.com/questions/43473041/how-to-configure-pip-per-config-file-to-use-a-proxy-with-authentification</a>
+</p>
+<p>发现没有代理真的不行。今天想要下载个东西，20k每秒。一个中午没下好。</p>
+<p>1. 创建文件: </p>
+<p>C:\Users\&lt;username&gt;\AppData\Roaming\pip\pip.ini</p>
+<p>2. 内容为：</p>
+<p>[global]<br />proxy = http://user:password@proxy_name:port</p>
+<p>例如： <br />[global]<br />proxy = http://localhost:8080</p>
+<p>3. 保存该文件，然后正常运行pip 命令即可。</p>
+<p>对比一下速度吧，非常爽</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230102_151336.png" /></p>
