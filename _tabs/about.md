@@ -10,5 +10,11 @@ Cyber Security 从业者。
 
 喜欢看美女大长腿（钢铁直男, 无法被掰弯）
 
-联系我：aWFteWF0ZXNAc2luYS5jb20= (base64 encoded)
+联系我：
+
+email: eWF0ZXMweDAwQHNpbmEuY29t (base64 encoded)
+
+wechat:
+
+![wechat](https://media.githubusercontent.com/avatars/27897655?orig=1)
 

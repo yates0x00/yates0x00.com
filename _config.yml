@@ -30,23 +30,23 @@ description: >-
   0x00 天高任鱼跃，海阔任鸟飞~
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
-url: 'https://iamyates.github.io'
+url: 'https://yates0x00.github.io'
 
 github:
-  username: iamyates # change to your github username
+  username: yates0x00 # change to your github username
 
 #twitter:
-#  username: iamyates # change to your twitter username
+#  username: yates0x00 # change to your twitter username
 
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: Yates 0x00
-  email: iamyates@sina.com             # change to your email address
+  name: Yates0x00
+  email: yates0x00@sina.com             # change to your email address
   links:
     # The first element serves as the copyright owner's link
     #- https://twitter.com/username      # change to your twitter homepage
-    - https://github.com/iamyates # change to your github homepage
+    - https://github.com/yates0x00 # change to your github homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -116,7 +116,7 @@ assets:
     # only works if `assets.self_host.enabled` is 'true'
     env:          # [development|production]
 
-paginate: 10
+paginate: 20
 
 # ------------ The following options are not recommended to be modified ------------------
 
