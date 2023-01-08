@@ -1,0 +1,46 @@
+<p>refer to: <br /><a href="https://stackoverflow.com/questions/2198810/creating-and-writing-lines-to-a-file " target="_blank">https://stackoverflow.com/questions/2198810/creating-and-writing-lines-to-a-file</a>
+</p>
+<p>完整例子：（仅仅写）</p>
+<pre>&lt;%
+
+' Create The Object
+Set FSO = CreateObject("Scripting.FileSystemObject")
+
+' How To Write To A File
+'Set File = FSO.CreateTextFile("c:\\webhosting\\data\\data\\bar.txt",True)
+path = server.mappath("/") &amp; "/" &amp; "bar2.txt"
+response.write("path: " &amp; path)
+Set File = FSO.CreateTextFile(path,True)
+File.Write "Example String22"
+File.Close
+
+%&gt;</pre>
+<p>上面的&#160; server.mappath中，第一个参数 / 为当前目录， /data 表示当前目录下的data目录。 后面的 &amp;"/" 不能省略</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230123_091828.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230123_091947.png" /></p>
+<p>下面是一个完整的上传 asp 文件（通过提交表单达到上传的目的）</p>
+<pre>&lt;%
+response.write("current path: " &amp; server.mappath("/"))
+
+If request("file_name") &lt;&gt; "" Then
+  Set FSO = CreateObject("Scripting.FileSystemObject")
+
+  file_name = request("file_name")
+  file_extension = request("file_extension")
+  path = server.mappath("/") &amp; "/" &amp; file_name &amp; "." &amp; file_extension
+  response.write("path: " &amp; path)
+  Set File = FSO.CreateTextFile(path,True)
+  File.Write request("file_content")
+  File.Close
+End If
+
+%&gt;
+&lt;form method=POST&gt;
+  file name: &lt;input type="text" name="file_name" placeholder="e.g. my_page"/&gt; &lt;br/&gt;
+  file ext : &lt;input type="text" name="file_extension" placeholder="e.g. asp"/&gt; &lt;br/&gt;
+  content: &lt;br/&gt;
+  &lt;textarea name="file_content" style='width: 300px; height: 200px'&gt;
+  &lt;/textarea&gt; <br />
+  &lt;input type="submit" value="submit" /&gt;
+&lt;/form&gt;
+</pre>
