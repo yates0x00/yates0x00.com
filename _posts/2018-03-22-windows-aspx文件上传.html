@@ -1,0 +1,60 @@
+<p>refer to: <br /><a href="https://stackoverflow.com/questions/3167240/asp-net-file-upload " target="_blank">https://stackoverflow.com/questions/3167240/asp-net-file-upload</a>
+</p>
+<p>1. 需要一个html入口：asp_net_upload_demo.html</p>
+<pre>&lt;h3&gt;ASPX file upload demo&lt;/h3&gt;
+
+&lt;iframe height="40" width="700" src="Uploadfile.aspx"&gt;
+&lt;/iframe&gt;
+</pre>
+<p>2.Uploadfile.aspx的内容为：</p>
+<pre>&lt;!--
+Usage: visit `asp_net_upload_demo.html`
+--&gt;
+&lt;%@ Page Language="C#" AutoEventWireup="true" CodeFile="Uploadfile.aspx.cs" Inherits="Uploadfile" %&gt;
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+&lt;head runat="server"&gt;
+    &lt;title&gt;File Upload Control&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;form id="form1" runat="server"&gt;
+    &lt;div&gt;
+    &lt;asp:FileUpload  runat="server" ID="fuSample" /&gt;
+    &lt;asp:Button  runat="server" ID="btnUpload" Text="Upload"
+            onclick="btnUpload_Click" /&gt;
+            &lt;asp:Label runat="server" ID="lblMessage" Text=""&gt;&lt;/asp:Label&gt;
+    &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+</pre>
+<p>3. Uploadfile.aspx.cs</p>
+<pre>/*
+ * Usage:
+ * please change the Server.MapPath parameter as your file upload folder
+ * default is: "./data"
+ * visit `asp_net_upload_demo.html`
+ *
+ * */
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+public partial class Uploadfile : System.Web.UI.Page
+{
+  protected void Page_Load(object sender, EventArgs e)
+  {
+  }
+  protected void btnUpload_Click(object sender, EventArgs e)
+  {
+    //Files is folder Name
+    fuSample.SaveAs(Server.MapPath("/data") + "//" + fuSample.FileName);
+    lblMessage.Text = "File Successfully Uploaded";
+  }
+}
+</pre>
+<p>把这三个文件放到iis的文件夹下面，就可以了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230124_092829.png" /></p>

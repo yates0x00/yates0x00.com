@@ -1,0 +1,66 @@
+<p>refer to: <a href="https://zhuanlan.zhihu.com/p/394060852 " target="_blank">https://zhuanlan.zhihu.com/p/394060852</a>
+</p>
+<p>下面是通过webshell 运行的命令，搜集系统信息：<br />
+</p>
+<p>systeminfo </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_073947.png" /></p>
+<p>net user: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_073903.png" /></p>
+<p>netstat -ano </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_074420.png" /></p>
+<p>wmic os </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_075354.png" /></p>
+<p>wmic qfe</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_075337.png" /></p>
+<p>wmic product</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_075823.png" /></p>
+<p>whoami</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_075854.png" /></p>
+<p>wmic service list brief 列出service </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_080110.png" /></p>
+<p>wmic process list brief </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_080336.png" /></p>
+<p>net share 查看本机的共享列表</p>
+<p>netsh firewall show config 查看防火墙配置</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_081040.png" /></p>
+<p>linux中管理员为root, windows 中则是system </p>
+<h3>xp, 2000, 2003系统：at </h3>
+<p>at 提权： 在windows 7 中就已经不行了，大概是10年前。 </p>
+<p>cmd&gt; at 08:42 /interactive cmd&#160; </p>
+<p>就会在 特定时间弹出cmd 窗口， 原理是at是用管理员运行的，所以弹出的窗口就是管理员权限。</p>
+<h3>根据系统内核提权</h3>
+<p>根据系统信息，看看系统的版本和打的补丁，然后到metasploitframework中去搜索，然后使用 meterpreter:&#160; post/windows/gather/enum_patches&#160; 创建一个扫描程序（应该是的）进行扫描。</p>
+<p>windows7, 8 , windows server 2003, 2008, 2012, 2016&#160; sc命令</p>
+<p>注意下面的命令中， = 右侧都有个空格。否则会报错。</p>
+<pre>cmd&gt; sc Create systemcmd binPath= "cmd /K start" type= own type= interact
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_085001.png" /></p>
+<p>可以看到创建 service 成功。</p>
+<p>然后没结束，我们需要启动该service :&#160;&#160; &gt; sc start systemcmd</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_085827.png" /></p>
+<p>点击该弹窗 -&gt; 查看</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_085849.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_085548.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230119_091200.png" /></p>
+<p>可以在cmd 下创建和编辑文件. </p>
+<p>没有打开我的电脑。没有深入研究。 有cmd就够了。</p>
+<h3>psexec win 2003, win 2008</h3>
+<p>来这里下载：<br /><a href="https://learn.microsoft.com/zh-cn/sysinternals/downloads/pstools " target="_blank">https://learn.microsoft.com/zh-cn/sysinternals/downloads/pstools</a>
+</p>
+<p>psexec.exe -accepteula -s -i -d cmd.exe</p>
+<p>下面的都没试过 TODO</p>
+<h3>UAC： user account control 用户账户控制</h3>
+<p>一般通过msf 拿到 meterpreter之后，就可以绕过UAC</p>
+<p>#Msf （未正式）<br />exploit/windows/local/ask      #弹出UAC确认窗口，点击后获得system权限<br />exploit/windows/local/bypassuac<br />exploit/windows/local/bypassuac_injection<br />exploit/windows/local/bypassuac_fodhelper<br />exploit/windows/local/bypassuac_eventvwr<br />exploit/windows/local/bypassuac_comhijack</p>
+<p>令牌窃取 Token&#160; ，适用于 windows 2008 和之前的版本</p>
+<h3>烂土豆令牌窃取</h3>
+<h3>可信任服务路径漏洞</h3>
+<p>有的服务是带空格的，例如： c:\tencent apps\tencent\...&#160;&#160; 带引号就没漏洞</p>
+<p>(copy: )不带引号时：我们认为的服务路径是C:\Program Files (x86)\Common Files\Tencent\QQMusic\QQMusicService.exe，但是由于没有双引号的包裹，Windows会认为C:\Program空格后面的为Program这个程序的参数来进行启动服务。这样攻击者就可以命名一个为Program.exe的后门文件放在c盘下，进而等待含漏洞服务路径的启动或重启导致后门文件的执行。</p>
+<p>使用wmic 来查找，监听，上传文件(program.exe )然后配合msf 提权</p>
+<p>sctask</p>
+<p>unattended install </p>
+<p>AlwaysInstallElevated</p>
+<p>DLL劫持提权</p>
+<p>这里需要知道加载DLL的路径的顺序</p>
+<p>数据库提权</p>
