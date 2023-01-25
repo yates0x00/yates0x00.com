@@ -1,0 +1,109 @@
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093644.png" /></p>
+<p>refer to: <br /><a href="https://github.com/0x727/ShuiZe_0x727 " target="_blank">https://github.com/0x727/ShuiZe_0x727</a>
+</p>
+<h3>正常安装需要python 3.9， 已经失败</h3>
+<p>1. git clone <a href="https://github.com/0x727/ShuiZe_0x727.git " target="_blank">https://github.com/0x727/ShuiZe_0x727.git</a>
+</p>
+<p>2. chmod 777 build.sh</p>
+<p>3. sudo ./build.sh</p>
+<p>可以直接使用这个项目中的docker-compose.yml:&#160; <br /><a href="https://github.com/1itt1eB0y/MyCollection " target="_blank">https://github.com/1itt1eB0y/MyCollection</a>
+</p>
+<h3>填写各种测绘用的API。 （没有它不行）</h3>
+<p>然后把 iniFile/config.ini 文件填写好。</p>
+<pre>[fofa api]
+EMAIL = zhang.???
+KEY = b7168f800e5a9fd593bc8???
+
+[shodan api]
+SHODAN_API_KEY = YNvOQp3pZVephDCxVwh???
+
+[github api]
+GITHUB_TOKEN = github_pat_11AZBYBMY???
+
+[quake api]
+X-QuakeToken = d3948aa5-4509-4e????
+
+[quake nums]
+quake_nums = 1000
+
+[qianxin api]
+api-key =
+qianxin_nums = 200
+
+[C nums]
+c_nums = 5
+
+[virustotal api]
+VIRUSTOTAL_API = 776002554dc9e9c???
+
+[securitytrails api]
+Securitytrails_API = LVu9bl8j???
+
+[censys api]
+UID = e9d6ab52-df86-4d13-???
+SECRET = COmwKZbwcNkVY???
+
+[web ports]
+web_ports = ['80-90', 443, 7001, 8000, 8008, 8009, 8080, 8081, 8088, 8090, 8099, 8443, 8800, 8880, 8888, 9000, 9090]
+
+[service ports dict]
+service_ports_dict = {'389': 'ldaps', '1099': 'rmi', '1090': 'rmi', '6379': 'redis', '8000': 'jdwp', '9200': 'elastic', '27017': 'mongodb', '2181': 'zookeeper', '22': 'ssh', '21': 'ftp', '
+1433': 'mssql', '3306': 'mysql', '3389': 'rdp'}
+
+[github keywords]
+github_keywords = ['jdbc:', 'password', 'username', 'database', 'smtp', 'vpn', 'pwd', 'passwd', 'connect']
+
+[nuclei config]
+nuclei_config = -rl 300 -c 50 -timeout 5 -stats -silent -severity critical,high -as
+
+# 快代理的配置，使用快代理时，根据自己购买的配置设置线程数目，switch是开关，on为使用快代理，off为不使用
+[kuaidaili]
+tunnel = xxxx.kdltps.com:15818
+username = xxxxxxxxx
+password = xxxxxxxxx
+thread_num = 5
+switch = off</pre>
+<p><br /><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_092248.png" /></p>
+<p>然后就可以运行了：</p>
+<p>进入 docker ,</p>
+<p>cd /ShuiZe_0x727</p>
+<p>python3 ShuiZe.py -d yoursite.com</p>
+<p>就可以了。</p>
+<p>结果放在 result 目录下</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_092510.png" /></p>
+<p>过程中会出现很多的LOG， 很有帮助，可以用来调试。</p>
+<p>过程大概是：</p>
+<p>1. 搜集资产: 子域名，ip ,&#160; ip 反查域名， email 等,&#160; 备案信息</p>
+<p>2. 看一下哪些域名可以访问</p>
+<p>3. 看一下哪些域名中有特定漏洞</p>
+<h3>结果</h3>
+<p>是一个 excel文件，用wps打开即可。（支持国货!）</p>
+<p>tab1. 备案反查域名. </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_092840.png" /></p>
+<p>tab2. github敏感信息。</p>
+<p>tab3. 爬虫</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_092852.png" /></p>
+<p>tab4. 证书与信任的域名</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_092955.png" /></p>
+<p>tab5. 子域名A记录。很重要，子域名资产都有了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093130.png" /></p>
+<p>6. host碰撞</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093146.png" /></p>
+<p>7. 动态链接和后台地址</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093201.png" />
+</p>
+<p>8. 网络空间搜索引擎</p>
+<img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093215.png" />
+
+<p>9. 服务</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093652.png" /></p>
+<p>10. ip反查</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_093907.png" /></p>
+<p>11. 网站标题</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_094009.png" /></p>
+<p>12. 可能存在的漏洞。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_094109.png" /></p>
+<p>13. 存活网站标题</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_094121.png" /></p>
+<p>14. 相关域名和C段IP</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_094312.png" /></p>
