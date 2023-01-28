@@ -1,0 +1,29 @@
+<p>refer to: <br /><a href="https://doveip.com/ " target="_blank">https://doveip.com/</a>
+</p>
+<p>1. 注册， 登录</p>
+<p>2. 充值，可以选择 TRX 的usdt</p>
+<p>3. 使用</p>
+<p>3.1 获得 token </p>
+<p>curl -d "user=abcd&amp;password=abcd" https://dvapi.doveproxy.net/cmapi.php?rq=login</p>
+<p>{"errno":200,"msg":"Success","data":{"token":"OXhRbHd2MHVvaWZKckd2Vml0SVArUT09"}}</p>
+<p>3.2 获得 ip </p>
+<p>各种参数：（具体见：<a href="https://doveip.com/admin.php?s=/tutorials/api.html&amp;lang=en-us#show-ip-api " target="_blank">https://doveip.com/admin.php?s=/tutorials/api.html&amp;lang=en-us#show-ip-api</a>&#160; ）</p>
+<p>user= dove ip 用户名</p>
+<p>password= 密码</p>
+<p>token: 刚刚申请的token </p>
+<p>auth: 0 是否是白名单（任何人都可以使用）</p>
+<p>geo: 从哪个国家来拿ip&#160; </p>
+<p>agreement: 代理类型&#160; 0: socks5,&#160; 1: http </p>
+<p>type_ip:&#160; 1 ipv4,&#160; 2&#160; ipv6</p>
+<p>timeout: 10~35 之间，单位是分钟。 ip的有效时间。</p>
+<p>国家和城市列表： （看这个）<a href="https://doveip.com/index.php?s=/documentation/city.html&amp;lang=en-us " target="_blank">https://doveip.com/index.php?s=/documentation/city.html&amp;lang=en-us</a> </p>
+<p>这个决定了你能否的到ip proxy</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230110_083243.png" /></p>
+<p>curl -ipv4 -d "user=xxx&amp;password=xxx&amp;token=dGc3V3Rnb2EzTERpckJpUXBUSjRRZz09&amp;auth=0&amp;geo=tr&amp;agreement=0&amp;timeout=35&amp;type_ip=1" https://dvapi.doveproxy.net/cmapi.php?rq=distribute</p>
+<p>{"errno":200,"msg":"Success","data":{"geo":"mx","ip":"47.253.12.97","port":40004,"d_ip":"189.203.105.247"}}</p>
+<p>获得ip的结果：</p>
+<p>geo: 哪个国家的</p>
+<p>ip: 使用者使用的ipd</p>
+<p>port: 使用者使用的端口</p>
+<p>d_ip: 目标网站 被访问时，看到的ip 地址（真实暴露的ip）</p>
+<p>然后就可以在你的本地使用了（注意）</p>
