@@ -1,0 +1,93 @@
+<p>refer to: </p>
+<p><a href="https://github.com/projectdiscovery/nuclei " target="_blank">https://github.com/projectdiscovery/nuclei</a>
+</p>
+<p><a href="https://nuclei.projectdiscovery.io/nuclei/get-started/ " target="_blank">https://nuclei.projectdiscovery.io/nuclei/get-started/</a>
+</p>
+<p>非常强大的工具，最初知道它是在shuize上。 发现这个命令怎么都会报错。于是到官方看了一下，利器啊。</p>
+<p>nuclei是工具， nuclei-template则是具体的刀尖。 缺一不可。</p>
+<h3>安装 （貌似docker 有问题）</h3>
+<p>1. 安装go 1.19&#160;&#160; ( asdf install golang ... )</p>
+<p>2. go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest</p>
+<p>3. asdf reshim golang 即可。</p>
+<p>官方文档： <br /><a href="https://nuclei.projectdiscovery.io/nuclei/get-started/ " target="_blank">https://nuclei.projectdiscovery.io/nuclei/get-started/</a>
+</p>
+<h3>使用 nuclei -h&#160;</h3>
+<p>首次运行： 如果没有template的话会自动下载</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_070855.png" /></p>
+<h3>快速扫描某个站点&#160;&#160; </h3>
+<p>nuclei -u yates0x00.com </p>
+<h3>增加debug</h3>
+<p>nuclei -u yates0x00.com --debug -v </p>
+<h3>保存结果到某个文件夹 -irr -me my_result</h3>
+<p>见下面命令</p>
+<h3>使用特定的template id 来扫描</h3>
+<p>nuclei -u https://webmail.support.beiersdorf.com/  -vv -id roundcube-log-disclosure,roundcube-webmail-portal -irr -markdown-export 1report -debug -v</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_071404.png" /></p>
+<h3>查看 template id</h3>
+<p>find ~/nuclei-templates | grep roundcube </p>
+<pre>./exposures/logs/roundcube-log-disclosure.yaml
+./technologies/roundcube-webmail-portal.yaml</pre>
+<p>打开之后可以看到id&#160; 以及 其他的基本信息</p>
+<p>severity （严重程度， 是sev.. 不是 serv...） 的级别：&#160; info, low, medium, high, critical, unknown...</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_071614.png" /></p>
+<p>请求数量过多，如何恢复？</p>
+<p>当请求过多，没有-debug参数时，会发现屏幕一直被卡住，所以按ctrl + c 会自动生成一个resume.cfg文件；</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_071912.png" /></p>
+<p>对它恢复使用：</p>
+<p>nuclei -resume /home/siwei/.config/nuclei/resume-cfeorhvotj9ut300000g.cfg -debug</p>
+<p>查看debug的各种输出：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_073922.png" /></p>
+<p>一般的输出：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_073727.png" /></p>
+<p>再来个文字版吧：</p>
+<p>[email-extractor] [http] [info] http://yates0x00.com [shensiwei@sina.com] </p>
+<p>[ id ]&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; [返回的结果]</p>
+<pre>_@DESKTOP-GG23M21-wsl- bin$ ./nuclei -u http://yates0x00.com
+
+                     __     _
+   ____  __  _______/ /__  (_)
+  / __ \/ / / / ___/ / _ \/ /
+ / / / / /_/ / /__/ /  __/ /
+/_/ /_/\__,_/\___/_/\___/_/   v2.8.8
+
+                projectdiscovery.io
+
+[INF] Using Nuclei Engine 2.8.8 (latest)
+[INF] Using Nuclei Templates 9.3.6 (latest)
+[INF] Templates added in last update: 30
+[INF] Templates loaded for scan: 4870
+[INF] Targets loaded for scan: 1
+[INF] Templates clustered: 960 (Reduced 881 Requests)
+[nginx-version] [http] [info] http://yates0x00.com [nginx/1.10.3]
+[email-extractor] [http] [info] http://yates0x00.com [shensiwei@sina.com]  后面这个是邮箱的结果
+[INF] Using Interactsh Server: oast.fun
+[http-missing-security-headers:clear-site-data] [http] [info] http://yates0x00.com
+[http-missing-security-headers:cross-origin-embedder-policy] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-expose-headers] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-max-age] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-allow-headers] [http] [info] http://yates0x00.com
+[http-missing-security-headers:strict-transport-security] [http] [info] http://yates0x00.com
+[http-missing-security-headers:content-security-policy] [http] [info] http://yates0x00.com
+[http-missing-security-headers:x-frame-options] [http] [info] http://yates0x00.com
+[http-missing-security-headers:x-content-type-options] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-allow-methods] [http] [info] http://yates0x00.com
+[http-missing-security-headers:permissions-policy] [http] [info] http://yates0x00.com
+[http-missing-security-headers:x-permitted-cross-domain-policies] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-allow-credentials] [http] [info] http://yates0x00.com
+[http-missing-security-headers:access-control-allow-origin] [http] [info] http://yates0x00.com
+[http-missing-security-headers:referrer-policy] [http] [info] http://yates0x00.com
+[http-missing-security-headers:cross-origin-opener-policy] [http] [info] http://yates0x00.com
+[http-missing-security-headers:cross-origin-resource-policy] [http] [info] http://yates0x00.com
+[waf-detect:nginxgeneric] [http] [info] http://yates0x00.com/
+[nameserver-fingerprint] [dns] [info] yates0x00.com [f1g1ns1.dnspod.net.,f1g1ns2.dnspod.net.]
+[openssh-detect] [network] [info] yates0x00.com:22 [SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.4]</pre>
+<h3>根据tags来进行查询：(tags) 与输出 ( -irr: 包含request/response, -o,&#160; -me markdown, -se sarif format </h3>
+<p>nuclei -u yates0x00.com -tags ruby,rails,refinery,linux,ubuntu  -irr -o result1 -me result2 -se result3</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_075123.png" /></p>
+<h3>-td 列出tag content </h3>
+<p>可以看到各种 template / tag的正文内容</p>
+<h3>-as&#160; automatic scan </h3>
+<p>会自动帮我们进行判断，设置tag</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_080905.png" /></p>
+<p>此时被扫描的服务器的日志：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230204_080819.png" /></p>

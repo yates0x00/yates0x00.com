@@ -1,0 +1,104 @@
+<p>refer to: <br /><br /><a href="https://www.php.net/manual/zh/install.unix.debian.php " target="_blank">https://www.php.net/manual/zh/install.unix.debian.php</a>
+</p>
+<h3>最高级方式： docker</h3>
+<p>无论是windows, 还是linux , 直接用docker吧，各种版本隔离的非常好。</p>
+<p>1. docker-compose&#160; 文件：（具体用法不说了）</p>
+<pre>version: '3'
+services:
+
+  php5.4:
+    container_name: "php5.4"
+    image: php:5.4-apache
+    volumes:
+      - /d/workspace/docker_folder/php5.4:/var/www/html
+    ports:
+      - "8054:80"
+  php5.5:
+    container_name: "php5.5"
+    image: php:5.5-apache
+    volumes:
+      - /d/workspace/docker_folder/php5.5:/var/www/html
+    ports:
+      - "8055:80"
+  php5.6:
+    container_name: "php5.6"
+    image: php:5.6-apache
+    volumes:
+      - /d/workspace/docker_folder/php5.6:/var/www/html
+    ports:
+      - "8056:80"
+  php7.0:
+    container_name: "php7.0"
+    image: php:7.0-apache
+    volumes:
+      - /d/workspace/docker_folder/php7.0:/var/www/html
+    ports:
+      - "8070:80"
+  php7.1:
+    container_name: "php7.1"
+    image: php:7.1-apache
+    volumes:
+      - /d/workspace/docker_folder/php7.1:/var/www/html
+    #command: 'mysqld'
+    ports:
+      - "8071:80"
+  php7.2:
+    container_name: "php7.2"
+    image: php:7.2-apache
+    volumes:
+      - /d/workspace/docker_folder/php7.2:/var/www/html
+    #command: 'mysqld'
+    ports:
+      - "8072:80"
+  php7.3:
+    container_name: "php7.3"
+    image: php:7.3-apache
+    volumes:
+      - /d/workspace/docker_folder/php7.3:/var/www/html
+    #command: 'mysqld'
+    ports:
+      - "8073:80"
+  php7.4:
+    container_name: "php7.4"
+    image: php:7.4-apache
+    volumes:
+      - /d/workspace/docker_folder/php7.4:/var/www/html
+    #command: 'mysqld'
+    ports:
+      - "8074:80"
+
+  php8.0:
+    container_name: "php8.0"
+    image: php:8.0-apache-bullseye
+    volumes:
+      - /d/workspace/docker_folder/php8.0:/var/www/html
+    ports:
+      - "8079:80"
+  php8.1:
+    container_name: "php8.1"
+    image: php:8.1-apache
+    volumes:
+      - /d/workspace/docker_folder/php8.1:/var/www/html
+    ports:
+      - "8081:80"
+  php8.2:
+    container_name: "php8.2"
+    image: php:8.2-apache
+    volumes:
+      - /d/workspace/docker_folder/php8.2:/var/www/html
+    ports:
+      - "8082:80"
+</pre>
+<p>2. 对应的docker位置是 /var/www/html </p>
+<h1>傻瓜方式<br />
+</h1>
+<p>更新apt </p>
+<p>apt update</p>
+<p>安装php</p>
+<p>apt install php-common libapache2-mod-php php-cli</p>
+<p>重启apache</p>
+<p># /etc/init.d/apache2 stop<br /># /etc/init.d/apache2 start</p>
+<p>安装mysql, curl的php支持</p>
+<p># apt install php-mysql php-curl</p>
+<h1>正统方式 （失败，不用看了，行不通）</h1>
+
