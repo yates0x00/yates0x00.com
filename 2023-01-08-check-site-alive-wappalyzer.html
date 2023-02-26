@@ -1,0 +1,67 @@
+<p>(补充：) 输入法坏了。所以用英文</p>
+<p>refer to: <a href="https://github.com/wappalyzer/wappalyzer " target="_blank">https://github.com/wappalyzer/wappalyzer</a>
+</p>
+<p><a href="https://security.stackexchange.com/questions/117131/how-to-find-out-what-programming-language-a-website-is-built-in " target="_blank">https://security.stackexchange.com/questions/117131/how-to-find-out-what-programming-language-a-website-is-built-in</a>
+</p>
+<p>very good~ </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230215_133537.png" /></p>
+<h3>register ( no need ... ) </h3>
+<p>9$ / month</p>
+<h3>github: </h3>
+<p>git clone https://github.com/wappalyzer/wappalyzer.git<br />cd wappalyzer<br />yarn install<br />yarn run link</p>
+<h3>usage:</h3>
+<p>node src/drivers/npm/cli.js https://somesite.me</p>
+<p>result: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230215_140305.png" /></p>
+<h3>do some test: ( run as rails script ) </h3>
+<pre>ENV['RAILS_ENV'] = ARGV.first || ENV['RAILS_ENV'] || 'production'
+require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+require 'rails'
+require 'rubygems'
+require 'httparty'
+
+require 'csv'
+
+
+puts "== install wappalyzer from: https://github.com/wappalyzer/wappalyzer"
+
+WAPPALYZER = "node /workspace2/coding_tools/wappalyzer/src/drivers/npm/cli.js"
+
+def run url, server
+  command = "#{WAPPALYZER} https://#{url}"
+  result = `#{command}`
+  puts "== result: #{result.inspect}"
+  puts "== result.urls: #{JSON.parse(result)['urls'].inspect}"
+  key = JSON.parse(result)['urls'].keys[0]
+  puts "== key is: #{key}"
+  if JSON.parse(result)['urls'][key]['status'] &lt; 400
+    server.update wappalyzer_result: result
+  else
+    command = "#{WAPPALYZER} http://#{url}"
+    result = `#{command}`
+    server.update wappalyzer_result: "https is not available, <br />" + result
+  end
+end
+
+all_servers = Server.all.order('id desc')
+all_servers.each_slice(10) do |servers|
+  threads = []
+  servers.each do |server|
+    threads &lt;&lt; Thread.new do
+      puts "site: #{server.name}, id: #{server.id}"
+      run server.name, server
+    end
+  end
+  threads.each {|t| t.join }
+  sleep 10
+end
+
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230215_142423.png" /></p>
+<p>result looks very good: <img src="https://files.sweetysoft.com/blog_images/from_paste_20230215_142554.png" /></p>
+<p>some practice:&#160; CPU may got high if run multiple threads</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230215_215353.png" /></p>
+<p>caution:</p>
+<p>it tops when executing mass tasks. ( multiple thread )&#160;</p>
+<p>maybe because this PC only has 4 core CPU</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230216_085218.png" /></p>
