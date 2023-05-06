@@ -1,0 +1,18 @@
+<p>还是记录一下吧</p>
+<p>refer to: <br /><a href="https://www.bilibili.com/video/BV1FL411E7g3/?spm_id_from=333.337.search-card.all.click&amp;vd_source=760370308ce01ce4b34ea757917ac641 " target="_blank">https://www.bilibili.com/video/BV1FL411E7g3/?spm_id_from=333.337.search-card.all.click&amp;vd_source=760370308ce01ce4b34ea757917ac641</a>
+</p>
+<p><a href="https://422926799.github.io/posts/98d13101.html " target="_blank">https://422926799.github.io/posts/98d13101.html</a>
+</p>
+<p>影响 log4j &lt; 2.14 </p>
+<p>本质：log4j 有个奇怪的lookup 功能，可以显示 ${os.type} 等信息。</p>
+<p>lookup: <br /><a href="https://logging.apache.org/log4j/2.x/manual/lookups.html " target="_blank">https://logging.apache.org/log4j/2.x/manual/lookups.html</a>
+</p>
+<p>log4j2.enableJndiLookup=true</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230404_134301.png" /></p>
+<p>然后就可以执行 rce 了。</p>
+<p>RMIserver: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230404_133717.png" /></p>
+<p>EvilObj</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230404_134020.png" /></p>
+<p>调用：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230404_134105.png" /></p>

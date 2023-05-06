@@ -1,0 +1,28 @@
+<p>refer to: <br /><a href="https://github.com/KaranGauswami/socks-to-http-proxy/ " target="_blank">https://github.com/KaranGauswami/socks-to-http-proxy/</a>
+</p>
+<p>https/http代理是之前的主流。</p>
+<p>socks5代理是目前的主流。</p>
+<p>目前我的问题是，socks5代理好用，需要一个稳定的http/https代理。</p>
+<p>之前用的是 python proxy ( pproxy) 发现该软件的特点是只能跑在8080，而且特别简单，无法做任何参数方面的配置。</p>
+<p>所以导致有时候在8080端口跑起来后，跟nodejs相冲突。</p>
+<p>所以需要定制化，所以搜索到了这个项目</p>
+<p>安装</p>
+<p>不要自行编译了，太麻烦。直接用这个。（而且我是在WSL环境下，还不如直接跑在windows下的二进制）</p>
+<p><a href="https://github.com/KaranGauswami/socks-to-http-proxy/releases " target="_blank">https://github.com/KaranGauswami/socks-to-http-proxy/releases</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230504_081051.png" /></p>
+<h3>使用</h3>
+<p>1. 先保证你的一个socks5 代理跑起来，例如跑在1093端口</p>
+<p>2. .\sthp-windows.exe  -p 7093 -s 127.0.0.1:1093</p>
+<p>就可以使用了。</p>
+<h3>用法例子：(linux下）</h3>
+<p>创建一个文件：</p>
+<pre>#  ~/env_.env_file_7093
+export HTTP_PROXY="http://192.168.1.105:7093"
+export HTTPS_PROXY="http://192.168.1.105:7093"
+export http_proxy="http://192.168.1.105:7093"
+export https_proxy="http://192.168.1.105:7093"
+
+</pre>
+<p>加载该文件：source ~/env_.env_file_7093</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230504_081358.png" /></p>
