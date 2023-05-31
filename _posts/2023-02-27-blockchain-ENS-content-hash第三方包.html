@@ -1,0 +1,31 @@
+<p>refer to: </p>
+<p>https://github.com/ensdomains/content-hash</p>
+<p>https://github.com/ensdomains/ensjs-v3/blob/main/packages/ensjs/src/utils/contentHash.ts</p>
+<p>可以很方便的大家进行各种转换。</p>
+<h3>安装</h3>
+<p>npm install content-hash</p>
+<h3>使用</h3>
+<pre>const contentHash = require('content-hash')
+
+let string_from_ens_query = 'e30101701220fb542ce810ffbcfa68c8a64c7825a8408148822051ab959d448553d09c27df25'
+let result = contentHash.decode(string_from_ens_query)
+console.info("== result: ", result)
+
+let string_from_ens_query_of_vitalik_eth = 'e30101701220d26f29c6d794c4957392c052bacd274b5d32790640c3ffec9fed0c32d8deccf9'
+
+let v0_vitalik_eth = contentHash.decode(string_from_ens_query_of_vitalik_eth)
+console.info("== vitalik.eth, result:", v0_vitalik_eth)
+console.info("== vitalik.eth, CID v1:", contentHash.helpers.cidV0ToV1Base32(v0_vitalik_eth))
+
+输出：
+
+== result:  QmfFjVBz5wd66kyd89RWkJJiWEMq1Fde3XGN9MBfx47Btp
+== vitalik.eth, result: QmcW6e33pgdHaQE4PLKLShEHeyWtzHthanjoyRhaRy9bdA
+== vitalik.eth, CID v1: bafybeigsn4u4nv4uyskxhewakk5m2j2lluzhsbsayp76zh7nbqznrxwm7e
+</pre>
+
+<h3>Demo 地址：</h3>
+<p>https://content-hash.surge.sh/</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20220919_082344.png" /></p>
+<h3>Content hash的来龙去脉：</h3>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20220919_083032.png" /></p>

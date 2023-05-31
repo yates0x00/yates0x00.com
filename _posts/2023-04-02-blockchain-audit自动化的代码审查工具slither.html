@@ -1,0 +1,25 @@
+<p>refer to: <br /><a href="https://github.com/crytic/slither#how-to-install " target="_blank">https://github.com/crytic/slither#how-to-install</a>
+</p>
+<p>slither也是一款contract的代码审查工具。</p>
+<h3>安装</h3>
+<p>pip3 install slither-analyzer</p>
+<p>一次安装不成功就安装两次。</p>
+<h3>使用</h3>
+<p>cd &lt;your-hardhat-project&gt;</p>
+<p>slither .&#160;&#160; # 这个是帧对整个hardhat项目</p>
+<p>slither YourContract.sol # 针对某个sol文件的</p>
+<h3>针对单个文件的结果</h3>
+<p>如下，可以看到，它是分别把内容列出来的。</p>
+<pre>// 这里是出现问题的地方<br />Lock.constructor(uint256) (Lock.sol#10-18) uses timestamp for comparisons
+        Dangerous comparisons:
+        - require(bool,string)(block.timestamp &lt; _unlockTime,Unlock time should be in the future) (Lock.sol#11-14)
+Lock.withdraw() (Lock.sol#20-27) uses timestamp for comparisons
+        Dangerous comparisons:
+        - require(bool,string)(block.timestamp &gt;= unlockTime,You can't withdraw yet) (Lock.sol#21)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Pragma version^0.8.9 (Lock.sol#2) allows old versions
+solc-0.8.15 is not recommended for deployment<br />// 这里是需要参考文档的地方。
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity</pre>
+<h3>针对多个文件的结果</h3>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230106_084948.png" /></p>

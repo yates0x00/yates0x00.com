@@ -2,12 +2,11 @@
 <p>但是在我的UBUNTU14.04 上跑不起来， 原因是 默认下载的文件是 32位的。而UBUNTU14是64位的。</p>
 <p>试了所有google的方法都不行，</p>
 <p>于是 下载源代码， 编译， 运行。 OK 了。</p>
-<p>答案写在了这里:&#160; <a href="http://stackoverflow.com/questions/21046225/cant-launch-jd-gui-on-ubuntu-12-04-3-64-bits/29727604#29727604">http://stackoverflow.com/questions/21046225/cant-launch-jd-gui-on-ubuntu-12-04-3-64-bits/29727604#29727604</a>
 </p>
 <pre>this worked for me:
 
 $ git clone git@github.com:java-decompiler/jd-gui.git
-$ gradle build 
+$ gradle build
 then a file will be generated to : build/libs/jd-gui-1.0.0.jar
 
 run it:

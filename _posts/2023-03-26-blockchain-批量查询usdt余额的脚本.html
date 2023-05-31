@@ -1,0 +1,42 @@
+<p>。。。。记录一下吧，好多年的事儿了。</p>
+<pre># -*- encoding : utf-8 -*-
+require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+require 'rails'
+require 'rubygems'
+
+addresses = %w{
+1Nnsjg2t6HU7DGWtepFRDyr57wGuTrQHQB
+1NwHbVpDi7UvTBhgahoQhZWS42Xw6tqES1
+
+}
+
+require 'json'
+def get_balance address
+  api_address = "https://api.omniexplorer.info/v1/address/addr/details/"
+  command = %Q{curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "Content-Type: application/x-www-form-urlencoded" -d "addr=#{address}" "#{api_address}"}
+  #puts "-- command: #{command}"
+
+  usdt_balance = 0
+  begin
+    body = JSON.parse(`#{command}`)
+    body['balance'].each do |balance_details|
+      if balance_details['id'] == '31'
+        usdt_balance = balance_details['value'].to_i
+        break
+      end
+    end
+
+  rescue Exception =&gt; e
+    Rails.logger.error e.backtrace.join("\n")
+  end
+  return usdt_balance
+end
+
+addresses.each do |address|
+  Rails.logger.info "-- checking: #{address}"
+  usdt_balance = get_balance(address)
+  Rails.logger.info "address: #{address}, balance: #{usdt_balance}" if usdt_balance &gt; 0
+  sleep 60
+
+end
+</pre>

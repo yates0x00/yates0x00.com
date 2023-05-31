@@ -1,0 +1,9 @@
+1. 钱包中需要有钱 ( sender )  (否则会报错)
+
+2. contract的abi 需要正确 （abi不正确的话，就算你的调用js 代码是正确的，也会报莫名其妙的错误）
+
+3. web3.js 一些package的版本需要正确（ 最新版本1.7.x   ，我的一些项目居然安装 0.19.x ）
+
+4. 网络的要求特别严格，( 我在terminal中设置了http_proxy, https_proxy, 结果无论如何就是无法访问远程rpc , （此时甚至可以访问google）  然后无奈之下我到 HK server上运行相同的代码，居然秒通 )
+
+5. msg.sender 在mint函数中 是 0

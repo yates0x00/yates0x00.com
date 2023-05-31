@@ -1,0 +1,9 @@
+<p>refer to: </p>
+<p><a href="https://ethereum.stackexchange.com/questions/134395/why-msg-sender-always-gives-me-0x0000000000000000000/135305#135305 " target="_blank">https://ethereum.stackexchange.com/questions/134395/why-msg-sender-always-gives-me-0x0000000000000000000/135305#135305</a>
+</p><div><a href="https://ethereum.stackexchange.com/questions/130479/why-requireminter-msg-sender-always-throw-error-i-used-the-correct-address?rq=1&lt;br &gt;&lt;/a&gt;&lt;br /&gt; " target="_blank">https://ethereum.stackexchange.com/questions/130479/why-requireminter-msg-sender-always-throw-error-i-used-the-correct-address?rq=1</a>
+</div><div><a href="https://ethereum.stackexchange.com/questions/130479/why-requireminter-msg-sender-always-throw-error-i-used-the-correct-address?rq=1&lt;br &gt;&lt;/a&gt;&lt;br /&gt; " target="_blank"></a>
+</div><div>具体过程如上。
+</div>
+<p>总之，想调用contract，需要满足：</p>
+<p>1. 使用ether.js ， 绝对不要使用 web3.js&#160; 后者bug, 会在 检查msg.sender的时候报错（经过debug提示 msg.sender是 0）</p>
+<p>2. 找一个香港或者海外的服务器 ，这样的话就可以 直接调用RPC server</p>

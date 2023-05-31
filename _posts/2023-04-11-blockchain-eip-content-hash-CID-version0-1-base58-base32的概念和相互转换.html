@@ -1,0 +1,30 @@
+<h3>EIP:&#160;&#160;&#160; </h3>
+<p>refer to: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1577.md</p>
+<p>Ethereum Improvement Propalsal: 以太坊改进提案。 会提出以太坊的各种特性和新功能。</p>
+<h3>ENS； </h3>
+<p>refer to: https://ens.domains/</p>
+<p>Ethereum Naming Service ,&#160; 以太坊命名服务</p>
+<h3>Content Hash</h3>
+<p>这个是ENS中的特点，用户可以生成一个ipfs地址并且保存到这里。&#160; 0x..... 好多位</p>
+<p>例如， bitsofcode.eth 的content hash： 0xe30101701220fb542ce810ffbcfa68c8a64c7825a8408148822051ab959d448553d09c27df25</p>
+<h3>IPFS CID :&#160; ( Conteng Identifiers )&#160; 文本唯一标识。 Base 58: 一种编码，例如btc的地址</h3>
+<p>refer to: https://docs.filebase.com/ipfs/ipfs-cids</p>
+<p>我们在使用IPFS的时候，总会看到这样的东东：</p>
+<p>ipfs add CAKE.jpg </p>
+<p>=&gt;&#160;&#160; QmSkFCXoTamt9fJDxdiRU8EEsvBrT3zw8FFL5zvok2VyyB added</p>
+<p>这里的 QmSk ... 就是 Base58的东东，它可以转换成CID。</p>
+<p>一个 CID , 分成v0 和 v1两个版本。 例如：</p>
+<p>对应上面的&#160;&#160; QmSk ... ，它的 CID是 Bafy&#160; .....</p>
+<p>Vitalik.eth 的 IPFS CID:&#160; bafybeigsn4u4nv4uyskxhewakk5m2j2lluzhsbsayp76zh7nbqznrxwm7e</p>
+<p>借助于 content hash 这个组件： https://content-hash.surge.sh/&#160; 我们可以直接转换：</p>
+<p>例如对于&#160; bitsofcode.eth: </p>
+<p>ipfs 的内容：&#160;&#160; QmfFjVBz5wd66kyd89RWkJJiWEMq1Fde3XGN9MBfx47Btp</p>
+<p>content hash:&#160;&#160;&#160; (0x省略)&#160; e30101701220fb542ce810ffbcfa68c8a64c7825a8408148822051ab959d448553d09c27df25</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20220919_081535.png" /></p>
+<p>Base58 </p>
+<p>是一种编码格式，比特币的地址就是这样来的（据说）</p>
+<p>ruby , python等语言都有。我就不赘述了。 参考这个ruby&#160; </p>
+<p>CID v1, Base58, Base32之间的转换（我没看懂）： https://github.com/ipfs/kubo/issues/6220</p>
+<p>cid bafk ... 是base32的格式。</p>
+<p><br />
+<img src="https://files.sweetysoft.com/blog_images/from_paste_20220919_082052.png" /></p>
