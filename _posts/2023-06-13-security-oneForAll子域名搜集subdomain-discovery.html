@@ -1,0 +1,40 @@
+<p>refer to: <br /><a href="https://github.com/shmilylty/OneForAll " target="_blank">https://github.com/shmilylty/OneForAll</a>
+</p>
+<p>我之前一般都用shuize</p>
+<p>不过感觉对于海外目标，shuize只能弄个子域名。。。</p>
+<p>所以试试这个</p>
+<p>安装 linux</p>
+<p>cd OneForAll/<br />sudo yum install gcc python3-devel python3-pip -y<br />sudo python3 -m pip install -U pip setuptools wheel -i https://mirrors.aliyun.com/pypi/simple/<br />sudo pip3 install --ignore-installed -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/</p>
+<p>运行</p>
+<p>python3 oneforall.py --help</p>
+<p>在2023-0606, python3.11下，会报错：</p>
+<pre>python3 oneforall.py --help
+Traceback (most recent call last):
+  File "/mnt/d/workspace/coding_tools/one_for_all/oneforall.py", line 16, in
+    from brute import Brute
+  File "/mnt/d/workspace/coding_tools/one_for_all/brute.py", line 14, in
+    import exrex
+  File "/home/xx/.asdf/installs/python/3.11.2/lib/python3.11/site-packages/exrex.py", line 25, in <br /><br />
+</pre>
+<p>参考：<a href="https://github.com/shmilylty/OneForAll/issues/295 " target="_blank">https://github.com/shmilylty/OneForAll/issues/295</a>
+</p>
+
+
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230606_112708.png" /></p>
+<p>然后就可以运行该命令了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230606_113525.png" /></p>
+<p>对应的API：</p>
+<p><a href="https://github.com/shmilylty/OneForAll/blob/master/docs/collection_modules.md " target="_blank">https://github.com/shmilylty/OneForAll/blob/master/docs/collection_modules.md</a>
+</p>
+<p>直接修改 config/api.py 即可</p>
+<p>每次都是个大工程。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230606_113756.png" /></p>
+<p>运行：</p>
+<p>python3 oneforall.py --target siwei.me run</p>
+<p>结果：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230606_120655.png" /></p>
+<p>结果：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230606_120832.png" /></p>
+
+
+

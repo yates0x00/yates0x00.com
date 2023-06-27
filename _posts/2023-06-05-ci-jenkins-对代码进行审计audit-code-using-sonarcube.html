@@ -1,0 +1,90 @@
+<p>refer to:</p>
+<p><a href="https://www.jenkins.io/doc/pipeline/steps/sonar/ " target="_blank">https://www.jenkins.io/doc/pipeline/steps/sonar/</a>
+</p>
+<p><a href="https://plugins.jenkins.io/sonar/ " target="_blank">https://plugins.jenkins.io/sonar/</a>
+</p>
+<p>（本文用到的maven项目的地址： <a href="https://github.com/yates0x00/test_jenkins_sonarqube_maven " target="_blank">https://github.com/yates0x00/test_jenkins_sonarqube_maven</a> )</p>
+<p>jenkins官方文档直接让我们去看sonar官方文档：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_110403.png" /></p>
+<p>可以看到，这里针对不同的语言，有不同的选项 / plugin:</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_110537.png" /></p>
+<p>直接忽略下图红框的链接，</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_110730.png" /></p>
+<p>进入到jenkins -&gt; 系统管理 -&gt; plugin管理 -&gt; available plugins: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_110844.png" /></p>
+<p>安装之：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_111021.png" /></p>
+<p>dashboard -&gt; 系统管理 -&gt; system 才能看到：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_113323.png" /></p>
+<p>需要安装sonar cube server. </p>
+<p>太神奇了。这里又打了一遍。。。已经2次丢失内容了。</p>
+<p>内容略，记得用JDK17 安装即可。</p>
+<p>使用 ubuntu的alternative就可以自由切换。</p>
+<p>update-java-alternatives --list</p>
+<p>sudo update-java-alternatives --set /usr/lib/jvm/java-1.17.0-openjdk-amd64</p>
+<p>然后记录好该 JDK 的HOME：</p>
+<p>jenkins中设置好该JDK：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_172909.png" /></p>
+<p>然后在对应的jenkins项目中，就可以配置sonarqube了，指定好对应的JDK17:</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173101.png" /></p>
+<p>然后就可以看到 在jenkins项目下，sonarqube的图标出来了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173124.png" /></p>
+<p>然后点击一下 build 试试：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173152.png" /></p>
+<p>上图报错了，说明 可以走到sonarqube 审计代码这一步了。只是由于sonarqube没有启动，所以这里报错了。 不要紧</p>
+<p>手动启动sonarqube: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173421.png" /></p>
+<p>再来一次，又失败了，如下图：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173229.png" /></p>
+<p>分析了下，可以看到网页，JDK版本没错，所以说明jenkins + sonarqube都分别跑起来了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173245.png" /></p>
+<p>直接访问 9000端口（sonar web页面）可以看到 项目都有了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173332.png" /></p>
+<p>联想到jenkins 只能看到login之前的loading, 估计是没有权限。回头查一下文档，原来是需要 user key</p>
+<p>所以这样的设置：（如下图）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173450.png" /></p>
+<p>得到了这个key: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173501.png" /></p>
+<p>然后，我们copy该key, 进入到jenkins中进行设置，如下图：</p>
+<p>全局配置中，找到这个sonarqube servers:</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173603.png" /></p>
+<p>点击这个“添加”，会出现下面2个图片的弹窗（实际上是一个大弹窗）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173538.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173551.png" /></p>
+<p>添加好后，再回到 刚才的下拉单，就可以看到了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173720.png" /></p>
+<p>保存后，再运行：</p>
+<p>发现又报错了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_173842.png" /></p>
+<p>查看文档，文档中没写，查看jenkins, 发现了这个form, 需要填写：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_172718.png" /></p>
+<p>又报错了？</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_172726.png" /></p>
+<p>继续修改配置：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175114.png" /></p>
+<p>参考：<br /><a href="https://stackoverflow.com/questions/46976567/please-provide-compiled-classes-of-your-project-with-sonar-java-binaries " target="_blank">https://stackoverflow.com/questions/46976567/please-provide-compiled-classes-of-your-project-with-sonar-java-binaries</a>
+</p>
+<p>也就是，填写成这样：</p>
+<p><a href="https://stackoverflow.com/a/63930274/445908 " target="_blank">https://stackoverflow.com/a/63930274/445908</a>
+</p>
+<p>sonar.projectKey=my:testwithjenkinsandsonar<br />sonar.projectName=Test Jenkins With Sonar<br />sonar.projectVersion=1.0<br />sonar.sources=src/main/java<br />sonar.exclusions=target/classes</p>终于可以运行了：<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175024.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175348.png" /></p>
+<p>点击可以查看报告：</p>
+<p><a href="http://54.178.99.67:9000/dashboard?id=my%3Atestwithjenkinsandsonar " target="_blank">http://54.178.99.67:9000/dashboard?id=my%3Atestwithjenkinsandsonar</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175428.png" /></p>
+<p>这里可以查看API形式的报告，方便整理：（邮件，报警啥的）</p>
+<p><a href="http://54.178.99.67:9000/api/ce/task?id=AYiK9TwuIm-UnC0p2Pa8 " target="_blank">http://54.178.xx99.67:9000/api/ce/task?id=AYiK9TwuIm-UnC0p2Pa8</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175527.png" /></p>
+<p>对应的java项目看起来是这样：：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_175638.png" /></p>
+<p>我们把代码修改一下，弄的危险一些：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_180326.png" /></p>
+<p>可以看到，jenkins还是会正常的成功构建的：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_180452.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_181036.png" /></p>
+<p>我们进入到sonarqube的web GUI:</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_180601.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230605_180258.png" /></p>
+
