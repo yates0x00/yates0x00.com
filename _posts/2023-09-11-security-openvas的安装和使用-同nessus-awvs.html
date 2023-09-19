@@ -1,0 +1,251 @@
+<p>refer to: </p>
+<p>（看这个就可以了，其他的千万别看）<a href="https://greenbone.github.io/docs/latest/22.4/container/index.html " target="_blank">https://greenbone.github.io/docs/latest/22.4/container/index.html</a>
+</p>
+
+<p>官网：<a href="https://github.com/greenbone/ " target="_blank">https://github.com/greenbone/</a>
+</p>
+<p>（别看了）<a href="https://www.geeksforgeeks.org/installing-openvas-on-kali-linux/ " target="_blank">https://www.geeksforgeeks.org/installing-openvas-on-kali-linux/</a>
+</p>
+<p>（别看了）<a href="https://www.ceos3c.com/security/install-openvas-kali-linux/ " target="_blank">https://www.ceos3c.com/security/install-openvas-kali-linux/</a>
+</p>
+<p>openvas 是一款漏洞扫描软件，现在是收费的。 有社区版。 据说扫描很快，扫描的规则有5000多个。是nessus的一个分支.(fork)</p>
+<p>免费版叫做 greenbone openvas</p>
+<p>最新的名字叫做 gvm&#160; greenbone vulnerability manager</p>
+<p>gvmd:&#160; greenbone vulnerability manager database 数据库后端</p>
+<h1>总结：</h1>
+<p>1. 必须用docker安装</p>
+<p>2. 使用挺简单的。</p>
+<p>3. sniper1 仅支持openvas &lt;7, 而目前(2023-08-19) 的最新版本是22</p>
+<h1>安装 </h1>
+<p>直接用docker-compose:&#160; 参考 <a href="https://greenbone.github.io/docs/latest/22.4/container/index.html " target="_blank">https://greenbone.github.io/docs/latest/22.4/container/index.html</a>
+</p>
+<p>docker-compose.yml 文件内容：</p>
+<pre>services:
+  vulnerability-tests:
+    image: greenbone/vulnerability-tests
+    environment:
+      STORAGE_PATH: /var/lib/openvas/22.04/vt-data/nasl
+    volumes:
+      - vt_data_vol:/mnt
+
+  notus-data:
+    image: greenbone/notus-data
+    volumes:
+      - notus_data_vol:/mnt
+
+  scap-data:
+    image: greenbone/scap-data
+    volumes:
+      - scap_data_vol:/mnt
+
+  cert-bund-data:
+    image: greenbone/cert-bund-data
+    volumes:
+      - cert_data_vol:/mnt
+
+  dfn-cert-data:
+    image: greenbone/dfn-cert-data
+    volumes:
+      - cert_data_vol:/mnt
+    depends_on:
+      - cert-bund-data
+
+  data-objects:
+    image: greenbone/data-objects
+    volumes:
+      - data_objects_vol:/mnt
+
+  report-formats:
+    image: greenbone/report-formats
+    volumes:
+      - data_objects_vol:/mnt
+    depends_on:
+      - data-objects
+
+  gpg-data:
+    image: greenbone/gpg-data
+    volumes:
+      - gpg_data_vol:/mnt
+
+  redis-server:
+    image: greenbone/redis-server
+    restart: on-failure
+    volumes:
+      - redis_socket_vol:/run/redis/
+
+  pg-gvm:
+    image: greenbone/pg-gvm:stable
+    restart: on-failure
+    volumes:
+      - psql_data_vol:/var/lib/postgresql
+      - psql_socket_vol:/var/run/postgresql
+
+  gvmd:
+    image: greenbone/gvmd:stable
+    restart: on-failure
+    volumes:
+      - gvmd_data_vol:/var/lib/gvm
+      - scap_data_vol:/var/lib/gvm/scap-data/
+      - cert_data_vol:/var/lib/gvm/cert-data
+      - data_objects_vol:/var/lib/gvm/data-objects/gvmd
+      - vt_data_vol:/var/lib/openvas/plugins
+      - psql_data_vol:/var/lib/postgresql
+      - gvmd_socket_vol:/run/gvmd
+      - ospd_openvas_socket_vol:/run/ospd
+      - psql_socket_vol:/var/run/postgresql
+    depends_on:
+      pg-gvm:
+        condition: service_started
+      scap-data:
+        condition: service_completed_successfully
+      cert-bund-data:
+        condition: service_completed_successfully
+      dfn-cert-data:
+        condition: service_completed_successfully
+      data-objects:
+        condition: service_completed_successfully
+      report-formats:
+        condition: service_completed_successfully
+
+  gsa:
+    image: greenbone/gsa:stable
+    restart: on-failure
+    ports:
+      - 9392:80
+    volumes:
+      - gvmd_socket_vol:/run/gvmd
+    depends_on:
+      - gvmd
+
+  ospd-openvas:
+    image: greenbone/ospd-openvas:stable
+    restart: on-failure
+    init: true
+    hostname: ospd-openvas.local
+    cap_add:
+      - NET_ADMIN # for capturing packages in promiscuous mode
+      - NET_RAW # for raw sockets e.g. used for the boreas alive detection
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=unconfined
+    command:
+      [
+        "ospd-openvas",
+        "-f",
+        "--config",
+        "/etc/gvm/ospd-openvas.conf",
+        "--mqtt-broker-address",
+        "mqtt-broker",
+        "--notus-feed-dir",
+        "/var/lib/notus/advisories",
+        "-m",
+        "666"
+      ]
+    volumes:
+      - gpg_data_vol:/etc/openvas/gnupg
+      - vt_data_vol:/var/lib/openvas/plugins
+      - notus_data_vol:/var/lib/notus
+      - ospd_openvas_socket_vol:/run/ospd
+      - redis_socket_vol:/run/redis/
+    depends_on:
+      redis-server:
+        condition: service_started
+      gpg-data:
+        condition: service_completed_successfully
+      vulnerability-tests:
+        condition: service_completed_successfully
+
+  mqtt-broker:
+    restart: on-failure
+    image: greenbone/mqtt-broker
+    ports:
+      - 1883:1883
+    networks:
+      default:
+        aliases:
+          - mqtt-broker
+          - broker
+
+  notus-scanner:
+    restart: on-failure
+    image: greenbone/notus-scanner:stable
+    volumes:
+      - notus_data_vol:/var/lib/notus
+      - gpg_data_vol:/etc/openvas/gnupg
+    environment:
+      NOTUS_SCANNER_MQTT_BROKER_ADDRESS: mqtt-broker
+      NOTUS_SCANNER_PRODUCTS_DIRECTORY: /var/lib/notus/products
+    depends_on:
+      - mqtt-broker
+      - gpg-data
+      - vulnerability-tests
+
+  gvm-tools:
+    image: greenbone/gvm-tools
+    volumes:
+      - gvmd_socket_vol:/run/gvmd
+      - ospd_openvas_socket_vol:/run/ospd
+    depends_on:
+      - gvmd
+      - ospd-openvas
+
+volumes:
+  gpg_data_vol:
+  scap_data_vol:
+  cert_data_vol:
+  data_objects_vol:
+  gvmd_data_vol:
+  psql_data_vol:
+  vt_data_vol:
+  notus_data_vol:
+  psql_socket_vol:
+  gvmd_socket_vol:
+  ospd_openvas_socket_vol:
+  redis_socket_vol:
+</pre>
+<p>docker-compose.exe -f .\docker-compose.yml -p greenbone-community-edition pull</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_140934.png" /></p>
+<p>docker pull好了，就运行：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_142634.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_142656.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_142727.png" /></p>
+<p>看到上面的图片，就表示程序运行起来了。</p>
+<p>打开 <br /><a href="http://127.0.0.1:9392 " target="_blank">http://127.0.0.1:9392</a>
+</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_142944.png" /></p>
+<p>登陆后这样：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_143532.png" /></p>
+<p>使用：</p>
+<p>可以使用wizard: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_144338.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_144503.png" /></p>
+<p>（下面这几个太啰嗦了，是最开始尝试的时候弄的，可以不用看了）</p>
+<p>需要先增加 scan config:&#160;&#160; config -&gt; scan config -&gt; 看一下里面有没有东西。没有的话多点一点。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_143918.png" /></p>
+<p>这里似乎要等一等，第一次打开的是上面的情况，是不对的。</p>
+<p>在上面页面点击了提交，页面报错，然后刷新，就看到下图了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_144112.png" /></p>
+<p>然后scans -&gt; new scan: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_143350.png" /></p>
+<p>新增alert: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_143727.png" /></p>
+<h3>架构图 （可以参考理解）</h3>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_140821.png" /></p>
+<h1 style="color:red">以下的都不要看了</h1>
+<p>安装 （好吧，问题卡在了这里。建议不要自行编译了，直接使用docker ) </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230808_140204.png" /></p>
+<p>参考：<br /><a href="https://greenbone.github.io/docs/latest/22.4/source-build/index.html " target="_blank">https://greenbone.github.io/docs/latest/22.4/source-build/index.html</a>
+</p>
+<p>2015  sudo useradd -r -M -U -G sudo -s /usr/sbin/nologin gvm<br /> 2016  sudo usermod -aG gvm $USER<br /> 2017  su $USER<br /> 2018  echo $USER<br /> 2019  export INSTALL_PREFIX=/usr/local<br /> 2020  export PATH=$PATH:$INSTALL_PREFIX/sbin<br /> 2021  export SOURCE_DIR=$HOME/source<br /> 2022  mkdir -p $SOURCE_DIR<br /> 2023  echo $HOME<br /> 2024  export BUILD_DIR=$HOME/build<br /> 2025  mkdir -p $BUILD_DIR<br /> 2026  export INSTALL_DIR=$HOME/install<br /> 2027  mkdir -p $INSTALL_DIR<br /> 2028  sudo apt install --no-install-recommends --assume-yes   build-essential   curl   cmake   pkg-config   python3   python3-pip   gnupg<br /> 2029  curl -f -L https://www.greenbone.net/GBCommunitySigningKey.asc -o /tmp/GBCommunitySigningKey.asc<br /> 2030  gpg --import /tmp/GBCommunitySigningKey.asc<br /> 2031  echo "8AE4BE429B60A59B311C2E739823FAA60ED1E580:6:" | gpg --import-ownertrust<br /> 2032  export GVM_LIBS_VERSION=22.6.3<br /> 2033  sudo apt install -y   libglib2.0-dev   libgpgme-dev   libgnutls28-dev   uuid-dev   libssh-gcrypt-dev   libhiredis-dev   libxml2-dev   libpcap-dev   libnet1-dev </p>
+<p>如果你的ubuntu 是22， 那么就 apt install   libpaho-mqtt-dev</p>
+<p>如果你的ubuntu是20， （不是22），那么就需要根据这个文章来安装   libpaho-mqtt-dev <br /><a href="https://siwei.me/blog/posts/ubuntu-ubuntu-20-libpaho-mqtt-dev " target="_blank">https://siwei.me/blog/posts/ubuntu-ubuntu-20-libpaho-mqtt-dev</a>
+</p>
+<p>继续安装：( gvm libs) </p>
+<p>sudo apt install -y \<br />  libldap2-dev \<br />  libradcli-dev</p>
+<p>curl -f -L https://github.com/greenbone/gvm-libs/archive/refs/tags/v$GVM_LIBS_VERSION.tar.gz -o $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz<br />curl -f -L https://github.com/greenbone/gvm-libs/releases/download/v$GVM_LIBS_VERSION/gvm-libs-v$GVM_LIBS_VERSION.tar.gz.asc -o $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz.asc</p>
+<p>验证刚才下载的文件：</p>
+<p>gpg --verify $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz.asc $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz</p>
+<p>tar -C $SOURCE_DIR -xvzf $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz</p>
+<p>安装 gvm libs: </p>
+<p>tar -C $SOURCE_DIR -xvzf $SOURCE_DIR/gvm-libs-$GVM_LIBS_VERSION.tar.gz&#160; </p>
+<p>（失败了，由于没有安装成功 mqtt 那个lib )</p>
