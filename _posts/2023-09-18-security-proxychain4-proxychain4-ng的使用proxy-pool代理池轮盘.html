@@ -1,0 +1,20 @@
+<p>refer to: </p>
+<p><a href="https://github.com/haad/proxychains " target="_blank">https://github.com/haad/proxychains</a>
+</p>
+<p>该工具支持http, https, socks4, socks5 </p>
+<p>还支持多种mode: </p>
+<p>链式，随机选择， 多重代理。。。。</p>
+<p>从 metagoofile 这个项目中学习到的。 真是踏破铁鞋无觅处啊！</p>
+<p>1. 准备好proxy </p>
+<p>2. 修改 /etc/proxychains4.conf, 增加内容：</p>
+<pre>[ProxyList]
+# add proxy here ...
+# meanwile
+# defaults set to "tor
+# socks5  127.0.0.1 1072
+socks5  192.168.1.11 1072
+socks5  192.168.1.11 1074</pre>
+<p>3. 使用：</p>
+<p>proxychains curl xxx.me/222</p>
+<p>看log: </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230816_230611.png" /></p>

@@ -1,0 +1,127 @@
+<p>refer to :<br /><a href="https://opencv.org/ " target="_blank">https://opencv.org/</a>
+</p>
+<p><a href="https://docs.opencv.org/4.x/df/d65/tutorial_table_of_content_introduction.html " target="_blank">https://docs.opencv.org/4.x/df/d65/tutorial_table_of_content_introduction.html</a>
+</p>
+<p>识别摄像头中传入的扑克牌<br />
+<a href="https://www.youtube.com/watch?v=m-QPjO-2IkA " target="_blank">https://www.youtube.com/watch?v=m-QPjO-2IkA</a>
+</p>
+<h1>安装</h1>
+<p>windows下</p>
+<p><a href="https://sourceforge.net/projects/opencvlibrary/ " target="_blank">https://sourceforge.net/projects/opencvlibrary/</a>
+</p>
+<p>直接下载编译好的文件</p>
+<p>( <a href="https://docs.opencv.org/4.x/d3/d52/tutorial_windows_install.html " target="_blank">https://docs.opencv.org/4.x/d3/d52/tutorial_windows_install.html</a> )</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_150622.png" /></p>
+<p>设置环境变量 （用鼠标的形式 右键我的电脑 -&gt; 属性。。。也一样的 ）</p>
+<p>setx OpenCV_DIR D:\OpenCV\build\x64\vc14 </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_151546.png" /></p>
+<p>同时设置PATH 这个环境变量： </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_152319.png" /></p>
+<p>安装 cv2 : </p>
+<p>pip install opencv-python</p>
+<p>想要实现屏幕截屏，还要安装 pyautogui</p>
+<p> pip install pyautogui</p>
+<p>运行</p>
+<p>创建并运行这个文件：</p>
+<pre>import cv2 as cv
+import numpy as np
+import os
+from time import time
+import pyautogui
+#from PIL import ImageGrab
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+while(True):
+    screenshot = pyautogui.screenshot()
+    screenshot = np.array(screenshot)
+    screenshot = cv.cvtColor(screenshot, cv.COLOR_RGB2BGR)
+
+    cv.imshow('hihi ' , screenshot)
+
+    if cv.waitKey(1) == ord('q'):
+        cv.destroyAllWindows()
+</pre>
+<p>运行后可以看到（ 按ctrl + c 就可以退出了。）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_161659.png" /></p>
+<p>好的，我们进一步识别屏幕截图：</p>
+<pre>import cv2
+import numpy as np
+import pyautogui
+import time
+
+# 定义屏幕中心区域的大小
+region_width = 1920
+region_height = 1080
+
+# 获取屏幕的宽度和高度
+screen_width, screen_height = pyautogui.size()
+
+# 计算屏幕中心区域的左上角和右下角坐标
+region_x = (screen_width - region_width) // 2
+region_y = (screen_height - region_height) // 2
+region_right = region_x + region_width
+region_bottom = region_y + region_height
+
+print(f"region_x: {region_x}, region_y: {region_y}, region_right: {region_right}, region_bottom: {region_bottom}")
+
+# 获取屏幕截图
+screenshot = pyautogui.screenshot()
+
+# 将截图转换为 OpenCV 图像格式
+image = np.array(screenshot)
+image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+cv2.imshow("Screenshot", image)
+cv2.waitKey(0)  # 等待按下任意按键继续执行
+cv2.destroyWindow("Screenshot")
+
+# 从整个图像中提取屏幕中心区域
+#region_of_interest = image[region_y:region_bottom, region_x:region_right]
+# 458, 1152,   162
+# 459, 1152,   692
+region_of_interest = image[162:692, 458:1152]
+
+cv2.imshow('region_of_interest', region_of_interest)
+cv2.waitKey(0)  # 等待按下任意按键继续执行
+cv2.destroyWindow("region_of_interest")
+
+# 将屏幕中心区域转换为灰度图像
+gray = cv2.cvtColor(region_of_interest, cv2.COLOR_BGR2GRAY)
+
+cv2.imshow('gray', gray)
+cv2.waitKey(0)  # 等待按下任意按键继续执行
+cv2.destroyWindow("gray")
+cv2.imshow('region_of_interest', region_of_interest)
+cv2.waitKey(0)  # 等待按下任意按键继续执行
+cv2.destroyWindow("region_of_interest")
+
+# 进行纸牌检测（假设纸牌区域是黑色的背景）
+_, binary = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY_INV)
+
+# 查找轮廓
+contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# 统计纸牌数量并获取纸牌的大小
+card_count = len(contours)
+card_sizes = []
+
+for contour in contours:
+    x, y, w, h = cv2.boundingRect(contour)
+    card_sizes.append((w, h))
+
+print("纸牌数量：", card_count)
+print("纸牌大小：", card_sizes)</pre>
+<p>运行它，可以看到：</p>
+<p>第一步，获得整个截屏：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_171805.png" /></p>
+<p>第二步： 获得屏幕指定区域的内容：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_171841.png" /></p>
+<p>第三步：让该区域变灰</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20230929_171856.png" /></p>
+<p>总之，这里使用了&#160; </p>
+<p>cv2.imshow("Screenshot", image)<br />cv2.waitKey(0)  # 等待按下任意按键继续执行<br />cv2.destroyWindow("Screenshot")  # 关闭名为"Screenshot"的窗口</p>
+<p>来对整个过程进行debug</p>
+<p>如何进一步识别？ </p>
+<p>看这个 <br /><a href="https://www.youtube.com/watch?v=m-QPjO-2IkA " target="_blank">https://www.youtube.com/watch?v=m-QPjO-2IkA</a>
+</p>
