@@ -1,0 +1,38 @@
+<p><a href="https://docs.python.org/3/library/unittest.html " target="_blank">https://docs.python.org/3/library/unittest.html</a>
+</p>
+<p>非常简单：</p>
+<p>class: </p>
+<pre>class VisionTool:
+    def __init__(self):
+        pass
+    def get_current_player_cards(self, source_image_name):<br />        pass
+</pre>
+<p>对应的测试文件 </p>
+<pre>import unittest
+from vision_tool import VisionTool
+
+class TestVisionTool(unittest.TestCase):
+    def setUp(self):
+        self.vision_tool = VisionTool()
+
+    def test_get_current_player_cards(self):
+        # cards 1
+        current_player_cards = self.vision_tool.get_current_player_cards('test/test_current_player_cards_1.png')
+        expected_cards = [
+                'A_spade', 'A_heart', 'A_diamond', 'K_heart',
+                'Q_heart', 'Q_club', 'Q_diamond', 'J_diamond',
+                'T_spade', 'T_heart', 'T_diamond', '9_club',
+                '8_spade', '7_spade', '7_heart', '7_club',
+                '6_spade', '5_spade', '4_club', '3_spade'
+                ]
+        expected_cards.sort()
+
+        self.assertEqual(expected_cards, current_player_cards)
+
+if __name__ == '__main__':
+    unittest.main()
+</pre>
+<p>只运行某个单元测试；</p>
+<p><a href="https://stackoverflow.com/questions/15971735/running-a-single-test-from-unittest-testcase-via-the-command-line " target="_blank">https://stackoverflow.com/questions/15971735/running-a-single-test-from-unittest-testcase-via-the-command-line</a>
+</p>
+<p>python TestMyCase.py TestMyCase.testcase1</p>

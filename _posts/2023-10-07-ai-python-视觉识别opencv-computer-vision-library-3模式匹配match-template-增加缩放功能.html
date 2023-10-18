@@ -1,0 +1,76 @@
+<p>refer to: <br /><a href="https://pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/ " target="_blank">https://pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/</a>
+</p>
+<p>结论：</p>
+<p>最好还是用手动截取的template</p>
+<p>缩放截取的，匹配度比较低。</p>
+<p>关键代码: </p>
+<pre># 缩放模板图像
+scale_percent = 60  # 缩放比例为60%
+width = int(template_image.shape[1] * scale_percent / 100)
+height = int(template_image.shape[0] * scale_percent / 100)
+dim = (width, height)
+template_image_scaled = cv2.resize(template_image, dim, interpolation=cv2.INTER_AREA)
+</pre>
+<p> 完整代码： </p>
+<pre>import cv2
+
+source_image_name = "test_003.jpg"
+
+threadhold = 0.88
+#对该页面的所有区域进行匹配, 并且对template进行缩放 x 0.6
+target_left, target_top = 1016, 222
+target_right, target_bottom = 1280, 304
+
+source_image = cv2.imread(source_image_name, cv2.IMREAD_COLOR)[target_top:target_bottom, target_left:target_right]
+cv2.imshow('source_image',source_image)
+cv2.waitKey(0)
+
+# 先获得所有牌的模板
+
+from os import listdir
+from os.path import isfile, join
+
+found_cards = []
+
+onlyfiles = [f for f in listdir("cards_images") if isfile(join("cards_images", f)) and f.endswith(".jpg")]
+for template_file_name in onlyfiles:
+
+    template_image = cv2.imread(f"cards_images/{template_file_name}", cv2.IMREAD_COLOR)
+    result = cv2.matchTemplate(source_image, template_image, cv2.TM_CCOEFF_NORMED)
+
+    # 对template 缩放为 0.6
+    scale_percent = 0.614
+    width = int(template_image.shape[1] * scale_percent)
+    height = int(template_image.shape[0] * scale_percent )
+    template_image = cv2.resize( template_image, (width, height), interpolation=cv2.INTER_AREA)
+
+    #template_image = cv2.imread(f"cards_images/{template_file_name}", cv2.IMREAD_GRAYSCALE)
+    result = cv2.matchTemplate(source_image, template_image, cv2.TM_CCOEFF_NORMED)
+
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    print(f"== max_val: {max_val}")
+
+    # 如果匹配到，则把对应的目标区域整个覆盖
+    if max_val &gt;= threadhold:
+        #print(f"== 匹配到了, 牌：{template_file_name}, 准确率：{max_val}")
+        top_left = max_loc
+        # shape:  返回的是 height, width, channel.  所以 0 是高，1 是宽
+        bottom_right = (top_left[0] + template_image.shape[1], top_left[1] + template_image.shape[0])
+        cv2.rectangle(source_image, top_left, bottom_right, (0, 255, 0), -1)
+        card_name = template_file_name.split(".")[0]
+        found_cards.append(card_name)
+        print(f"== 找到了：{card_name}, {max_val}")
+
+        cv2.imshow('result', source_image)
+        cv2.waitKey(0)
+    else:
+        pass
+
+# 打印出所有的牌
+print(f"== cards: {found_cards}")
+short_names = []
+for card_full_name in found_cards:
+    short_names.append(card_full_name.split("_")[0])
+print(f"== short name cards: {short_names}")</pre>
+<p>结果如下：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231002_120932.png" /></p>

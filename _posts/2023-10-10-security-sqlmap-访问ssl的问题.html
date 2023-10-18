@@ -1,0 +1,12 @@
+<p>refer to: <br /><a href="https://github.com/sqlmapproject/sqlmap/issues/5392 " target="_blank">https://github.com/sqlmapproject/sqlmap/issues/5392</a>
+
+</p>
+<pre>[08:19:47] [DEBUG] SSL connection error occurred for 'PROTOCOL_TLS_CLIENT' ('SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:992)')
+[08:19:47] [DEBUG] SSL connection error occurred for 'PROTOCOL_TLSv1_2' ('SSLError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:992)')
+[08:19:47] [DEBUG] SSL connection error occurred for 'PROTOCOL_TLSv1_1' ('SSLError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:992)')
+[08:19:47] [DEBUG] SSL connection error occurred for 'PROTOCOL_TLSv1' ('SSLError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:992)')
+</pre>
+<p>1. 升级到sqlmap 的最新版本</p>
+<p>2. 使用一个海外的host</p>
+<p>就可以了。</p>
+<p>国内的网络环境比较复杂， 有点奇怪。</p>
