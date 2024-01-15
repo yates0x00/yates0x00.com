@@ -1,0 +1,6 @@
+<p>refer to:</p>
+<p>1. 手机端有个VPN</p>
+<p>2. 手机端设置跟host一样的网络，</p>
+<p>3. PC host 打开 burpsuite</p>
+<p>4. 手机端需要关闭VPN，然后设置 proxy, 然后PC端才能看到手机端的抓包。</p>
+<p>原因是，手机端的VPN走的是UDP，这个跟TCP不一样，无法抓包。所以burpsuite上看不到任何东西。</p>

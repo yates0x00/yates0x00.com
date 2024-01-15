@@ -1,0 +1,9 @@
+<p>refer to: <br /><a href="https://gist.github.com/hindol/4483374 " target="_blank">https://gist.github.com/hindol/4483374</a>
+</p>
+<p>1.&#160; 使用命令：sudo visudo &#160; 修改文件： /etc/sudoers</p>
+<p>2. 保证添加这一句：</p>
+<pre>Defaults	env_keep+="http_proxy ftp_proxy all_proxy https_proxy no_proxy"</pre>
+<p>就可以了。</p>
+<p>3. 验证：</p>
+<p>sudo curl google.com </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240114_082351.png" /></p>
