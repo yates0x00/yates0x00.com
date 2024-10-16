@@ -1,0 +1,20 @@
+<p>refer to: <br /><a href="https://hardhat.org/ignition/docs/guides/modifications " target="_blank">https://hardhat.org/ignition/docs/guides/modifications</a>
+</p>
+<p>首次部署贼简单 不过我失败了。准备使用foundry</p>
+<p>第二次部署（修改了contract之后）</p>
+<pre>const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
+
+module.exports = buildModule("Apollo", (m) =&gt; {
+  const apollo = m.contract("Rocket", ["Saturn V"]);
+
+  m.call(apollo, "launch", []);
+
+  const artemis = m.contract("Rocket", ["Artemis 2"], { id: "artemis" });
+
+  m.call(artemis, "launch", []);
+
+  return { apollo, artemis };
+});</pre>
+<p>撤销上一次部署：</p>
+<p>npx hardhat ignition wipe SayHi2Module SayHi2_FutureId</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240401_154716.png" /></p>

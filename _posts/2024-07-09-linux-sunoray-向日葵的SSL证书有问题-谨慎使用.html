@@ -1,0 +1,8 @@
+<p>1. 花生壳：只能同时用一个端口，要么443， 要么80， 不能同时用</p>
+<p>2。 所以就会出现重定向后的问题。例如https -&gt; http 提示网站不存在</p>
+<p>特别讨厌</p>
+<p>在rails中，又无法使用force ssl, 只能用http的方式</p>
+<p>所以</p>
+<p>最后的解决方案： 花生壳用https, 后端的rails用http ,&#160; </p>
+<p>否则就会出现循环重定向的问题。</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240826_032720.png" /></p>

@@ -1,0 +1,16 @@
+<p>SNMP是专门用来做设备监控的协议</p>
+<p>实现了SNMP的产品有： </p>
+<p>许多网络管理和监控工具实现了 SNMP 协议。以下是一些常见的产品：</p>
+<p>    Zabbix:<br />        Zabbix 是一个开源的监控解决方案，支持 SNMP 监控网络设备、服务器和应用程序。<br />        它可以收集 SNMP 数据，生成图表和报告，并在设备状态变化时发送告警。</p>
+<p>    Nagios:<br />        Nagios 是一个广泛使用的开源监控系统，支持 SNMP 和其他监控方法。<br />        它能够监控网络设备的状态，设置告警和通知。</p>
+<p>    Cacti:<br />        Cacti 是一个网络图形监控工具，主要用于网络流量监控。<br />        它使用 SNMP 获取设备的接口信息，并生成流量图表。</p>
+<p>    PRTG Network Monitor:<br />        PRTG 是一个功能强大的网络监控工具，支持 SNMP 监控。<br />        它可以监测网络流量、设备性能，提供实时监控和告警功能。</p>
+<p>    SolarWinds:<br />        SolarWinds 提供一系列网络管理和监控工具，支持 SNMP 协议。<br />        它的产品包括网络性能监控、服务器监控等。</p>
+<p>    ManageEngine OpManager:<br />        OpManager 是一个网络监控工具，支持 SNMP 用于监控网络设备和服务器。<br />        它能够生成详细的报告和告警。</p>
+<p>一个具体的使用的例子；</p>
+<p>snmpget -v 2c -c public 192.168.1.1 1.3.6.1.2.1.1.1.0</p>
+<p>上面命令中的1.3.6.1.2.1.1.1.0 是一个特定的字符串，类似于magic number, 用来查询目标机器的情况的。</p>
+<p>响应例子: </p>
+<p>SNMPv2-SMI::sysDescr.0 = STRING: Linux 5.4.0-42-generic #46-Ubuntu SMP Fri Oct 30 14:48:07 UTC 2020 x86_64</p>
+<p>标准 OID 示例:</p>
+<p>    1.3.6.1.2.1.1.1.0: 系统描述 (sysDescr)<br />    1.3.6.1.2.1.1.5.0: 主机名 (sysName)<br />    1.3.6.1.2.1.1.3.0: 系统启动时间 (sysUpTime)</p>

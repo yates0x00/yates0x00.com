@@ -1,0 +1,41 @@
+<p>refer to: <br /><a href="https://ethereum.stackexchange.com/a/156128/30431 " target="_blank">https://ethereum.stackexchange.com/a/156128/30431</a>
+</p>
+<p>例如，给定某个网络，获得某个contract的abi: </p>
+<p>1. 先获得对应contract的bytecode: </p>
+<p>curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_getCode","params":["0x2462EE3624d7C8678865E4b248930325d65697bF", "latest"],"id":1}' http://35.89.151.219:8000/7eb0d1b4-551c-4e7e-94a3-433d9658c11c</p>
+<p>结果：</p>
+<pre>{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c8063521eb27314603757806364d98f6e146051575b600080fd5b603d6062565b60405160489190608d565b60405180910390f35b60576071565b604051604891906082565b6000546001600160a01b031681565b6000546001600160a01b0316311590565b901515815260200190565b6001600160a01b039190911681526020019056fea2646970667358221220de10fbfb38dd3c11abcc4574a6e3dd40ad0900d9a88dd9bdc8a04e5c6153302964736f6c63430008000033"
+}
+</pre>
+<p>2. 使用whatsabi, 或者对应的结果：</p>
+<pre>const { whatsabi } = require("@shazow/whatsabi");
+
+(async () =&gt; {
+  const bytecode = "0x6080604052348015600f57600080fd5b506004361060325760003560e01c8063521eb27314603757806364d98f6e146051575b600080fd5b603d6062565b60405160489190608d565b60405180910390f35b60576071565b604051604891906082565b6000546001600160a01b031681565b6000546001600160a01b0316311590565b901515815260200190565b6001600160a01b039190911681526020019056fea2646970667358221220de10fbfb38dd3c11abcc4574a6e3dd40ad0900d9a88dd9bdc8a04e5c6153302964736f6c63430008000033"; // 替换为您的字节码
+
+  const abi = whatsabi.abiFromBytecode(bytecode);
+  console.dir(abi);
+
+})();
+
+结果：
+
+[
+  {
+    type: 'function',
+    selector: '0x521eb273',
+    payable: true,
+    stateMutability: 'payable'
+  },
+  {
+    type: 'function',
+    selector: '0x64d98f6e',
+    payable: true,
+    stateMutability: 'payable'
+  }
+]
+</pre>
+

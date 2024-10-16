@@ -1,0 +1,28 @@
+<p>使用ufw</p>
+<p>ufw status: 列出 来</p>
+<p>ufw allow 80&#160; 开启80端口</p>
+<pre>root@vultr:/usr/local/openresty/nginx# ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere
+80                         ALLOW       Anywhere
+22/tcp (v6)                ALLOW       Anywhere (v6)
+80 (v6)                    ALLOW       Anywhere (v6)
+
+root@vultr:/usr/local/openresty/nginx# ufw allow 443
+Rule added
+Rule added (v6)
+root@vultr:/usr/local/openresty/nginx# ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere
+80                         ALLOW       Anywhere
+443                        ALLOW       Anywhere
+22/tcp (v6)                ALLOW       Anywhere (v6)
+80 (v6)                    ALLOW       Anywhere (v6)
+443 (v6)                   ALLOW       Anywhere (v6)
+</pre>

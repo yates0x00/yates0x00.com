@@ -1,0 +1,37 @@
+<p>基本分为快速的和正面硬钢的两部分</p>
+<p>refer to: <br /><a href="https://firefox-source-docs.mozilla.org/devtools-user/#javascript-debugger " target="_blank">https://firefox-source-docs.mozilla.org/devtools-user/#javascript-debugger</a>&#160; firefox的javascript debugger的使用</p>
+<h3>快速的： 依靠浏览器（别小瞧了developer tool啊） </h3>
+<p>使用firefox ( chrome也一样）</p>
+<p>打开F12， 打开目标网站, 可以看到加载所有资源：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240616_153621.png" /></p>
+<p>重点来了： </p>
+<p>点击“调试器”tab, 就可以进行： 全局查询关键词，代码美化，打断点</p>
+<p>搜索快捷键： ctrl + shift + f</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240616_162726.png" /></p>
+<p>代码美化：必须鼠标右键点在文件名tab上：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240616_162841.png" /></p>
+<p>添加代码： 右键断点，然后 添加记录：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240616_163007.png" /></p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240624_032544.png" /></p>
+<p><br /><img src="https://files.sweetysoft.com/blog_images/from_paste_20240624_032453.png" /></p>
+<p>然后就可以在console中看到内容了：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240616_163113.png" /></p>
+<h3>正面硬钢：</h3>
+<p>1. 下载所有的静态文件到本地</p>
+<p>2. 把代码部署到远程服务器</p>
+<p>3. 该创建redirect (例如针对 api )的就redirect </p>
+<p>4. 跑通websocket</p>
+<p>5. 直接在远程服务器上修改代码。</p>
+<h3>使用firefox的过程：</h3>
+<p>1.1 先查找 on send, receive, pack 等 websocket 的核心方法（这一步建议在上面的 快速方法中做）</p>
+<p>1.2 找到对应的文件，手动修改代码</p>
+<p>1.3 疯狂打log, 依次追踪</p>
+<p>1.4 不一定能得到理想的decode/encode函数，scope一层一层套的太多，或者方法 N次调用形成依赖、参数也需要构造。。等等。</p>
+<p>2. 添加记录的意思是， 输入 console.info('xxx') 中的 xxx的内容， 所以你可以输的内容是：&#160;&#160; "c is:", c&#160;&#160;&#160;&#160;&#160; </p>
+<p>这样的话，就会被传入到console.info中去。 </p>
+<p>高级： 也可以输入任意代码，然后使用eval的方式执行，例如： 输入 eval("a = 1 ; b = 2; a + b ") </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240625_005148.png" /></p>
+<p>就会输出3</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240625_005213.png" /></p>
+<p>3. 刷新后，页面的断点内容还在，所以不怕丢。</p>
+<p>推荐使用firefox. 貌似chrome 不好用。</p>

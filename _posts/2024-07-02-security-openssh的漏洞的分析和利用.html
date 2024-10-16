@@ -1,0 +1,37 @@
+<p>refer to: </p>
+<p>POC 已经放出来了：<br /><br /><a href="https://github.com/lflare/cve-2024-6387-poc " target="_blank">https://github.com/lflare/cve-2024-6387-poc</a>
+</p>
+<p>我也做了备份。</p>
+<p>详细解释：<br /><a href="https://github.com/sg552/cve-2024-6387-poc/blob/master/regresshion.txt " target="_blank">https://github.com/sg552/cve-2024-6387-poc/blob/master/regresshion.txt</a>
+</p>
+<p>几个概念：</p>
+<p>该漏洞使用于 openssh 的&#160; &lt; 4.1&#160;&#160;&#160;&#160; 8.2~ 9.1 之间</p>
+<p>glibc address会随时变化，使用的技术是 aslr 技术 (address space layout randomilize )</p>
+<p>0: 禁止该技术</p>
+<p>1: 保守使用（部分使用）</p>
+<p>2: 完整使用（全都是随机的）</p>
+<p>echo 2 | sudo tee /proc/sys/kernel/randomize_va_space</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240702_043714.png" /></p>
+<p>测试代码： (aslrtest.c ) </p>
+<pre>( gcc xx.c ，就是编译，得到一个 a.out 文件，执行即可   ./a.out ）
+  1 #include <stdio.h>
+  2 #include <stdlib.h>
+  3
+  4 int main() {
+  5     printf("%p\n", &amp;system);
+  6     return 0;
+  7     printf("hihihi");
+  8 }
+~
+</stdlib.h></stdio.h></pre>
+<p>禁止aslr 之后： </p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240702_043911.png" /></p>
+<p>开启了aslr之后：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240702_044028.png" /></p>
+<p>保守开启后：</p>
+<p><img src="https://files.sweetysoft.com/blog_images/from_paste_20240702_044114.png" /></p>
+<p>修复方式：</p>
+<p>1. 把openssh 更新到最新版本</p>
+<p>2. 或者，修改 sshd 配置文件： sudo vim /etc/ssh/sshd_config&#160; </p>
+<p>LoginGraceTime 0&#160;&#160; #&#160; 表示该session永不关闭。默认是2m</p>
+<p>修改后记得 sudo service ssh restart</p>
